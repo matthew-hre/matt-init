@@ -1,7 +1,7 @@
 {
   "name": "matt-init",
   "version": "1.0.0",
-  "description": "A CLI tool for scaffolding Next.js projects with opinionated defaults",
+  "description": "A simple CLI tool for scaffolding Next.js projects",
   "main": "dist/index.js",
   "bin": {
     "matt-init": "dist/index.js"
@@ -12,7 +12,7 @@
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "test": "node dist/index.js test-project --no-confirm",
+    "test": "node dist/index.js test-project",
     "clean": "rm -rf dist",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
@@ -22,9 +22,7 @@
     "scaffold",
     "typescript",
     "react",
-    "tailwind",
-    "drizzle",
-    "better-auth"
+    "tailwind"
   ],
   "author": "",
   "license": "ISC",

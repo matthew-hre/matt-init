@@ -13,7 +13,7 @@ const utils_1 = require("./lib/utils");
 const program = new commander_1.Command();
 program
     .name('matt-init')
-    .description('CLI tool for scaffolding Next.js projects with opinionated defaults')
+    .description('CLI tool for scaffolding Next.js projects')
     .version('1.0.0');
 // Main command - interactive project creation
 program
@@ -21,7 +21,7 @@ program
     .action(async (directory) => {
     (0, banner_1.displayBanner)();
     try {
-        console.log(chalk_1.default.blue('🚀 Let\'s create your Next.js project!\n'));
+        console.log(chalk_1.default.blue('Let\'s create your Next.js project!\n'));
         // Step 1: Project name and directory
         const projectInfo = await inquirer_1.default.prompt([
             {
@@ -57,113 +57,26 @@ program
         const projectName = projectInfo.name || projectDirectory;
         console.log(chalk_1.default.gray(`\nProject: ${chalk_1.default.white(projectName)}`));
         console.log(chalk_1.default.gray(`Directory: ${chalk_1.default.white(projectDirectory)}\n`));
-        // Step 2: Database setup
-        console.log(chalk_1.default.cyan('📊 Database Configuration'));
-        const databaseChoice = await inquirer_1.default.prompt([
-            {
-                type: 'list',
-                name: 'database',
-                message: 'Choose your database setup:',
-                choices: [
-                    {
-                        name: '🚀 Turso - SQLite on the edge (recommended for most apps)',
-                        value: 'turso',
-                        short: 'Turso'
-                    },
-                    {
-                        name: '🐘 PostgreSQL - Traditional SQL database via Docker',
-                        value: 'postgres',
-                        short: 'PostgreSQL'
-                    },
-                    {
-                        name: '🚫 None - Skip database setup for now',
-                        value: 'none',
-                        short: 'None'
-                    }
-                ],
-                default: 'turso'
-            }
-        ]);
-        // Step 3: Authentication
-        console.log(chalk_1.default.cyan('\n🔐 Authentication'));
-        const authChoice = await inquirer_1.default.prompt([
-            {
-                type: 'confirm',
-                name: 'auth',
-                message: 'Include Better-Auth for user authentication?',
-                default: true
-            }
-        ]);
-        // Step 4: UI Library
-        console.log(chalk_1.default.cyan('\n🎨 UI Library'));
-        const uiChoice = await inquirer_1.default.prompt([
-            {
-                type: 'list',
-                name: 'ui',
-                message: 'Choose your UI component library:',
-                choices: [
-                    {
-                        name: '🎯 shadcn/ui - Modern React components with Radix UI',
-                        value: 'shadcn',
-                        short: 'shadcn/ui'
-                    },
-                    {
-                        name: '🌼 DaisyUI - Beautiful Tailwind CSS components',
-                        value: 'daisyui',
-                        short: 'DaisyUI'
-                    },
-                    {
-                        name: '🎨 None - Just Tailwind CSS (I\'ll build my own)',
-                        value: 'none',
-                        short: 'Tailwind only'
-                    }
-                ],
-                default: 'shadcn'
-            }
-        ]);
-        // Step 5: Development Tools
-        console.log(chalk_1.default.cyan('\n⚙️ Development Tools'));
-        const toolsChoice = await inquirer_1.default.prompt([
-            {
-                type: 'confirm',
-                name: 'ci',
-                message: 'Setup GitHub Actions for CI/CD (linting, type-checking)?',
-                default: true
-            },
-            {
-                type: 'confirm',
-                name: 'hooks',
-                message: 'Setup Git pre-commit hooks (Husky + lint-staged)?',
-                default: true
-            },
-            {
-                type: 'confirm',
-                name: 'editor',
-                message: 'Include VS Code settings and EditorConfig?',
-                default: true
-            }
-        ]);
-        // Combine all choices
         const projectOptions = {
             name: projectName,
             directory: projectDirectory,
-            database: databaseChoice.database,
-            auth: authChoice.auth,
-            ui: uiChoice.ui,
-            ci: toolsChoice.ci,
-            hooks: toolsChoice.hooks,
-            editor: toolsChoice.editor
+            initGit: false // Default value
         };
+        // Ask if the user wants to initialize a git repository
+        const { initGit } = await inquirer_1.default.prompt([
+            {
+                type: 'confirm',
+                name: 'initGit',
+                message: 'Would you like to initialize a git repository?',
+                default: false
+            }
+        ]);
+        projectOptions.initGit = initGit;
         // Show summary
         console.log(chalk_1.default.blue('\n📋 Project Summary:'));
         console.log(chalk_1.default.gray(`  Name: ${projectOptions.name}`));
         console.log(chalk_1.default.gray(`  Directory: ${projectOptions.directory}`));
-        console.log(chalk_1.default.gray(`  Database: ${projectOptions.database}`));
-        console.log(chalk_1.default.gray(`  Auth: ${projectOptions.auth ? 'Yes' : 'No'}`));
-        console.log(chalk_1.default.gray(`  UI: ${projectOptions.ui}`));
-        console.log(chalk_1.default.gray(`  CI/CD: ${projectOptions.ci ? 'Yes' : 'No'}`));
-        console.log(chalk_1.default.gray(`  Git Hooks: ${projectOptions.hooks ? 'Yes' : 'No'}`));
-        console.log(chalk_1.default.gray(`  Editor Config: ${projectOptions.editor ? 'Yes' : 'No'}`));
+        console.log(chalk_1.default.gray(`  Initialize Git: ${projectOptions.initGit ? 'Yes' : 'No'}`));
         const { confirm } = await inquirer_1.default.prompt([
             {
                 type: 'confirm',
@@ -176,25 +89,12 @@ program
             console.log(chalk_1.default.yellow('Project creation cancelled.'));
             process.exit(0);
         }
-        console.log(chalk_1.default.blue('\n🚀 Creating your Next.js project...\n'));
+        console.log(''); // Add some space before spinner starts
         await (0, create_project_1.createProject)(projectOptions);
         console.log(chalk_1.default.green(`\n✅ Project "${projectOptions.name}" created successfully!`));
         console.log(chalk_1.default.gray(`\nTo get started:`));
         console.log(chalk_1.default.gray(`  cd ${projectOptions.directory}`));
-        console.log(chalk_1.default.gray(`  pnpm install`));
         console.log(chalk_1.default.gray(`  pnpm dev`));
-        if (projectOptions.database === 'postgres') {
-            console.log(chalk_1.default.yellow(`\n⚠️  Don't forget to start your PostgreSQL database:`));
-            console.log(chalk_1.default.gray(`  docker-compose up -d`));
-        }
-        if (projectOptions.database === 'turso') {
-            console.log(chalk_1.default.blue(`\n💡 To set up Turso:`));
-            console.log(chalk_1.default.gray(`  1. Install Turso CLI: curl -sSfL https://get.tur.so/install.sh | bash`));
-            console.log(chalk_1.default.gray(`  2. Create database: turso db create ${projectOptions.directory}`));
-            console.log(chalk_1.default.gray(`  3. Get URL: turso db show --url ${projectOptions.directory}`));
-            console.log(chalk_1.default.gray(`  4. Create token: turso db tokens create ${projectOptions.directory}`));
-            console.log(chalk_1.default.gray(`  5. Update your .env.local file`));
-        }
     }
     catch (error) {
         console.error(chalk_1.default.red('❌ Error creating project:'), error instanceof Error ? error.message : error);

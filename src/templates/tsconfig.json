@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "skipLibCheck": true,
+        "noEmit": true,
+        "allowJs": true
+    },
+    "include": [
+        "**/*"
+    ],
+    "exclude": []
+}

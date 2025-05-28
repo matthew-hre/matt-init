@@ -14,6 +14,6 @@ function displayBanner() {
  ██║ ╚═╝ ██║██║  ██║   ██║      ██║         ██║██║ ╚████║██║   ██║   
  ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝         ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   
   `));
-    console.log(chalk_1.default.gray('  🚀 Next.js projects the way Matt likes \'em.\n'));
+    console.log(chalk_1.default.gray('    Next.js projects the way Matt likes \'em.\n'));
 }
 //# sourceMappingURL=banner.js.map
