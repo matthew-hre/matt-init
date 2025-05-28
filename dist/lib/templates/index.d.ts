@@ -17,11 +17,19 @@ export declare function createBasicReadme(projectPath: string, options: {
     name: string;
     directory: string;
     nixFlake?: boolean;
+    database?: string;
 }): Promise<void>;
 /**
  * Create nix flake files from templates
  */
 export declare function createNixFlake(projectPath: string, options: {
     name: string;
+    database?: string;
+}): Promise<void>;
+/**
+ * Create typesafe env files from templates
+ */
+export declare function createEnvFiles(projectPath: string, options: {
+    database?: string;
 }): Promise<void>;
 //# sourceMappingURL=index.d.ts.map

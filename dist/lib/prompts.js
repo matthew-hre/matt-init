@@ -7,7 +7,8 @@ exports.askProjectInfo = askProjectInfo;
 exports.askNixFlake = askNixFlake;
 exports.askGitInit = askGitInit;
 exports.askConfirmation = askConfirmation;
-exports.askFeatures = askFeatures;
+exports.askDatabase = askDatabase;
+exports.askPreCommitHooks = askPreCommitHooks;
 const inquirer_1 = __importDefault(require("inquirer"));
 const utils_1 = require("~/lib/utils");
 /**
@@ -54,7 +55,7 @@ async function askNixFlake() {
             type: 'confirm',
             name: 'nixFlake',
             message: 'Would you like to add a nix flake for development environment?',
-            default: false
+            default: true
         }
     ]);
 }
@@ -85,21 +86,38 @@ async function askConfirmation() {
     ]);
 }
 /**
- * Ask user to select optional features
+ * Ask user to select database type
  */
-async function askFeatures() {
+async function askDatabase() {
     return await inquirer_1.default.prompt([
         {
-            type: 'checkbox',
-            name: 'features',
-            message: 'Which optional features would you like to include?',
+            type: 'list',
+            name: 'database',
+            message: 'Which database would you like to use?',
             choices: [
                 {
-                    name: 'Drizzle ORM - Type-safe database toolkit',
-                    value: 'drizzle',
-                    checked: false
+                    name: 'Turso (SQLite)',
+                    value: 'turso'
+                },
+                {
+                    name: 'None',
+                    value: 'none'
                 }
-            ]
+            ],
+            default: 'none'
+        }
+    ]);
+}
+/**
+ * Ask if user wants to enable pre-commit hooks
+ */
+async function askPreCommitHooks() {
+    return await inquirer_1.default.prompt([
+        {
+            type: 'confirm',
+            name: 'preCommitHooks',
+            message: 'Would you like to enable pre-commit hooks (Husky + lint-staged)?',
+            default: false
         }
     ]);
 }

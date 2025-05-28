@@ -38,6 +38,7 @@ exports.replaceAppFiles = replaceAppFiles;
 exports.removeFavicon = removeFavicon;
 exports.createBasicReadme = createBasicReadme;
 exports.createNixFlake = createNixFlake;
+exports.createEnvFiles = createEnvFiles;
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
 const utils_1 = require("~/lib/utils");
@@ -95,10 +96,19 @@ async function createBasicReadme(projectPath, options) {
     const templatesPath = path.join(__dirname, '..', '..', 'templates');
     const readmeTemplate = path.join(templatesPath, 'README.md');
     const outputPath = path.join(projectPath, 'README.md');
+    // Generate database-specific instructions
+    let databaseInstructions = '';
+    if (options.database === 'turso') {
+        databaseInstructions = `
+   > **Note:** This project uses Turso (SQLite) as the database. The \`pnpm dev\` command will automatically start both the database server and Next.js development server using concurrently.
+
+`;
+    }
     (0, utils_1.createFileFromTemplate)(readmeTemplate, outputPath, {
         PROJECT_NAME: options.name,
         DIRECTORY: options.directory,
-        NIX_DEVELOP_COMMAND: options.nixFlake ? 'nix develop\n   ' : ''
+        NIX_DEVELOP_COMMAND: options.nixFlake ? 'nix develop\n   ' : '',
+        DATABASE_INSTRUCTIONS: databaseInstructions
     });
 }
 /**
@@ -115,11 +125,43 @@ async function createNixFlake(projectPath, options) {
     (0, utils_1.createFileFromTemplate)(flakeTemplate, flakeOutput, {
         PROJECT_NAME: options.name
     });
-    // Create devShell.nix in nix directory
+    // Determine additional nix packages and parameters based on options
+    const nixPackages = [];
+    const nixParams = [];
+    if (options.database === 'turso') {
+        nixPackages.push('turso-cli', 'sqld');
+        nixParams.push('turso-cli', 'sqld');
+    }
+    // Create devShell.nix with conditional packages
     const devShellTemplate = path.join(templatesPath, 'devShell.nix');
     const devShellOutput = path.join(nixDir, 'devShell.nix');
     (0, utils_1.createFileFromTemplate)(devShellTemplate, devShellOutput, {
-        PROJECT_NAME: options.name
+        PROJECT_NAME: options.name,
+        ADDITIONAL_PARAMS: nixParams.length > 0 ? `\n  ${nixParams.join(',\n  ')},` : '',
+        ADDITIONAL_PACKAGES: nixPackages.length > 0 ? `\n    ${nixPackages.join('\n    ')}` : ''
     });
+}
+/**
+ * Create typesafe env files from templates
+ */
+async function createEnvFiles(projectPath, options) {
+    const templatesPath = path.join(__dirname, '..', '..', 'templates', 'env');
+    const envDir = path.join(projectPath, 'src', 'lib');
+    await fs.ensureDir(envDir);
+    // Generate Turso-specific env schema if Turso is selected
+    let tursoEnvSchema = '';
+    if (options.database === 'turso') {
+        tursoEnvSchema = '\n  TURSO_DATABASE_URL: z.string(),\n  TURSO_AUTH_TOKEN: z.string(),';
+    }
+    // Copy env.ts with conditional schema
+    const envTemplate = path.join(templatesPath, 'env.ts');
+    const envOutput = path.join(envDir, 'env.ts');
+    (0, utils_1.createFileFromTemplate)(envTemplate, envOutput, {
+        TURSO_ENV_SCHEMA: tursoEnvSchema
+    });
+    // Copy try-parse-env.ts
+    const tryParseEnvTemplate = path.join(templatesPath, 'try-parse-env.ts');
+    const tryParseEnvOutput = path.join(envDir, 'try-parse-env.ts');
+    await fs.copy(tryParseEnvTemplate, tryParseEnvOutput);
 }
 //# sourceMappingURL=index.js.map

@@ -21,19 +21,17 @@ TURSO_AUTH_TOKEN=
 `;
     await fs.writeFile(path.join(projectPath, '.env'), envContent);
 
-    // Create database client file
+    // Create database client file from template using processTemplateFile to remove @ts-nocheck
     const dbDir = path.join(projectPath, 'src', 'lib', 'db');
     await fs.ensureDir(dbDir);
 
-    const clientContent = `import { createClient } from "@libsql/client";
+    const clientTemplate = path.join(__dirname, '..', '..', 'templates', 'db', 'turso', 'client.ts');
+    const clientOutput = path.join(dbDir, 'client.ts');
 
-const client = createClient({
-  url: "http://127.0.0.1:8080",
-});
-
-export default client;
-`;
-    await fs.writeFile(path.join(dbDir, 'client.ts'), clientContent);
+    // Use processTemplateFile to remove @ts-nocheck comments
+    const content = await fs.readFile(clientTemplate, 'utf8');
+    const processedContent = content.replace(/^\/\/ @ts-nocheck\s*\n?/gm, '');
+    await fs.writeFile(clientOutput, processedContent);
 
     // Update package.json scripts
     const packageJsonPath = path.join(projectPath, 'package.json');
@@ -133,4 +131,12 @@ export async function applyPreCommitInstaller(
 
     // Apply the installer
     await preCommitInstaller.apply(projectPath);
+}
+
+export async function installEnvDependencies(projectPath: string): Promise<void> {
+    // Install zod as a dependency for the env system
+    await runCmd('pnpm', ['add', 'zod'], {
+        cwd: projectPath,
+        stdio: 'pipe'
+    });
 }

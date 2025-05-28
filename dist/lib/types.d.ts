@@ -3,6 +3,7 @@ export interface ProjectOptions {
     directory: string;
     initGit: boolean;
     nixFlake: boolean;
-    features: string[];
+    database: string;
+    preCommitHooks: boolean;
 }
 //# sourceMappingURL=types.d.ts.map

@@ -60,21 +60,26 @@ async function createProject(options) {
         await (0, file_handlers_1.customizeNextJsProject)(projectPath, {
             initGit: options.initGit,
             nixFlake: options.nixFlake,
-            projectName: options.name
+            projectName: options.name,
+            database: options.database
         });
         spinner.succeed('Project files customized');
+        spinner = (0, ora_1.default)('Installing environment dependencies...').start();
+        await (0, installers_1.installEnvDependencies)(projectPath);
+        spinner.succeed('Environment dependencies installed');
         spinner = (0, ora_1.default)('Setting up project documentation...').start();
         await (0, templates_1.createBasicReadme)(projectPath, {
             name: options.name,
             directory: options.directory,
-            nixFlake: options.nixFlake
+            nixFlake: options.nixFlake,
+            database: options.database
         });
         spinner.succeed('Project documentation created');
-        // Apply selected features
-        if (options.features.length > 0) {
-            spinner = (0, ora_1.default)(`Installing features: ${options.features.join(', ')}...`).start();
-            await (0, installers_1.applyInstallers)(projectPath, options.features);
-            spinner.succeed('Features installed and configured');
+        // Apply database setup if selected
+        if (options.database !== 'none') {
+            spinner = (0, ora_1.default)(`Setting up database: ${options.database}...`).start();
+            await (0, installers_1.applyDatabaseInstaller)(projectPath, options.database);
+            spinner.succeed('Database setup completed');
         }
         spinner = (0, ora_1.default)('Tidying up...').start();
         await (0, format_1.runLintFix)(projectPath);
@@ -83,6 +88,18 @@ async function createProject(options) {
             spinner = (0, ora_1.default)('Initializing git repository...').start();
             await (0, git_1.initializeGitRepository)(projectPath);
             spinner.succeed('Git repository initialized');
+        }
+        // Apply pre-commit hooks if enabled (must be after git init)
+        if (options.preCommitHooks) {
+            spinner = (0, ora_1.default)('Setting up pre-commit hooks...').start();
+            await (0, installers_1.applyPreCommitInstaller)(projectPath, options.preCommitHooks);
+            spinner.succeed('Pre-commit hooks configured');
+        }
+        // Create initial git commit at the very end (after all files are created)
+        if (options.initGit) {
+            spinner = (0, ora_1.default)('Creating initial commit...').start();
+            await (0, git_1.createInitialCommit)(projectPath);
+            spinner.succeed('Initial commit created');
         }
     }
     catch (error) {

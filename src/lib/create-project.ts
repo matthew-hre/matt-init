@@ -6,7 +6,7 @@ import { customizeNextJsProject } from '~/lib/file-handlers';
 import { initializeGitRepository, createInitialCommit } from '~/lib/git';
 import { runLintFix } from '~/lib/format';
 import { createBasicReadme } from '~/lib/templates';
-import { applyDatabaseInstaller, applyPreCommitInstaller } from '~/lib/installers';
+import { applyDatabaseInstaller, applyPreCommitInstaller, installEnvDependencies } from '~/lib/installers';
 import { ProjectOptions } from '~/lib/types';
 import { runCmd } from '~/lib/run-cmd';
 
@@ -32,6 +32,10 @@ export async function createProject(options: ProjectOptions): Promise<void> {
             database: options.database
         });
         spinner.succeed('Project files customized');
+
+        spinner = ora('Installing environment dependencies...').start();
+        await installEnvDependencies(projectPath);
+        spinner.succeed('Environment dependencies installed');
 
         spinner = ora('Setting up project documentation...').start();
         await createBasicReadme(projectPath, {

@@ -125,3 +125,31 @@ export async function createNixFlake(projectPath: string, options: { name: strin
         ADDITIONAL_PACKAGES: nixPackages.length > 0 ? `\n    ${nixPackages.join('\n    ')}` : ''
     });
 }
+
+/**
+ * Create typesafe env files from templates
+ */
+export async function createEnvFiles(projectPath: string, options: { database?: string }): Promise<void> {
+    const templatesPath = path.join(__dirname, '..', '..', 'templates', 'env');
+    const envDir = path.join(projectPath, 'src', 'lib');
+
+    await fs.ensureDir(envDir);
+
+    // Generate Turso-specific env schema if Turso is selected
+    let tursoEnvSchema = '';
+    if (options.database === 'turso') {
+        tursoEnvSchema = ',\n  TURSO_DATABASE_URL: z.string(),\n  TURSO_AUTH_TOKEN: z.string()';
+    }
+
+    // Copy env.ts with conditional schema
+    const envTemplate = path.join(templatesPath, 'env.ts');
+    const envOutput = path.join(envDir, 'env.ts');
+    createFileFromTemplate(envTemplate, envOutput, {
+        TURSO_ENV_SCHEMA: tursoEnvSchema
+    });
+
+    // Copy try-parse-env.ts using processTemplateFile to remove @ts-nocheck
+    const tryParseEnvTemplate = path.join(templatesPath, 'try-parse-env.ts');
+    const tryParseEnvOutput = path.join(envDir, 'try-parse-env.ts');
+    await processTemplateFile(tryParseEnvTemplate, tryParseEnvOutput);
+}
