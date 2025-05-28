@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { createProject } from '~/lib/create-project';
 import { displayBanner } from '~/lib/banner';
 import { ProjectOptions } from '~/lib/types';
-import { askProjectInfo, askGitInit, askConfirmation, askNixFlake, askDatabase } from '~/lib/prompts';
+import { askProjectInfo, askGitInit, askConfirmation, askNixFlake, askDatabase, askPreCommitHooks } from '~/lib/prompts';
 
 export async function runCli(): Promise<void> {
     const program = new Command();
@@ -35,13 +35,23 @@ export async function runCli(): Promise<void> {
             // Step 4: Ask about git initialization
             const { initGit } = await askGitInit();
 
-            // Step 5: Show summary and get confirmation
+            // Step 5: Ask about pre-commit hooks (only if git is enabled)
+            let preCommitHooks = false;
+            if (initGit) {
+                const preCommitAnswer = await askPreCommitHooks();
+                preCommitHooks = preCommitAnswer.preCommitHooks;
+            }
+
+            // Step 6: Show summary and get confirmation
             console.log(chalk.blue('\n📋 Project Summary:'));
             console.log(chalk.gray(`  Name: ${projectName}`));
             console.log(chalk.gray(`  Directory: ${projectDirectory}`));
             console.log(chalk.gray(`  Database: ${database === 'none' ? 'None' : database.charAt(0).toUpperCase() + database.slice(1)}`));
             console.log(chalk.gray(`  Nix Flake: ${nixFlake ? 'Yes' : 'No'}`));
             console.log(chalk.gray(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`));
+            if (initGit) {
+                console.log(chalk.gray(`  Pre-commit Hooks: ${preCommitHooks ? 'Yes' : 'No'}`));
+            }
 
             const { confirm } = await askConfirmation();
 
@@ -56,7 +66,8 @@ export async function runCli(): Promise<void> {
                 directory: projectDirectory,
                 initGit,
                 nixFlake,
-                database
+                database,
+                preCommitHooks
             };
 
             console.log(''); // Add some space before spinner starts

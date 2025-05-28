@@ -26,6 +26,10 @@ export interface DatabaseAnswers {
     database: string;
 }
 
+export interface PreCommitHooksAnswers {
+    preCommitHooks: boolean;
+}
+
 /**
  * Ask for project directory and name
  */
@@ -124,6 +128,20 @@ export async function askDatabase(): Promise<DatabaseAnswers> {
                 }
             ],
             default: 'none'
+        }
+    ]);
+}
+
+/**
+ * Ask if user wants to enable pre-commit hooks
+ */
+export async function askPreCommitHooks(): Promise<PreCommitHooksAnswers> {
+    return await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'preCommitHooks',
+            message: 'Would you like to enable pre-commit hooks (Husky + lint-staged)?',
+            default: false
         }
     ]);
 }

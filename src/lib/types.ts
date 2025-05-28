@@ -4,4 +4,5 @@ export interface ProjectOptions {
     initGit: boolean;
     nixFlake: boolean;
     database: string;
+    preCommitHooks: boolean;
 }

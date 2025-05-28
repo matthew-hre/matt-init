@@ -8,6 +8,11 @@ export interface DatabaseInstaller {
     apply: (projectPath: string) => Promise<void>;
 }
 
+export interface PreCommitInstaller {
+    devDeps?: string[];
+    apply: (projectPath: string) => Promise<void>;
+}
+
 // Turso installer
 async function applyTurso(projectPath: string): Promise<void> {
     // Create .env file with Turso configuration
@@ -43,11 +48,42 @@ export default client;
     await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 }
 
+// Pre-commit hooks installer
+async function applyPreCommitHooks(projectPath: string): Promise<void> {
+    // Update package.json with lint-staged configuration
+    const packageJsonPath = path.join(projectPath, 'package.json');
+    const packageJson = await fs.readJson(packageJsonPath);
+
+    packageJson['lint-staged'] = {
+        "*": "pnpm lint"
+    };
+
+    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+
+    // Initialize Husky
+    await runCmd('pnpm', ['exec', 'husky', 'init'], {
+        cwd: projectPath,
+        stdio: 'pipe'
+    });
+
+    // Update pre-commit hook
+    const preCommitPath = path.join(projectPath, '.husky', 'pre-commit');
+    await fs.writeFile(preCommitPath, 'pnpm exec lint-staged\n');
+
+    // Make pre-commit executable
+    await fs.chmod(preCommitPath, '755');
+}
+
 export const databaseInstallers: Record<string, DatabaseInstaller> = {
     turso: {
         deps: ['@libsql/client', 'concurrently'],
         apply: applyTurso,
     }
+};
+
+export const preCommitInstaller: PreCommitInstaller = {
+    devDeps: ['husky', 'lint-staged'],
+    apply: applyPreCommitHooks,
 };
 
 export async function applyDatabaseInstaller(
@@ -77,4 +113,24 @@ export async function applyDatabaseInstaller(
 
     // Apply the installer
     await installer.apply(projectPath);
+}
+
+export async function applyPreCommitInstaller(
+    projectPath: string,
+    enabled: boolean
+): Promise<void> {
+    if (!enabled) {
+        return;
+    }
+
+    // Install dev dependencies
+    if (preCommitInstaller.devDeps && preCommitInstaller.devDeps.length > 0) {
+        await runCmd('pnpm', ['add', '-D', ...preCommitInstaller.devDeps], {
+            cwd: projectPath,
+            stdio: 'pipe'
+        });
+    }
+
+    // Apply the installer
+    await preCommitInstaller.apply(projectPath);
 }

@@ -3,10 +3,10 @@ import * as path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
 import { customizeNextJsProject } from '~/lib/file-handlers';
-import { initializeGitRepository } from '~/lib/git';
+import { initializeGitRepository, createInitialCommit } from '~/lib/git';
 import { runLintFix } from '~/lib/format';
 import { createBasicReadme } from '~/lib/templates';
-import { applyDatabaseInstaller } from '~/lib/installers';
+import { applyDatabaseInstaller, applyPreCommitInstaller } from '~/lib/installers';
 import { ProjectOptions } from '~/lib/types';
 import { runCmd } from '~/lib/run-cmd';
 
@@ -57,6 +57,20 @@ export async function createProject(options: ProjectOptions): Promise<void> {
             spinner = ora('Initializing git repository...').start();
             await initializeGitRepository(projectPath);
             spinner.succeed('Git repository initialized');
+        }
+
+        // Apply pre-commit hooks if enabled (must be after git init)
+        if (options.preCommitHooks) {
+            spinner = ora('Setting up pre-commit hooks...').start();
+            await applyPreCommitInstaller(projectPath, options.preCommitHooks);
+            spinner.succeed('Pre-commit hooks configured');
+        }
+
+        // Create initial git commit at the very end (after all files are created)
+        if (options.initGit) {
+            spinner = ora('Creating initial commit...').start();
+            await createInitialCommit(projectPath);
+            spinner.succeed('Initial commit created');
         }
 
     } catch (error) {
