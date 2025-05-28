@@ -1,1 +1,0 @@
-{"version":3,"file":"run-cmd.js","sourceRoot":"","sources":["../../src/lib/run-cmd.ts"],"names":[],"mappings":";;AAEA,wBAGC;AALD,iCAA4C;AAErC,KAAK,UAAU,MAAM,CAAC,GAAW,EAAE,IAAc,EAAE,OAAgB,EAAE;IACxE,MAAM,MAAM,GAAG,MAAM,IAAA,aAAK,EAAC,GAAG,EAAE,IAAI,EAAE,EAAE,KAAK,EAAE,SAAS,EAAE,GAAG,IAAI,EAAE,CAAC,CAAC;IACrE,OAAO,MAAM,CAAC;AAClB,CAAC"}
