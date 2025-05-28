@@ -1,7 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import chalk from 'chalk';
-import { Spinner } from '~/lib/spinner';
+import ora from 'ora';
 import { customizeNextJsProject } from '~/lib/file-handlers';
 import { initializeGitRepository } from '~/lib/git';
 import { runLintFix } from '~/lib/format';
@@ -17,31 +16,26 @@ export async function createProject(options: ProjectOptions): Promise<void> {
         throw new Error(`Directory "${options.directory}" already exists`);
     }
 
-    const spinner = new Spinner('Creating Next.js project...');
-    spinner.start();
+    let spinner = ora('Creating Next.js project...').start();
 
     try {
         await createNextJsProject(options.directory);
         spinner.succeed('Next.js project created');
 
-        spinner.updateMessage('Customizing project files...');
-        spinner.start();
+        spinner = ora('Customizing project files...').start();
         await customizeNextJsProject(projectPath, { initGit: options.initGit });
         spinner.succeed('Project files customized');
 
-        spinner.updateMessage('Setting up project documentation...');
-        spinner.start();
+        spinner = ora('Setting up project documentation...').start();
         await createBasicReadme(projectPath, options);
         spinner.succeed('Project documentation created');
 
-        spinner.updateMessage('Tidying up...');
-        spinner.start();
+        spinner = ora('Tidying up...').start();
         await runLintFix(projectPath);
         spinner.succeed('Code formatted and linted');
 
         if (options.initGit) {
-            spinner.updateMessage('Initializing git repository...');
-            spinner.start();
+            spinner = ora('Initializing git repository...').start();
             await initializeGitRepository(projectPath);
             spinner.succeed('Git repository initialized');
         }

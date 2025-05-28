@@ -73,11 +73,13 @@ export async function askConfirmation(projectName: string, projectDirectory: str
     console.log(`  Directory: ${projectDirectory}`);
     console.log(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`);
 
+    console.log();
+
     return await inquirer.prompt([
         {
             type: 'confirm',
             name: 'confirm',
-            message: '\nDoes this look good? Ready to create your project?',
+            message: 'Does this look good? Ready to create your project?',
             default: true
         }
     ]);
