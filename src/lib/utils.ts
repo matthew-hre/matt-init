@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { execSync } from 'child_process';
 
 export function validateProjectName(name: string): boolean {
     return /^[a-z0-9-_]+$/.test(name);
@@ -12,13 +11,6 @@ export function isValidDirectory(dirPath: string): boolean {
     } catch {
         return false;
     }
-}
-
-export function runCommand(command: string, cwd: string, silent = false): void {
-    execSync(command, {
-        cwd,
-        stdio: silent ? 'ignore' : 'inherit'
-    });
 }
 
 export function createFileFromTemplate(templatePath: string, outputPath: string, replacements: Record<string, string> = {}): void {

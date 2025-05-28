@@ -16,5 +16,12 @@ export declare function removeFavicon(projectPath: string): Promise<void>;
 export declare function createBasicReadme(projectPath: string, options: {
     name: string;
     directory: string;
+    nixFlake?: boolean;
+}): Promise<void>;
+/**
+ * Create nix flake files from templates
+ */
+export declare function createNixFlake(projectPath: string, options: {
+    name: string;
 }): Promise<void>;
 //# sourceMappingURL=index.d.ts.map

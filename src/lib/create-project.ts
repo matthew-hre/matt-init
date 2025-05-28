@@ -1,10 +1,12 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import chalk from 'chalk';
 import ora from 'ora';
 import { customizeNextJsProject } from '~/lib/file-handlers';
 import { initializeGitRepository } from '~/lib/git';
 import { runLintFix } from '~/lib/format';
 import { createBasicReadme } from '~/lib/templates';
+import { applyInstallers } from '~/lib/installers';
 import { ProjectOptions } from '~/lib/types';
 import { runCmd } from '~/lib/run-cmd';
 
@@ -23,12 +25,27 @@ export async function createProject(options: ProjectOptions): Promise<void> {
         spinner.succeed('Next.js project created');
 
         spinner = ora('Customizing project files...').start();
-        await customizeNextJsProject(projectPath, { initGit: options.initGit });
+        await customizeNextJsProject(projectPath, {
+            initGit: options.initGit,
+            nixFlake: options.nixFlake,
+            projectName: options.name
+        });
         spinner.succeed('Project files customized');
 
         spinner = ora('Setting up project documentation...').start();
-        await createBasicReadme(projectPath, options);
+        await createBasicReadme(projectPath, {
+            name: options.name,
+            directory: options.directory,
+            nixFlake: options.nixFlake
+        });
         spinner.succeed('Project documentation created');
+
+        // Apply selected features
+        if (options.features.length > 0) {
+            spinner = ora(`Installing features: ${options.features.join(', ')}...`).start();
+            await applyInstallers(projectPath, options.features);
+            spinner.succeed('Features installed and configured');
+        }
 
         spinner = ora('Tidying up...').start();
         await runLintFix(projectPath);

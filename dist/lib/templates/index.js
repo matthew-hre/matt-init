@@ -37,14 +37,24 @@ exports.emptyPublicDirectory = emptyPublicDirectory;
 exports.replaceAppFiles = replaceAppFiles;
 exports.removeFavicon = removeFavicon;
 exports.createBasicReadme = createBasicReadme;
+exports.createNixFlake = createNixFlake;
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
+const utils_1 = require("~/lib/utils");
 /**
  * Process template file content by removing development-only comments
  */
 function processTemplateContent(content) {
     // Remove @ts-nocheck comments that are only needed in the templates folder
     return content.replace(/^\/\/ @ts-nocheck\s*\n?/gm, '');
+}
+/**
+ * Process and copy a template file to the destination
+ */
+async function processTemplateFile(templatePath, outputPath) {
+    const content = await fs.readFile(templatePath, 'utf8');
+    const processedContent = processTemplateContent(content);
+    await fs.writeFile(outputPath, processedContent);
 }
 /**
  * Empty the public directory of a Next.js project
@@ -65,16 +75,9 @@ async function emptyPublicDirectory(projectPath) {
 async function replaceAppFiles(projectPath) {
     const appPath = path.join(projectPath, 'src', 'app');
     const templatesPath = path.join(__dirname, '..', '..', 'templates', 'nextjs');
-    // Process and copy layout.tsx
-    const layoutTemplate = path.join(templatesPath, 'layout.tsx');
-    const layoutContent = await fs.readFile(layoutTemplate, 'utf8');
-    const processedLayoutContent = processTemplateContent(layoutContent);
-    await fs.writeFile(path.join(appPath, 'layout.tsx'), processedLayoutContent);
-    // Process and copy page.tsx
-    const pageTemplate = path.join(templatesPath, 'page.tsx');
-    const pageContent = await fs.readFile(pageTemplate, 'utf8');
-    const processedPageContent = processTemplateContent(pageContent);
-    await fs.writeFile(path.join(appPath, 'page.tsx'), processedPageContent);
+    // Process and copy template files
+    await processTemplateFile(path.join(templatesPath, 'layout.tsx'), path.join(appPath, 'layout.tsx'));
+    await processTemplateFile(path.join(templatesPath, 'page.tsx'), path.join(appPath, 'page.tsx'));
 }
 /**
  * Remove default favicon from the app directory
@@ -89,14 +92,34 @@ async function removeFavicon(projectPath) {
  * Create basic README from template
  */
 async function createBasicReadme(projectPath, options) {
-    // Read the README template
     const templatesPath = path.join(__dirname, '..', '..', 'templates');
     const readmeTemplate = path.join(templatesPath, 'README.md');
-    let readmeContent = await fs.readFile(readmeTemplate, 'utf8');
-    // Replace placeholders with actual values
-    readmeContent = readmeContent
-        .replace(/{{PROJECT_NAME}}/g, options.name)
-        .replace(/{{DIRECTORY}}/g, options.directory);
-    await fs.writeFile(path.join(projectPath, 'README.md'), readmeContent);
+    const outputPath = path.join(projectPath, 'README.md');
+    (0, utils_1.createFileFromTemplate)(readmeTemplate, outputPath, {
+        PROJECT_NAME: options.name,
+        DIRECTORY: options.directory,
+        NIX_DEVELOP_COMMAND: options.nixFlake ? 'nix develop\n   ' : ''
+    });
+}
+/**
+ * Create nix flake files from templates
+ */
+async function createNixFlake(projectPath, options) {
+    const templatesPath = path.join(__dirname, '..', '..', 'templates', 'nix');
+    // Create nix directory
+    const nixDir = path.join(projectPath, 'nix');
+    await fs.ensureDir(nixDir);
+    // Create flake.nix in project root
+    const flakeTemplate = path.join(templatesPath, 'flake.nix');
+    const flakeOutput = path.join(projectPath, 'flake.nix');
+    (0, utils_1.createFileFromTemplate)(flakeTemplate, flakeOutput, {
+        PROJECT_NAME: options.name
+    });
+    // Create devShell.nix in nix directory
+    const devShellTemplate = path.join(templatesPath, 'devShell.nix');
+    const devShellOutput = path.join(nixDir, 'devShell.nix');
+    (0, utils_1.createFileFromTemplate)(devShellTemplate, devShellOutput, {
+        PROJECT_NAME: options.name
+    });
 }
 //# sourceMappingURL=index.js.map

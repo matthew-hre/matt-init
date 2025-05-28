@@ -35,13 +35,11 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateProjectName = validateProjectName;
 exports.isValidDirectory = isValidDirectory;
-exports.runCommand = runCommand;
 exports.createFileFromTemplate = createFileFromTemplate;
 exports.logStep = logStep;
 exports.logSuccess = logSuccess;
 exports.logError = logError;
 const fs = __importStar(require("fs-extra"));
-const child_process_1 = require("child_process");
 function validateProjectName(name) {
     return /^[a-z0-9-_]+$/.test(name);
 }
@@ -52,12 +50,6 @@ function isValidDirectory(dirPath) {
     catch {
         return false;
     }
-}
-function runCommand(command, cwd, silent = false) {
-    (0, child_process_1.execSync)(command, {
-        cwd,
-        stdio: silent ? 'ignore' : 'inherit'
-    });
 }
 function createFileFromTemplate(templatePath, outputPath, replacements = {}) {
     let content = fs.readFileSync(templatePath, 'utf-8');

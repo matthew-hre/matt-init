@@ -12,5 +12,8 @@ async function customizeNextJsProject(projectPath, options) {
     await (0, templates_1.removeFavicon)(projectPath);
     await (0, format_1.setupEslint)(projectPath);
     await (0, format_1.addLintScripts)(projectPath);
+    if (options.nixFlake) {
+        await (0, templates_1.createNixFlake)(projectPath, { name: options.projectName });
+    }
 }
 //# sourceMappingURL=file-handlers.js.map

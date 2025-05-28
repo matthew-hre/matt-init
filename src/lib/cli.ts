@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { createProject } from '~/lib/create-project';
 import { displayBanner } from '~/lib/banner';
 import { ProjectOptions } from '~/lib/types';
-import { askProjectInfo, askGitInit, askConfirmation } from '~/lib/prompts';
+import { askProjectInfo, askGitInit, askFeatures, askConfirmation, askNixFlake } from '~/lib/prompts';
 
 export async function runCli(): Promise<void> {
     const program = new Command();
@@ -26,11 +26,24 @@ export async function runCli(): Promise<void> {
             const projectDirectory = directory || projectInfo.directory;
             const projectName = projectInfo.name || projectDirectory;
 
-            // Step 2: Ask about git initialization
+            // Step 2: Ask about optional features
+            const { features } = await askFeatures();
+
+            // Step 3: Ask about nix flake
+            const { nixFlake } = await askNixFlake();
+
+            // Step 4: Ask about git initialization
             const { initGit } = await askGitInit();
 
-            // Step 3: Show summary and get confirmation
-            const { confirm } = await askConfirmation(projectName, projectDirectory, initGit);
+            // Step 5: Show summary and get confirmation
+            console.log(chalk.blue('\n📋 Project Summary:'));
+            console.log(chalk.gray(`  Name: ${projectName}`));
+            console.log(chalk.gray(`  Directory: ${projectDirectory}`));
+            console.log(chalk.gray(`  Features: ${features.length > 0 ? features.join(', ') : 'None'}`));
+            console.log(chalk.gray(`  Nix Flake: ${nixFlake ? 'Yes' : 'No'}`));
+            console.log(chalk.gray(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`));
+
+            const { confirm } = await askConfirmation();
 
             if (!confirm) {
                 console.log(chalk.yellow('Project creation cancelled.'));
@@ -41,7 +54,9 @@ export async function runCli(): Promise<void> {
             const projectOptions: ProjectOptions = {
                 name: projectName,
                 directory: projectDirectory,
-                initGit
+                initGit,
+                nixFlake,
+                features
             };
 
             console.log(''); // Add some space before spinner starts
@@ -49,6 +64,9 @@ export async function runCli(): Promise<void> {
             await createProject(projectOptions);
 
             console.log(chalk.green(`\n✅ Project "${projectOptions.name}" created successfully!`));
+            if (features.length > 0) {
+                console.log(chalk.cyan(`🎉 Installed features: ${features.join(', ')}`));
+            }
             console.log(chalk.gray(`\nTo get started:`));
             console.log(chalk.gray(`  cd ${projectOptions.directory}`));
             console.log(chalk.gray(`  pnpm dev`));

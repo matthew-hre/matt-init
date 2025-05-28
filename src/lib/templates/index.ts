@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { createFileFromTemplate } from '~/lib/utils';
 
 /**
  * Process template file content by removing development-only comments
@@ -7,6 +8,15 @@ import * as path from 'path';
 function processTemplateContent(content: string): string {
     // Remove @ts-nocheck comments that are only needed in the templates folder
     return content.replace(/^\/\/ @ts-nocheck\s*\n?/gm, '');
+}
+
+/**
+ * Process and copy a template file to the destination
+ */
+async function processTemplateFile(templatePath: string, outputPath: string): Promise<void> {
+    const content = await fs.readFile(templatePath, 'utf8');
+    const processedContent = processTemplateContent(content);
+    await fs.writeFile(outputPath, processedContent);
 }
 
 /**
@@ -31,17 +41,16 @@ export async function replaceAppFiles(projectPath: string): Promise<void> {
     const appPath = path.join(projectPath, 'src', 'app');
     const templatesPath = path.join(__dirname, '..', '..', 'templates', 'nextjs');
 
-    // Process and copy layout.tsx
-    const layoutTemplate = path.join(templatesPath, 'layout.tsx');
-    const layoutContent = await fs.readFile(layoutTemplate, 'utf8');
-    const processedLayoutContent = processTemplateContent(layoutContent);
-    await fs.writeFile(path.join(appPath, 'layout.tsx'), processedLayoutContent);
+    // Process and copy template files
+    await processTemplateFile(
+        path.join(templatesPath, 'layout.tsx'),
+        path.join(appPath, 'layout.tsx')
+    );
 
-    // Process and copy page.tsx
-    const pageTemplate = path.join(templatesPath, 'page.tsx');
-    const pageContent = await fs.readFile(pageTemplate, 'utf8');
-    const processedPageContent = processTemplateContent(pageContent);
-    await fs.writeFile(path.join(appPath, 'page.tsx'), processedPageContent);
+    await processTemplateFile(
+        path.join(templatesPath, 'page.tsx'),
+        path.join(appPath, 'page.tsx')
+    );
 }
 
 /**
@@ -58,16 +67,39 @@ export async function removeFavicon(projectPath: string): Promise<void> {
 /**
  * Create basic README from template
  */
-export async function createBasicReadme(projectPath: string, options: { name: string; directory: string }): Promise<void> {
-    // Read the README template
+export async function createBasicReadme(projectPath: string, options: { name: string; directory: string; nixFlake?: boolean }): Promise<void> {
     const templatesPath = path.join(__dirname, '..', '..', 'templates');
     const readmeTemplate = path.join(templatesPath, 'README.md');
-    let readmeContent = await fs.readFile(readmeTemplate, 'utf8');
+    const outputPath = path.join(projectPath, 'README.md');
 
-    // Replace placeholders with actual values
-    readmeContent = readmeContent
-        .replace(/{{PROJECT_NAME}}/g, options.name)
-        .replace(/{{DIRECTORY}}/g, options.directory);
+    createFileFromTemplate(readmeTemplate, outputPath, {
+        PROJECT_NAME: options.name,
+        DIRECTORY: options.directory,
+        NIX_DEVELOP_COMMAND: options.nixFlake ? 'nix develop\n   ' : ''
+    });
+}
 
-    await fs.writeFile(path.join(projectPath, 'README.md'), readmeContent);
+/**
+ * Create nix flake files from templates
+ */
+export async function createNixFlake(projectPath: string, options: { name: string }): Promise<void> {
+    const templatesPath = path.join(__dirname, '..', '..', 'templates', 'nix');
+
+    // Create nix directory
+    const nixDir = path.join(projectPath, 'nix');
+    await fs.ensureDir(nixDir);
+
+    // Create flake.nix in project root
+    const flakeTemplate = path.join(templatesPath, 'flake.nix');
+    const flakeOutput = path.join(projectPath, 'flake.nix');
+    createFileFromTemplate(flakeTemplate, flakeOutput, {
+        PROJECT_NAME: options.name
+    });
+
+    // Create devShell.nix in nix directory
+    const devShellTemplate = path.join(templatesPath, 'devShell.nix');
+    const devShellOutput = path.join(nixDir, 'devShell.nix');
+    createFileFromTemplate(devShellTemplate, devShellOutput, {
+        PROJECT_NAME: options.name
+    });
 }

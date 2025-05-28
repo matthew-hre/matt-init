@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
 import { validateProjectName } from '~/lib/utils';
+import { installers } from '~/lib/installers';
 
 export interface ProjectInfoAnswers {
     directory: string;
@@ -10,8 +11,16 @@ export interface GitInitAnswers {
     initGit: boolean;
 }
 
+export interface NixFlakeAnswers {
+    nixFlake: boolean;
+}
+
 export interface ConfirmationAnswers {
     confirm: boolean;
+}
+
+export interface FeaturesAnswers {
+    features: string[];
 }
 
 /**
@@ -51,6 +60,20 @@ export async function askProjectInfo(directory?: string): Promise<ProjectInfoAns
 }
 
 /**
+ * Ask if user wants to add a nix flake
+ */
+export async function askNixFlake(): Promise<NixFlakeAnswers> {
+    return await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'nixFlake',
+            message: 'Would you like to add a nix flake for development environment?',
+            default: false
+        }
+    ]);
+}
+
+/**
  * Ask if user wants to initialize git repository
  */
 export async function askGitInit(): Promise<GitInitAnswers> {
@@ -67,20 +90,33 @@ export async function askGitInit(): Promise<GitInitAnswers> {
 /**
  * Show project summary and ask for confirmation
  */
-export async function askConfirmation(projectName: string, projectDirectory: string, initGit: boolean): Promise<ConfirmationAnswers> {
-    console.log('\n📋 Project Summary:');
-    console.log(`  Name: ${projectName}`);
-    console.log(`  Directory: ${projectDirectory}`);
-    console.log(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`);
-
-    console.log();
-
+export async function askConfirmation(): Promise<ConfirmationAnswers> {
     return await inquirer.prompt([
         {
             type: 'confirm',
             name: 'confirm',
-            message: 'Does this look good? Ready to create your project?',
+            message: '\nDoes this look good? Ready to create your project?',
             default: true
+        }
+    ]);
+}
+
+/**
+ * Ask user to select optional features
+ */
+export async function askFeatures(): Promise<FeaturesAnswers> {
+    return await inquirer.prompt([
+        {
+            type: 'checkbox',
+            name: 'features',
+            message: 'Which optional features would you like to include?',
+            choices: [
+                {
+                    name: 'Drizzle ORM - Type-safe database toolkit',
+                    value: 'drizzle',
+                    checked: false
+                }
+            ]
         }
     ]);
 }

@@ -25,10 +25,20 @@ async function runCli() {
         const projectInfo = await (0, prompts_1.askProjectInfo)(directory);
         const projectDirectory = directory || projectInfo.directory;
         const projectName = projectInfo.name || projectDirectory;
-        // Step 2: Ask about git initialization
+        // Step 2: Ask about optional features
+        const { features } = await (0, prompts_1.askFeatures)();
+        // Step 3: Ask about nix flake
+        const { nixFlake } = await (0, prompts_1.askNixFlake)();
+        // Step 4: Ask about git initialization
         const { initGit } = await (0, prompts_1.askGitInit)();
-        // Step 3: Show summary and get confirmation
-        const { confirm } = await (0, prompts_1.askConfirmation)(projectName, projectDirectory, initGit);
+        // Step 5: Show summary and get confirmation
+        console.log(chalk_1.default.blue('\n📋 Project Summary:'));
+        console.log(chalk_1.default.gray(`  Name: ${projectName}`));
+        console.log(chalk_1.default.gray(`  Directory: ${projectDirectory}`));
+        console.log(chalk_1.default.gray(`  Features: ${features.length > 0 ? features.join(', ') : 'None'}`));
+        console.log(chalk_1.default.gray(`  Nix Flake: ${nixFlake ? 'Yes' : 'No'}`));
+        console.log(chalk_1.default.gray(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`));
+        const { confirm } = await (0, prompts_1.askConfirmation)();
         if (!confirm) {
             console.log(chalk_1.default.yellow('Project creation cancelled.'));
             process.exit(0);
@@ -37,11 +47,16 @@ async function runCli() {
         const projectOptions = {
             name: projectName,
             directory: projectDirectory,
-            initGit
+            initGit,
+            nixFlake,
+            features
         };
         console.log(''); // Add some space before spinner starts
         await (0, create_project_1.createProject)(projectOptions);
         console.log(chalk_1.default.green(`\n✅ Project "${projectOptions.name}" created successfully!`));
+        if (features.length > 0) {
+            console.log(chalk_1.default.cyan(`🎉 Installed features: ${features.join(', ')}`));
+        }
         console.log(chalk_1.default.gray(`\nTo get started:`));
         console.log(chalk_1.default.gray(`  cd ${projectOptions.directory}`));
         console.log(chalk_1.default.gray(`  pnpm dev`));

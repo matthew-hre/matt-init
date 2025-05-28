@@ -15,8 +15,7 @@ A modern Next.js application created with matt-init.
 
 1. **Install dependencies:**
    ```bash
-   nix develop
-   pnpm install
+   {{NIX_DEVELOP_COMMAND}}   pnpm install
    ```
 
 2. **Run the development server:**

@@ -32,15 +32,19 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createProject = createProject;
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
-const spinner_1 = require("~/lib/spinner");
+const ora_1 = __importDefault(require("ora"));
 const file_handlers_1 = require("~/lib/file-handlers");
 const git_1 = require("~/lib/git");
 const format_1 = require("~/lib/format");
 const templates_1 = require("~/lib/templates");
+const installers_1 = require("~/lib/installers");
 const run_cmd_1 = require("~/lib/run-cmd");
 async function createProject(options) {
     const projectPath = path.resolve(process.cwd(), options.directory);
@@ -48,26 +52,35 @@ async function createProject(options) {
     if (await fs.pathExists(projectPath)) {
         throw new Error(`Directory "${options.directory}" already exists`);
     }
-    const spinner = new spinner_1.Spinner('Creating Next.js project...');
-    spinner.start();
+    let spinner = (0, ora_1.default)('Creating Next.js project...').start();
     try {
         await createNextJsProject(options.directory);
         spinner.succeed('Next.js project created');
-        spinner.updateMessage('Customizing project files...');
-        spinner.start();
-        await (0, file_handlers_1.customizeNextJsProject)(projectPath, { initGit: options.initGit });
+        spinner = (0, ora_1.default)('Customizing project files...').start();
+        await (0, file_handlers_1.customizeNextJsProject)(projectPath, {
+            initGit: options.initGit,
+            nixFlake: options.nixFlake,
+            projectName: options.name
+        });
         spinner.succeed('Project files customized');
-        spinner.updateMessage('Setting up project documentation...');
-        spinner.start();
-        await (0, templates_1.createBasicReadme)(projectPath, options);
+        spinner = (0, ora_1.default)('Setting up project documentation...').start();
+        await (0, templates_1.createBasicReadme)(projectPath, {
+            name: options.name,
+            directory: options.directory,
+            nixFlake: options.nixFlake
+        });
         spinner.succeed('Project documentation created');
-        spinner.updateMessage('Tidying up...');
-        spinner.start();
+        // Apply selected features
+        if (options.features.length > 0) {
+            spinner = (0, ora_1.default)(`Installing features: ${options.features.join(', ')}...`).start();
+            await (0, installers_1.applyInstallers)(projectPath, options.features);
+            spinner.succeed('Features installed and configured');
+        }
+        spinner = (0, ora_1.default)('Tidying up...').start();
         await (0, format_1.runLintFix)(projectPath);
         spinner.succeed('Code formatted and linted');
         if (options.initGit) {
-            spinner.updateMessage('Initializing git repository...');
-            spinner.start();
+            spinner = (0, ora_1.default)('Initializing git repository...').start();
             await (0, git_1.initializeGitRepository)(projectPath);
             spinner.succeed('Git repository initialized');
         }

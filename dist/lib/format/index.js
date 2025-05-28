@@ -54,7 +54,7 @@ async function setupEslint(projectPath) {
     const eslintContent = await fs.readFile(eslintTemplate, 'utf8');
     await fs.writeFile(path.join(projectPath, 'eslint.config.mjs'), eslintContent);
     // Install antfu's ESLint config
-    await (0, run_cmd_1.runCmd)('pnpm', ['add', '-D', '@antfu/eslint-config'], { stdio: 'pipe', cwd: projectPath });
+    await (0, run_cmd_1.runCmd)('pnpm', ['add', '-D', '@antfu/eslint-config', 'eslint-plugin-format'], { stdio: 'pipe', cwd: projectPath });
 }
 /**
  * Add lint scripts to package.json
@@ -77,7 +77,11 @@ async function addLintScripts(projectPath) {
  */
 async function runLintFix(projectPath) {
     try {
-        await (0, run_cmd_1.runCmd)('pnpm', ['run', 'lint:fix'], { stdio: 'pipe', cwd: projectPath });
+        await (0, run_cmd_1.runCmd)('pnpm', ['run', 'lint:fix'], {
+            stdio: 'pipe',
+            cwd: projectPath,
+            timeout: 30000 // Add 30 second timeout
+        });
     }
     catch (error) {
         // ESLint returns non-zero exit codes when it finds/fixes issues, but that's okay
@@ -86,7 +90,8 @@ async function runLintFix(projectPath) {
             // Ignore ESLint exit codes, it's normal for it to return non-zero when fixing issues
             return;
         }
-        throw error;
+        // Log the error but don't fail the entire process for lint issues
+        console.warn('Lint fix failed:', error instanceof Error ? error.message : error);
     }
 }
 //# sourceMappingURL=index.js.map

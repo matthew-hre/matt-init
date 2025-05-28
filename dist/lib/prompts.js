@@ -4,8 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.askProjectInfo = askProjectInfo;
+exports.askNixFlake = askNixFlake;
 exports.askGitInit = askGitInit;
 exports.askConfirmation = askConfirmation;
+exports.askFeatures = askFeatures;
 const inquirer_1 = __importDefault(require("inquirer"));
 const utils_1 = require("~/lib/utils");
 /**
@@ -44,6 +46,19 @@ async function askProjectInfo(directory) {
     ]);
 }
 /**
+ * Ask if user wants to add a nix flake
+ */
+async function askNixFlake() {
+    return await inquirer_1.default.prompt([
+        {
+            type: 'confirm',
+            name: 'nixFlake',
+            message: 'Would you like to add a nix flake for development environment?',
+            default: false
+        }
+    ]);
+}
+/**
  * Ask if user wants to initialize git repository
  */
 async function askGitInit() {
@@ -59,17 +74,32 @@ async function askGitInit() {
 /**
  * Show project summary and ask for confirmation
  */
-async function askConfirmation(projectName, projectDirectory, initGit) {
-    console.log('\n📋 Project Summary:');
-    console.log(`  Name: ${projectName}`);
-    console.log(`  Directory: ${projectDirectory}`);
-    console.log(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`);
+async function askConfirmation() {
     return await inquirer_1.default.prompt([
         {
             type: 'confirm',
             name: 'confirm',
             message: '\nDoes this look good? Ready to create your project?',
             default: true
+        }
+    ]);
+}
+/**
+ * Ask user to select optional features
+ */
+async function askFeatures() {
+    return await inquirer_1.default.prompt([
+        {
+            type: 'checkbox',
+            name: 'features',
+            message: 'Which optional features would you like to include?',
+            choices: [
+                {
+                    name: 'Drizzle ORM - Type-safe database toolkit',
+                    value: 'drizzle',
+                    checked: false
+                }
+            ]
         }
     ]);
 }
