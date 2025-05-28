@@ -65,9 +65,6 @@ program
             const projectDirectory = directory || projectInfo.directory;
             const projectName = projectInfo.name || projectDirectory;
 
-            console.log(chalk.gray(`\nProject: ${chalk.white(projectName)}`));
-            console.log(chalk.gray(`Directory: ${chalk.white(projectDirectory)}\n`));
-
             const projectOptions: ProjectOptions = {
                 name: projectName,
                 directory: projectDirectory,

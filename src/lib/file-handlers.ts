@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { spawn } from 'child_process';
 
 /**
  * Empty the public directory of a Next.js project
@@ -48,8 +49,6 @@ export async function replaceAppFiles(projectPath: string): Promise<void> {
  * Initialize a git repository in the project directory
  */
 export async function initializeGitRepository(projectPath: string): Promise<void> {
-    const { spawn } = require('child_process');
-
     return new Promise((resolve, reject) => {
         // Initialize git repo
         const initProcess = spawn('git', ['init'], {
@@ -123,9 +122,103 @@ export async function initializeGitRepository(projectPath: string): Promise<void
 }
 
 /**
+ * Set up ESLint with antfu's configuration
+ */
+export async function setupEslint(projectPath: string): Promise<void> {
+    // Remove default ESLint config files created by Next.js
+    const eslintrcPath = path.join(projectPath, 'eslint.config.mjs');
+    if (await fs.pathExists(eslintrcPath)) {
+        await fs.remove(eslintrcPath);
+    }
+
+    // Copy eslint.config.js from template
+    const templatesPath = path.join(__dirname, '..', 'templates');
+    const eslintTemplate = path.join(templatesPath, 'eslint.config.mjs');
+    const eslintContent = await fs.readFile(eslintTemplate, 'utf8');
+    await fs.writeFile(path.join(projectPath, 'eslint.config.mjs'), eslintContent);
+
+    // Install antfu's ESLint config
+    return new Promise((resolve, reject) => {
+        const child = spawn('pnpm', ['add', '-D', '@antfu/eslint-config'], {
+            stdio: 'pipe',
+            cwd: projectPath
+        });
+
+        child.on('close', (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`ESLint setup failed with exit code ${code}`));
+            }
+        });
+
+        child.on('error', (error) => {
+            reject(error);
+        });
+    });
+}
+
+/**
+ * Add lint scripts to package.json
+ */
+export async function addLintScripts(projectPath: string): Promise<void> {
+    const packageJsonPath = path.join(projectPath, 'package.json');
+
+    if (await fs.pathExists(packageJsonPath)) {
+        const packageJson = await fs.readJson(packageJsonPath);
+
+        // Add lint scripts
+        packageJson.scripts = {
+            ...packageJson.scripts,
+            "lint": "eslint .",
+            "lint:fix": "eslint . --fix"
+        };
+
+        await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+    }
+}
+
+/**
+ * Run lint:fix on the project
+ */
+export async function runLintFix(projectPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const child = spawn('pnpm', ['run', 'lint:fix'], {
+            stdio: 'pipe',
+            cwd: projectPath
+        });
+
+        child.on('close', (code) => {
+            // ESLint returns non-zero exit codes when it finds/fixes issues, but that's okay
+            // We only reject if there's an actual error running the command
+            resolve();
+        });
+
+        child.on('error', (error) => {
+            // Only reject on actual command execution errors
+            reject(error);
+        });
+    });
+}
+
+/**
+ * Remove default favicon from the app directory
+ */
+export async function removeFavicon(projectPath: string): Promise<void> {
+    const faviconPath = path.join(projectPath, 'src', 'app', 'favicon.ico');
+
+    if (await fs.pathExists(faviconPath)) {
+        await fs.remove(faviconPath);
+    }
+}
+
+/**
  * Apply all customizations to a newly created Next.js project
  */
 export async function customizeNextJsProject(projectPath: string, options: { initGit: boolean }): Promise<void> {
     await emptyPublicDirectory(projectPath);
     await replaceAppFiles(projectPath);
+    await removeFavicon(projectPath);
+    await setupEslint(projectPath);
+    await addLintScripts(projectPath);
 }

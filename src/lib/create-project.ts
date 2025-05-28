@@ -3,8 +3,7 @@ import * as path from 'path';
 import { spawn } from 'child_process';
 import chalk from 'chalk';
 import { Spinner } from './spinner';
-import { customizeNextJsProject, initializeGitRepository } from './file-handlers';
-import { generateReadme } from '../templates/readme';
+import { customizeNextJsProject, initializeGitRepository, runLintFix } from './file-handlers';
 
 export interface ProjectOptions {
     name: string;
@@ -36,6 +35,11 @@ export async function createProject(options: ProjectOptions): Promise<void> {
         spinner.start();
         await createBasicReadme(projectPath, options);
         spinner.succeed('Project documentation created');
+
+        spinner.updateMessage('Tidying up...');
+        spinner.start();
+        await runLintFix(projectPath);
+        spinner.succeed('Code formatted and linted');
 
         if (options.initGit) {
             spinner.updateMessage('Initializing git repository...');
@@ -84,6 +88,15 @@ async function createNextJsProject(directory: string): Promise<void> {
 }
 
 async function createBasicReadme(projectPath: string, options: ProjectOptions): Promise<void> {
-    const readme = generateReadme(options.name, options.directory);
-    await fs.writeFile(path.join(projectPath, 'README.md'), readme);
+    // Read the README template
+    const templatesPath = path.join(__dirname, '..', 'templates');
+    const readmeTemplate = path.join(templatesPath, 'README.md');
+    let readmeContent = await fs.readFile(readmeTemplate, 'utf8');
+
+    // Replace placeholders with actual values
+    readmeContent = readmeContent
+        .replace(/{{PROJECT_NAME}}/g, options.name)
+        .replace(/{{DIRECTORY}}/g, options.directory);
+
+    await fs.writeFile(path.join(projectPath, 'README.md'), readmeContent);
 }
