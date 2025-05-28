@@ -1,15 +1,13 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { spawn } from 'child_process';
 import chalk from 'chalk';
-import { Spinner } from './spinner';
-import { customizeNextJsProject, initializeGitRepository, runLintFix } from './file-handlers';
-
-export interface ProjectOptions {
-    name: string;
-    directory: string;
-    initGit: boolean;
-}
+import { Spinner } from '~/lib/spinner';
+import { customizeNextJsProject } from '~/lib/file-handlers';
+import { initializeGitRepository } from '~/lib/git';
+import { runLintFix } from '~/lib/format';
+import { createBasicReadme } from '~/lib/templates';
+import { ProjectOptions } from '~/lib/types';
+import { runCmd } from '~/lib/run-cmd';
 
 export async function createProject(options: ProjectOptions): Promise<void> {
     const projectPath = path.resolve(process.cwd(), options.directory);
@@ -55,48 +53,20 @@ export async function createProject(options: ProjectOptions): Promise<void> {
 }
 
 async function createNextJsProject(directory: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const child = spawn('pnpm', [
-            'create',
-            'next-app@latest',
-            directory,
-            '--typescript',
-            '--tailwind',
-            '--eslint',
-            '--app',
-            '--turbopack',
-            '--src-dir',
-            '--import-alias=~/*',
-            '--use-pnpm'
-        ], {
-            stdio: 'pipe', // Hide output
-            cwd: process.cwd()
-        });
-
-        child.on('close', (code) => {
-            if (code === 0) {
-                resolve();
-            } else {
-                reject(new Error(`Command failed with exit code ${code}`));
-            }
-        });
-
-        child.on('error', (error) => {
-            reject(error);
-        });
+    await runCmd('pnpm', [
+        'create',
+        'next-app@latest',
+        directory,
+        '--typescript',
+        '--tailwind',
+        '--eslint',
+        '--app',
+        '--turbopack',
+        '--src-dir',
+        '--import-alias=~/*',
+        '--use-pnpm'
+    ], {
+        stdio: 'pipe', // Hide output
+        cwd: process.cwd()
     });
-}
-
-async function createBasicReadme(projectPath: string, options: ProjectOptions): Promise<void> {
-    // Read the README template
-    const templatesPath = path.join(__dirname, '..', 'templates');
-    const readmeTemplate = path.join(templatesPath, 'README.md');
-    let readmeContent = await fs.readFile(readmeTemplate, 'utf8');
-
-    // Replace placeholders with actual values
-    readmeContent = readmeContent
-        .replace(/{{PROJECT_NAME}}/g, options.name)
-        .replace(/{{DIRECTORY}}/g, options.directory);
-
-    await fs.writeFile(path.join(projectPath, 'README.md'), readmeContent);
 }

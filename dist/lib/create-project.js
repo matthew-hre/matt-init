@@ -36,10 +36,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createProject = createProject;
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
-const child_process_1 = require("child_process");
-const spinner_1 = require("./spinner");
-const file_handlers_1 = require("./file-handlers");
-const readme_1 = require("../templates/readme");
+const spinner_1 = require("~/lib/spinner");
+const file_handlers_1 = require("~/lib/file-handlers");
+const git_1 = require("~/lib/git");
+const format_1 = require("~/lib/format");
+const templates_1 = require("~/lib/templates");
+const run_cmd_1 = require("~/lib/run-cmd");
 async function createProject(options) {
     const projectPath = path.resolve(process.cwd(), options.directory);
     // Check if directory already exists
@@ -57,12 +59,16 @@ async function createProject(options) {
         spinner.succeed('Project files customized');
         spinner.updateMessage('Setting up project documentation...');
         spinner.start();
-        await createBasicReadme(projectPath, options);
+        await (0, templates_1.createBasicReadme)(projectPath, options);
         spinner.succeed('Project documentation created');
+        spinner.updateMessage('Tidying up...');
+        spinner.start();
+        await (0, format_1.runLintFix)(projectPath);
+        spinner.succeed('Code formatted and linted');
         if (options.initGit) {
             spinner.updateMessage('Initializing git repository...');
             spinner.start();
-            await (0, file_handlers_1.initializeGitRepository)(projectPath);
+            await (0, git_1.initializeGitRepository)(projectPath);
             spinner.succeed('Git repository initialized');
         }
     }
@@ -72,38 +78,21 @@ async function createProject(options) {
     }
 }
 async function createNextJsProject(directory) {
-    return new Promise((resolve, reject) => {
-        const child = (0, child_process_1.spawn)('pnpm', [
-            'create',
-            'next-app@latest',
-            directory,
-            '--typescript',
-            '--tailwind',
-            '--eslint',
-            '--app',
-            '--turbopack',
-            '--src-dir',
-            '--import-alias=~/*',
-            '--use-pnpm'
-        ], {
-            stdio: 'pipe', // Hide output
-            cwd: process.cwd()
-        });
-        child.on('close', (code) => {
-            if (code === 0) {
-                resolve();
-            }
-            else {
-                reject(new Error(`Command failed with exit code ${code}`));
-            }
-        });
-        child.on('error', (error) => {
-            reject(error);
-        });
+    await (0, run_cmd_1.runCmd)('pnpm', [
+        'create',
+        'next-app@latest',
+        directory,
+        '--typescript',
+        '--tailwind',
+        '--eslint',
+        '--app',
+        '--turbopack',
+        '--src-dir',
+        '--import-alias=~/*',
+        '--use-pnpm'
+    ], {
+        stdio: 'pipe', // Hide output
+        cwd: process.cwd()
     });
-}
-async function createBasicReadme(projectPath, options) {
-    const readme = (0, readme_1.generateReadme)(options.name, options.directory);
-    await fs.writeFile(path.join(projectPath, 'README.md'), readme);
 }
 //# sourceMappingURL=create-project.js.map
