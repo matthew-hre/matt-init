@@ -2,88 +2,79 @@ import { runCmd } from '~/lib/run-cmd';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-export interface Installer {
+export interface DatabaseInstaller {
     deps?: string[];
     devDeps?: string[];
     apply: (projectPath: string) => Promise<void>;
 }
 
-// Drizzle installer
-async function applyDrizzle(projectPath: string): Promise<void> {
-    // Copy drizzle configuration files
-    const templatesPath = path.join(__dirname, '..', '..', 'templates', 'drizzle');
-    const targetPath = path.join(projectPath, 'src', 'lib', 'db');
-
-    await fs.ensureDir(targetPath);
-
-    // Copy drizzle files if they exist
-    if (await fs.pathExists(templatesPath)) {
-        await fs.copy(templatesPath, targetPath);
-    }
-
-    // Create drizzle config file
-    const drizzleConfig = `import type { Config } from 'drizzle-kit';
-
-export default {
-    schema: './src/lib/db/schema.ts',
-    out: './drizzle',
-    driver: 'sqlite',
-    dbCredentials: {
-        url: './sqlite.db',
-    },
-} satisfies Config;
+// Turso installer
+async function applyTurso(projectPath: string): Promise<void> {
+    // Create .env file with Turso configuration
+    const envContent = `TURSO_DATABASE_URL=http://127.0.0.1:8080
+TURSO_AUTH_TOKEN=
 `;
+    await fs.writeFile(path.join(projectPath, '.env'), envContent);
 
-    await fs.writeFile(path.join(projectPath, 'drizzle.config.ts'), drizzleConfig);
+    // Create database client file
+    const dbDir = path.join(projectPath, 'src', 'lib', 'db');
+    await fs.ensureDir(dbDir);
+
+    const clientContent = `import { createClient } from "@libsql/client";
+
+const client = createClient({
+  url: "http://127.0.0.1:8080",
+});
+
+export default client;
+`;
+    await fs.writeFile(path.join(dbDir, 'client.ts'), clientContent);
+
+    // Update package.json scripts
+    const packageJsonPath = path.join(projectPath, 'package.json');
+    const packageJson = await fs.readJson(packageJsonPath);
+
+    packageJson.scripts = {
+        ...packageJson.scripts,
+        'dev:db': 'turso dev --db-file local.db',
+        'dev': 'concurrently "pnpm run dev:db" "next dev"'
+    };
+
+    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 }
 
-
-export const installers: Record<string, Installer> = {
-    drizzle: {
-        deps: ['drizzle-orm', 'better-sqlite3'],
-        devDeps: ['drizzle-kit', '@types/better-sqlite3'],
-        apply: applyDrizzle,
+export const databaseInstallers: Record<string, DatabaseInstaller> = {
+    turso: {
+        deps: ['@libsql/client', 'concurrently'],
+        apply: applyTurso,
     }
 };
 
-export async function applyInstallers(
+export async function applyDatabaseInstaller(
     projectPath: string,
-    selectedFeatures: string[]
+    database: string
 ): Promise<void> {
-    const selectedInstallers = selectedFeatures
-        .filter(feature => feature in installers)
-        .map(feature => ({ name: feature, installer: installers[feature] }));
-
-    if (selectedInstallers.length === 0) {
+    if (database === 'none' || !databaseInstallers[database]) {
         return;
     }
 
-    // Collect all dependencies
-    const allDeps = new Set<string>();
-    const allDevDeps = new Set<string>();
-
-    selectedInstallers.forEach(({ installer }) => {
-        installer.deps?.forEach(dep => allDeps.add(dep));
-        installer.devDeps?.forEach(dep => allDevDeps.add(dep));
-    });
+    const installer = databaseInstallers[database];
 
     // Install dependencies
-    if (allDeps.size > 0) {
-        await runCmd('pnpm', ['add', ...Array.from(allDeps)], {
+    if (installer.deps && installer.deps.length > 0) {
+        await runCmd('pnpm', ['add', ...installer.deps], {
             cwd: projectPath,
             stdio: 'pipe'
         });
     }
 
-    if (allDevDeps.size > 0) {
-        await runCmd('pnpm', ['add', '-D', ...Array.from(allDevDeps)], {
+    if (installer.devDeps && installer.devDeps.length > 0) {
+        await runCmd('pnpm', ['add', '-D', ...installer.devDeps], {
             cwd: projectPath,
             stdio: 'pipe'
         });
     }
 
-    // Apply each installer
-    for (const { name, installer } of selectedInstallers) {
-        await installer.apply(projectPath);
-    }
+    // Apply the installer
+    await installer.apply(projectPath);
 }

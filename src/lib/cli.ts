@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { createProject } from '~/lib/create-project';
 import { displayBanner } from '~/lib/banner';
 import { ProjectOptions } from '~/lib/types';
-import { askProjectInfo, askGitInit, askFeatures, askConfirmation, askNixFlake } from '~/lib/prompts';
+import { askProjectInfo, askGitInit, askConfirmation, askNixFlake, askDatabase } from '~/lib/prompts';
 
 export async function runCli(): Promise<void> {
     const program = new Command();
@@ -26,8 +26,8 @@ export async function runCli(): Promise<void> {
             const projectDirectory = directory || projectInfo.directory;
             const projectName = projectInfo.name || projectDirectory;
 
-            // Step 2: Ask about optional features
-            const { features } = await askFeatures();
+            // Step 2: Ask about database
+            const { database } = await askDatabase();
 
             // Step 3: Ask about nix flake
             const { nixFlake } = await askNixFlake();
@@ -39,7 +39,7 @@ export async function runCli(): Promise<void> {
             console.log(chalk.blue('\n📋 Project Summary:'));
             console.log(chalk.gray(`  Name: ${projectName}`));
             console.log(chalk.gray(`  Directory: ${projectDirectory}`));
-            console.log(chalk.gray(`  Features: ${features.length > 0 ? features.join(', ') : 'None'}`));
+            console.log(chalk.gray(`  Database: ${database === 'none' ? 'None' : database.charAt(0).toUpperCase() + database.slice(1)}`));
             console.log(chalk.gray(`  Nix Flake: ${nixFlake ? 'Yes' : 'No'}`));
             console.log(chalk.gray(`  Initialize Git: ${initGit ? 'Yes' : 'No'}`));
 
@@ -56,7 +56,7 @@ export async function runCli(): Promise<void> {
                 directory: projectDirectory,
                 initGit,
                 nixFlake,
-                features
+                database
             };
 
             console.log(''); // Add some space before spinner starts
@@ -64,8 +64,8 @@ export async function runCli(): Promise<void> {
             await createProject(projectOptions);
 
             console.log(chalk.green(`\n✅ Project "${projectOptions.name}" created successfully!`));
-            if (features.length > 0) {
-                console.log(chalk.cyan(`🎉 Installed features: ${features.join(', ')}`));
+            if (database !== 'none') {
+                console.log(chalk.cyan(`🎉 Database setup: ${database.charAt(0).toUpperCase() + database.slice(1)}`));
             }
             console.log(chalk.gray(`\nTo get started:`));
             console.log(chalk.gray(`  cd ${projectOptions.directory}`));

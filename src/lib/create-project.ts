@@ -6,7 +6,7 @@ import { customizeNextJsProject } from '~/lib/file-handlers';
 import { initializeGitRepository } from '~/lib/git';
 import { runLintFix } from '~/lib/format';
 import { createBasicReadme } from '~/lib/templates';
-import { applyInstallers } from '~/lib/installers';
+import { applyDatabaseInstaller } from '~/lib/installers';
 import { ProjectOptions } from '~/lib/types';
 import { runCmd } from '~/lib/run-cmd';
 
@@ -28,7 +28,8 @@ export async function createProject(options: ProjectOptions): Promise<void> {
         await customizeNextJsProject(projectPath, {
             initGit: options.initGit,
             nixFlake: options.nixFlake,
-            projectName: options.name
+            projectName: options.name,
+            database: options.database
         });
         spinner.succeed('Project files customized');
 
@@ -36,15 +37,16 @@ export async function createProject(options: ProjectOptions): Promise<void> {
         await createBasicReadme(projectPath, {
             name: options.name,
             directory: options.directory,
-            nixFlake: options.nixFlake
+            nixFlake: options.nixFlake,
+            database: options.database
         });
         spinner.succeed('Project documentation created');
 
-        // Apply selected features
-        if (options.features.length > 0) {
-            spinner = ora(`Installing features: ${options.features.join(', ')}...`).start();
-            await applyInstallers(projectPath, options.features);
-            spinner.succeed('Features installed and configured');
+        // Apply database setup if selected
+        if (options.database !== 'none') {
+            spinner = ora(`Setting up database: ${options.database}...`).start();
+            await applyDatabaseInstaller(projectPath, options.database);
+            spinner.succeed('Database setup completed');
         }
 
         spinner = ora('Tidying up...').start();

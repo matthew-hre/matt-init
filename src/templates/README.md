@@ -22,7 +22,7 @@ A modern Next.js application created with matt-init.
    ```bash
    pnpm dev
    ```
-
+{{DATABASE_INSTRUCTIONS}}
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Development Scripts

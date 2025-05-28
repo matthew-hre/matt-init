@@ -1,6 +1,5 @@
 import inquirer from 'inquirer';
 import { validateProjectName } from '~/lib/utils';
-import { installers } from '~/lib/installers';
 
 export interface ProjectInfoAnswers {
     directory: string;
@@ -21,6 +20,10 @@ export interface ConfirmationAnswers {
 
 export interface FeaturesAnswers {
     features: string[];
+}
+
+export interface DatabaseAnswers {
+    database: string;
 }
 
 /**
@@ -68,7 +71,7 @@ export async function askNixFlake(): Promise<NixFlakeAnswers> {
             type: 'confirm',
             name: 'nixFlake',
             message: 'Would you like to add a nix flake for development environment?',
-            default: false
+            default: true
         }
     ]);
 }
@@ -102,21 +105,25 @@ export async function askConfirmation(): Promise<ConfirmationAnswers> {
 }
 
 /**
- * Ask user to select optional features
+ * Ask user to select database type
  */
-export async function askFeatures(): Promise<FeaturesAnswers> {
+export async function askDatabase(): Promise<DatabaseAnswers> {
     return await inquirer.prompt([
         {
-            type: 'checkbox',
-            name: 'features',
-            message: 'Which optional features would you like to include?',
+            type: 'list',
+            name: 'database',
+            message: 'Which database would you like to use?',
             choices: [
                 {
-                    name: 'Drizzle ORM - Type-safe database toolkit',
-                    value: 'drizzle',
-                    checked: false
+                    name: 'Turso (SQLite)',
+                    value: 'turso'
+                },
+                {
+                    name: 'None',
+                    value: 'none'
                 }
-            ]
+            ],
+            default: 'none'
         }
     ]);
 }

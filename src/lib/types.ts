@@ -3,5 +3,5 @@ export interface ProjectOptions {
     directory: string;
     initGit: boolean;
     nixFlake: boolean;
-    features: string[];
+    database: string;
 }

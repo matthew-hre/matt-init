@@ -67,22 +67,32 @@ export async function removeFavicon(projectPath: string): Promise<void> {
 /**
  * Create basic README from template
  */
-export async function createBasicReadme(projectPath: string, options: { name: string; directory: string; nixFlake?: boolean }): Promise<void> {
+export async function createBasicReadme(projectPath: string, options: { name: string; directory: string; nixFlake?: boolean; database?: string }): Promise<void> {
     const templatesPath = path.join(__dirname, '..', '..', 'templates');
     const readmeTemplate = path.join(templatesPath, 'README.md');
     const outputPath = path.join(projectPath, 'README.md');
 
+    // Generate database-specific instructions
+    let databaseInstructions = '';
+    if (options.database === 'turso') {
+        databaseInstructions = `
+   > **Note:** This project uses Turso (SQLite) as the database. The \`pnpm dev\` command will automatically start both the database server and Next.js development server using concurrently.
+
+`;
+    }
+
     createFileFromTemplate(readmeTemplate, outputPath, {
         PROJECT_NAME: options.name,
         DIRECTORY: options.directory,
-        NIX_DEVELOP_COMMAND: options.nixFlake ? 'nix develop\n   ' : ''
+        NIX_DEVELOP_COMMAND: options.nixFlake ? 'nix develop\n   ' : '',
+        DATABASE_INSTRUCTIONS: databaseInstructions
     });
 }
 
 /**
  * Create nix flake files from templates
  */
-export async function createNixFlake(projectPath: string, options: { name: string }): Promise<void> {
+export async function createNixFlake(projectPath: string, options: { name: string; database?: string }): Promise<void> {
     const templatesPath = path.join(__dirname, '..', '..', 'templates', 'nix');
 
     // Create nix directory
@@ -96,10 +106,22 @@ export async function createNixFlake(projectPath: string, options: { name: strin
         PROJECT_NAME: options.name
     });
 
-    // Create devShell.nix in nix directory
+    // Determine additional nix packages and parameters based on options
+    const nixPackages = [];
+    const nixParams = [];
+
+    if (options.database === 'turso') {
+        nixPackages.push('turso-cli', 'sqld');
+        nixParams.push('turso-cli', 'sqld');
+    }
+
+    // Create devShell.nix with conditional packages
     const devShellTemplate = path.join(templatesPath, 'devShell.nix');
     const devShellOutput = path.join(nixDir, 'devShell.nix');
+
     createFileFromTemplate(devShellTemplate, devShellOutput, {
-        PROJECT_NAME: options.name
+        PROJECT_NAME: options.name,
+        ADDITIONAL_PARAMS: nixParams.length > 0 ? `\n  ${nixParams.join(',\n  ')},` : '',
+        ADDITIONAL_PACKAGES: nixPackages.length > 0 ? `\n    ${nixPackages.join('\n    ')}` : ''
     });
 }

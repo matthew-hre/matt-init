@@ -3,7 +3,7 @@
   alejandra,
   bash,
   nodejs,
-  pnpm,
+  pnpm,{{ADDITIONAL_PARAMS}}
 }:
 mkShell rec {
   name = "{{PROJECT_NAME}}";
@@ -11,7 +11,7 @@ mkShell rec {
   packages = [
     bash
     nodejs
-    pnpm
+    pnpm{{ADDITIONAL_PACKAGES}}
 
     # Required for CI for format checking.
     alejandra

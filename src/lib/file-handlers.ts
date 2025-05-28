@@ -4,7 +4,7 @@ import { setupEslint, addLintScripts } from '~/lib/format';
 /**
  * Apply all customizations to a newly created Next.js project
  */
-export async function customizeNextJsProject(projectPath: string, options: { initGit: boolean; nixFlake: boolean; projectName: string }): Promise<void> {
+export async function customizeNextJsProject(projectPath: string, options: { initGit: boolean; nixFlake: boolean; projectName: string; database: string }): Promise<void> {
     await emptyPublicDirectory(projectPath);
     await replaceAppFiles(projectPath);
     await removeFavicon(projectPath);
@@ -12,6 +12,6 @@ export async function customizeNextJsProject(projectPath: string, options: { ini
     await addLintScripts(projectPath);
 
     if (options.nixFlake) {
-        await createNixFlake(projectPath, { name: options.projectName });
+        await createNixFlake(projectPath, { name: options.projectName, database: options.database });
     }
 }
