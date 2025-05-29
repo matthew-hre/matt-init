@@ -6,10 +6,10 @@ import { Command } from "commander";
 import { execa } from "execa";
 import fs from "fs-extra";
 import path from "path";
-import ora from "ora";
 import { setupGit } from "./utils/git";
 import { installDependencies } from "./utils/install-deps";
 import { buildNextApp } from "./builders/next-app";
+import { spinner } from "./utils/spinner";
 
 const PACKAGE_ROOT = path.join(__dirname, "../");
 
@@ -109,27 +109,47 @@ async function main() {
         }
     }
 
-    // Copy template with spinner
-    const spinner = ora('Creating project files...').start();
+    padSteps(1);
+
+    // Copy template files
+    spinner.start('Creating project files...');
     try {
         buildNextApp(projectDir, templateDir, projectName);
-
         spinner.succeed(`Project ${chalk.green(projectName)} created successfully!`);
     } catch (error) {
         spinner.fail('Failed to create project files');
         throw error;
     }
 
-    // Install dependencies with spinner
+    padSteps();
+
+    // Install dependencies
     if (shouldInstall) {
-        installDependencies(projectDir);
+        spinner.start('Installing dependencies with pnpm...');
+        try {
+            await installDependencies(projectDir);
+            spinner.succeed('Dependencies installed successfully!');
+        } catch (error) {
+            spinner.fail('Failed to install dependencies');
+            console.log(chalk.yellow("You can install dependencies manually later with: pnpm install"));
+        }
     }
 
+    padSteps();
+
+    // Initialize git repository
     if (shouldInitGit) {
-        setupGit(projectDir);
+        spinner.start('Initializing git repository...');
+        try {
+            await setupGit(projectDir);
+            spinner.succeed('Git repository initialized with initial commit!');
+        } catch (error) {
+            spinner.fail('Failed to initialize git repository');
+            console.log(chalk.yellow("You can initialize git manually later with: git init"));
+        }
     }
 
-    console.log(chalk.green(`\n✨ All done! Next, make sure to:`));
+    console.log(chalk.green(`\nAll done! Next, make sure to:`));
     console.log(chalk.gray(`  ${chalk.bold(`cd ${projectName}`)}`));
     console.log(chalk.gray(`  ${chalk.bold("pnpm dev")}`));
 }
@@ -138,3 +158,9 @@ main().catch((error) => {
     console.error(chalk.red("An error occurred:"), error);
     process.exit(1);
 });
+
+function padSteps(count: number = 2) {
+    for (let i = 0; i < count; i++) {
+        console.log(chalk.gray(`│`));
+    }
+}
