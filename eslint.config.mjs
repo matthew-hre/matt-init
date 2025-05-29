@@ -3,7 +3,6 @@ import antfu from "@antfu/eslint-config";
 export default antfu(
   {
     type: "app",
-    react: true,
     typescript: true,
     formatters: true,
     stylistic: {
@@ -12,18 +11,20 @@ export default antfu(
       quotes: "double",
     },
     ignores: ["**/migrations/*", "next-env.d.ts"],
+    overrides: [
+      {
+        files: ["template/**/*.tsx"],
+        parserOptions: {
+          ignoreDiagnostics: [7026],
+        },
+      },
+    ],
   },
   {
-    plugins: {
-      '@next/next': nextPlugin,
-    },
     rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
-      ...nextPlugin.configs.typescript.rules,
       "ts/no-redeclare": "off",
       "ts/consistent-type-definitions": ["error", "type"],
-      "no-console": "warn",
+      "no-console": "off",
       "antfu/no-top-level-await": ["off"],
       "node/prefer-global/process": ["off"],
       "node/no-process-env": ["error"],
@@ -36,5 +37,10 @@ export default antfu(
         },
       ],
     },
+  },
+  {
+    // Template files don't have reliable type information
+    files: ["./template/**/*.{ts,tsx}"],
+    extends: ["tseslint.configs.disableTypeChecked"],
   },
 );
