@@ -1,9 +1,12 @@
 import fs from "fs-extra";
 import path from "node:path";
 
+import type { DatabaseProvider } from "../types";
+
 export async function setupEnvValidator(
   projectDir: string,
   templateDir: string,
+  databaseProvider: DatabaseProvider = "none",
 ) {
   const envAddonDir = path.join(templateDir, "addons", "env");
 
@@ -11,8 +14,9 @@ export async function setupEnvValidator(
   const parseEnvSourcePath = path.join(envAddonDir, "try-parse-env.ts");
   const parseEnvTargetPath = path.join(projectDir, "src", "lib", "try-parse-env.ts");
 
-  // Copy env-base.ts to src/lib/
-  const envSourcePath = path.join(envAddonDir, "env-base.ts");
+  // Choose the correct env file based on database provider
+  const envFileName = databaseProvider === "turso" ? "env-turso.ts" : "env-base.ts";
+  const envSourcePath = path.join(envAddonDir, envFileName);
   const envTargetPath = path.join(projectDir, "src", "lib", "env.ts");
 
   if (fs.existsSync(parseEnvSourcePath)) {

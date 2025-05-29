@@ -1,23 +1,16 @@
 import chalk from "chalk";
 import fs from "fs-extra";
 
+import type { ProjectOptions } from "../types";
+
 import { buildNextApp } from "../builders/next-app";
 import { setupGit } from "../utils/git";
 import { installDependencies } from "../utils/install-deps";
 import { setupNixFlake } from "../utils/nix";
 import { spinner } from "../utils/spinner";
 
-export type ProjectOptions = {
-  projectName: string;
-  projectDir: string;
-  templateDir: string;
-  shouldUseNix: boolean;
-  shouldInitGit: boolean;
-  shouldInstall: boolean;
-};
-
 export async function generateProject(options: ProjectOptions) {
-  const { projectName, projectDir, templateDir, shouldUseNix, shouldInitGit, shouldInstall } = options;
+  const { projectName, projectDir, templateDir, shouldUseNix, shouldInitGit, shouldInstall, databaseProvider } = options;
 
   // Check if directory exists and handle overwrite
   await handleExistingDirectory(projectDir);
@@ -27,7 +20,7 @@ export async function generateProject(options: ProjectOptions) {
   // Copy template files
   spinner.start("Creating project files...");
   try {
-    buildNextApp(projectDir, templateDir, projectName);
+    buildNextApp(projectDir, templateDir, projectName, databaseProvider);
     spinner.succeed(`Project ${chalk.green(projectName)} created!`);
     padSteps();
   }
@@ -40,7 +33,7 @@ export async function generateProject(options: ProjectOptions) {
   if (shouldUseNix) {
     spinner.start("Setting up Nix flake...");
     try {
-      await setupNixFlake(projectDir, templateDir, projectName);
+      await setupNixFlake(projectDir, templateDir, projectName, databaseProvider);
       spinner.succeed("Nix flake configured!");
       padSteps();
     }

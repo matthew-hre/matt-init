@@ -4,7 +4,7 @@ import { Command } from "commander";
 import fs from "fs-extra";
 import path from "node:path";
 
-import type { ProjectOptions } from "./lib/project-generator";
+import type { DatabaseProvider, ProjectOptions } from "./types";
 
 import { generateProject } from "./lib/project-generator";
 
@@ -47,6 +47,7 @@ export async function runCLI() {
   let shouldInitGit = !options.noGit;
   let shouldInstall = !options.noInstall;
   let shouldUseNix = options.nix || true;
+  let databaseProvider: DatabaseProvider = "none";
 
   // Interactive prompts if not using defaults
   if (!options.default) {
@@ -65,6 +66,17 @@ export async function runCLI() {
 
       projectName = handleCancel(nameResult);
     }
+
+    const dbResult = await p.select({
+      message: "Choose a database provider:",
+      options: [
+        { value: "turso", label: "Turso (SQLite)" },
+        { value: "none", label: "None" },
+      ],
+      initialValue: "none",
+    });
+
+    databaseProvider = handleCancel(dbResult) as DatabaseProvider;
 
     const nixResult = await p.confirm({
       message: "Initialize with Nix flake?",
@@ -115,6 +127,7 @@ export async function runCLI() {
     shouldUseNix,
     shouldInitGit,
     shouldInstall,
+    databaseProvider,
   };
 
   // Generate the project
