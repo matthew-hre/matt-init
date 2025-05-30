@@ -12,7 +12,7 @@
 ## Features
 
 - **Opinionated Setup** - Pre-configured with sensible defaults and ~~best~~ practices that I like
-- **⚡ Interactive CLI** - Prompts powered by @clack/prompts
+- **Interactive CLI** - Prompts powered by @clack/prompts
 - **Flexible Configuration** - Choose your stack components
 - **Multiple Package Managers** - Support for pnpm (primary), with npm/bun/yarn on the roadmap
 - **Database Integration** - Built-in support for Turso (SQLite) with Drizzle ORM
