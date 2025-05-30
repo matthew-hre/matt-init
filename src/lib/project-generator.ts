@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import type { ProjectOptions } from "../types";
 
 import { buildNextApp } from "../builders/next-app";
+import { generateReadme } from "../utils/generate-readme";
 import { setupGit } from "../utils/git";
 import { installDependencies } from "../utils/install-deps";
 import { setupNixFlake } from "../utils/nix";
@@ -60,6 +61,27 @@ export async function generateProject(options: ProjectOptions) {
       if (error instanceof Error) {
         console.log(chalk.grey(`  ${chalk.bold("Error: ")} ${error.message}`));
       }
+    }
+  }
+
+  // Generate custom README
+  spinner.start("Generating README...");
+  try {
+    await generateReadme({
+      projectName,
+      projectDir,
+      databaseProvider,
+      ormProvider,
+      shouldUseNix,
+    });
+    spinner.succeed("README generated!");
+    padSteps();
+  }
+  catch (error: unknown) {
+    spinner.fail("Failed to generate README");
+    console.log(chalk.yellow("You can create a README manually later"));
+    if (error instanceof Error) {
+      console.log(chalk.grey(`  ${chalk.bold("Error: ")} ${error.message}`));
     }
   }
 
