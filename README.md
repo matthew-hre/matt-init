@@ -12,7 +12,7 @@
 ## Features
 
 - **Opinionated Setup** - Pre-configured with sensible defaults and ~~best~~ practices that I like
-- **⚡ Interactive CLI** - Prompts powered by @clack/prompts
+- **Interactive CLI** - Prompts powered by @clack/prompts
 - **Flexible Configuration** - Choose your stack components
 - **Multiple Package Managers** - Support for pnpm (primary), with npm/bun/yarn on the roadmap
 - **Database Integration** - Built-in support for Turso (SQLite) with Drizzle ORM
@@ -103,7 +103,7 @@ Every generated project includes:
 - **Drizzle ORM** - Type-safe database operations
 - **Nix Flake** - Reproducible development environment
 
-## 🗂️ Project Structure
+## Project Structure
 
 Generated projects roughly follow this structure:
 
@@ -150,12 +150,12 @@ my-project/
 - [x] Install Dependencies
 - [x] Setup Git / Stage
 
-### 🚧 In Progress
+### In Progress
 
 - [ ] Setup Github Actions for Linting
 - [ ] Husky / lint-staged (Known issues with git config when installed via execa)
 
-### 🗺️ Roadmap
+### Roadmap
 
 **Auth Providers:**
 
@@ -212,11 +212,11 @@ pnpm dev
 - `pnpm lint` - Run ESLint
 - `pnpm lint:fix` - Fix ESLint issues automatically
 
-## 📄 License
+## License
 
 CC BY-SA 4.0
 
-## 🤝 Contributing
+## Contributing
 
 Not taking any PRs until 1.0 is released!
 
