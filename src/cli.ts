@@ -4,7 +4,7 @@ import { Command } from "commander";
 import fs from "fs-extra";
 import path from "node:path";
 
-import type { DatabaseProvider, ProjectOptions } from "./types";
+import type { DatabaseProvider, OrmProvider, ProjectOptions } from "./types";
 
 import { generateProject } from "./lib/project-generator";
 
@@ -48,6 +48,7 @@ export async function runCLI() {
   let shouldInstall = !options.noInstall;
   let shouldUseNix = options.nix || true;
   let databaseProvider: DatabaseProvider = "none";
+  let ormProvider: OrmProvider = "none";
 
   // Interactive prompts if not using defaults
   if (!options.default) {
@@ -77,6 +78,20 @@ export async function runCLI() {
     });
 
     databaseProvider = handleCancel(dbResult) as DatabaseProvider;
+
+    // Ask for ORM selection if a database provider is chosen
+    if (databaseProvider !== "none") {
+      const ormResult = await p.select({
+        message: "Choose an ORM:",
+        options: [
+          { value: "drizzle", label: "Drizzle" },
+          { value: "none", label: "None" },
+        ],
+        initialValue: "none",
+      });
+
+      ormProvider = handleCancel(ormResult) as OrmProvider;
+    }
 
     const nixResult = await p.confirm({
       message: "Initialize with Nix flake?",
@@ -128,6 +143,7 @@ export async function runCLI() {
     shouldInitGit,
     shouldInstall,
     databaseProvider,
+    ormProvider,
   };
 
   // Generate the project

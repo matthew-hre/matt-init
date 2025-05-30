@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "node:path";
 
-export async function setupTursoDatabase(
+export async function setupTursoClient(
   projectDir: string,
   templateDir: string,
 ) {
@@ -50,7 +50,8 @@ export async function updateTursoScripts(projectDir: string) {
 }
 
 export async function createTursoEnvFile(projectDir: string) {
-  const envContent = `TURSO_DATABASE_URL=http://127.0.0.1:8080
+  const envContent = `NODE_ENV=development
+TURSO_DATABASE_URL=http://127.0.0.1:8080
 TURSO_AUTH_TOKEN=
 `;
 

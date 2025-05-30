@@ -8,11 +8,11 @@ export async function setupVscodeSettings(
   const vscodeAddonDir = path.join(templateDir, "addons", "vscode");
 
   // Copy vscode/extensions.json to .vscode/extensions.json
-  const vscodeExensionsSourceDir = path.join(vscodeAddonDir, "extensions.json");
+  const vscodeExensionsSourceDir = path.join(vscodeAddonDir, "_extensions.json");
   const vscodeExensionsTargetDir = path.join(projectDir, ".vscode", "extensions.json");
 
   // Copy vscode/settings.json to .vscode/settings.json
-  const vscodeSettingsSourceDir = path.join(vscodeAddonDir, "settings.json");
+  const vscodeSettingsSourceDir = path.join(vscodeAddonDir, "_settings.json");
   const vscodeSettingsTargetDir = path.join(projectDir, ".vscode", "settings.json");
 
   if (fs.existsSync(vscodeExensionsSourceDir)) {

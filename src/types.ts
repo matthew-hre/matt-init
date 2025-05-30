@@ -1,4 +1,5 @@
 export type DatabaseProvider = "turso" | "none";
+export type OrmProvider = "drizzle" | "none";
 
 export type ProjectOptions = {
   projectName: string;
@@ -8,4 +9,5 @@ export type ProjectOptions = {
   shouldInitGit: boolean;
   shouldInstall: boolean;
   databaseProvider: DatabaseProvider;
+  ormProvider: OrmProvider;
 };

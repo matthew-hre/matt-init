@@ -38,9 +38,4 @@ export default antfu(
       ],
     },
   },
-  {
-    // Template files don't have reliable type information
-    files: ["./template/**/*.{ts,tsx}"],
-    extends: ["tseslint.configs.disableTypeChecked"],
-  },
 );

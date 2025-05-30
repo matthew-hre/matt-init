@@ -29,3 +29,11 @@ export async function setupEnvValidator(
     fs.copyFileSync(envSourcePath, envTargetPath);
   }
 }
+
+export async function createBaseEnvFile(projectDir: string) {
+  const envContent = `NODE_ENV=development
+`;
+
+  const envFilePath = path.join(projectDir, ".env");
+  fs.writeFileSync(envFilePath, envContent);
+}

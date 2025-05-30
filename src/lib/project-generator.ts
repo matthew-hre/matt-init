@@ -7,10 +7,11 @@ import { buildNextApp } from "../builders/next-app";
 import { setupGit } from "../utils/git";
 import { installDependencies } from "../utils/install-deps";
 import { setupNixFlake } from "../utils/nix";
+import { setupDatabase } from "../utils/setup-database";
 import { spinner } from "../utils/spinner";
 
 export async function generateProject(options: ProjectOptions) {
-  const { projectName, projectDir, templateDir, shouldUseNix, shouldInitGit, shouldInstall, databaseProvider } = options;
+  const { projectName, projectDir, templateDir, shouldUseNix, shouldInitGit, shouldInstall, databaseProvider, ormProvider } = options;
 
   // Check if directory exists and handle overwrite
   await handleExistingDirectory(projectDir);
@@ -20,13 +21,46 @@ export async function generateProject(options: ProjectOptions) {
   // Copy template files
   spinner.start("Creating project files...");
   try {
-    buildNextApp(projectDir, templateDir, projectName, databaseProvider);
+    await buildNextApp(projectDir, templateDir, projectName);
     spinner.succeed(`Project ${chalk.green(projectName)} created!`);
     padSteps();
   }
   catch (error) {
     spinner.fail("Failed to create project files");
     throw error;
+  }
+
+  // Setup database if a provider is specified
+  if (databaseProvider !== "none") {
+    spinner.start("Setting up database...");
+    try {
+      await setupDatabase(projectDir, templateDir, databaseProvider, ormProvider);
+      spinner.succeed(`Database (${chalk.green(databaseProvider)}) configured!`);
+      padSteps();
+    }
+    catch (error) {
+      spinner.fail("Failed to setup database");
+      console.log(chalk.yellow("You can setup the database manually later"));
+      if (error instanceof Error) {
+        console.log(chalk.grey(`  ${chalk.bold("Error: ")} ${error.message}`));
+      }
+    }
+  }
+  else {
+    // Setup environment files for projects without a database
+    spinner.start("Setting up environment...");
+    try {
+      await setupDatabase(projectDir, templateDir, databaseProvider, ormProvider);
+      spinner.succeed("Environment configured!");
+      padSteps();
+    }
+    catch (error) {
+      spinner.fail("Failed to setup environment");
+      console.log(chalk.yellow("You can setup the environment manually later"));
+      if (error instanceof Error) {
+        console.log(chalk.grey(`  ${chalk.bold("Error: ")} ${error.message}`));
+      }
+    }
   }
 
   // Setup Nix flake if requested
@@ -86,6 +120,9 @@ export async function generateProject(options: ProjectOptions) {
     console.log(chalk.gray(`  ${chalk.bold("nix develop")} (to enter the Nix shell)`));
   }
   console.log(chalk.gray(`  ${chalk.bold("pnpm dev")}`));
+  if (databaseProvider !== "none" && ormProvider === "drizzle") {
+    console.log(chalk.gray(`  ${chalk.bold("pnpm db:push")} (to push your schema to the database)`));
+  }
 }
 
 async function handleExistingDirectory(projectDir: string) {

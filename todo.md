@@ -13,12 +13,12 @@
 ## Min. Optional Flags
 
 - [x] Setup Nix?
-- [ ] Database Options
-  - [ ] Turso (SQLite)
-  - [ ] None
-- [ ] ORM Options
-  - [ ] Drizzle
-  - [ ] None
+- [x] Database Options
+  - [x] Turso (SQLite)
+  - [x] None
+- [x] ORM Options
+  - [x] Drizzle
+  - [x] None
 - [ ] Auth Provider Options
   - [ ] BetterAuth
   - [ ] None
