@@ -5,7 +5,7 @@
   nodejs,
   pnpm,
   turso-cli,
-  sqld
+  sqld,
 }:
 mkShell rec {
   name = "{{PROJECT_NAME}}";
