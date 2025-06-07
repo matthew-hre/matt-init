@@ -11,13 +11,13 @@
 
 ## Features
 
-- **Opinionated Setup** - Pre-configured with sensible defaults and ~~best~~ practices that I like
-- **Interactive CLI** - Prompts powered by @clack/prompts
-- **Flexible Configuration** - Choose your stack components
-- **Multiple Package Managers** - Support for pnpm (primary), with npm/bun/yarn on the roadmap
-- **Database Integration** - Built-in support for Turso (SQLite) with Drizzle ORM
-- **Nix Support** - Optional Nix flake for reproducible development environments
-- **Pre-configured Tooling** - ESLint, TypeScript, VS Code settings out of the box
+- **Wickedly Fast Setup** - Under 30 seconds to a fully wired Next.js starter
+- **Minimal Choices** - Three streamlined prompts: backend setup, database provider, and tooling preferences
+- **Opinionated Defaults** - Pre-configured with sensible defaults and best practices
+- **Backend Bundles** - Choose "DB + Drizzle + BetterAuth" for full-stack or "None" for frontend-only
+- **Zero Configuration** - Strict linting, Prettier, pre-commit hooks, and CI rules included
+- **Type-Safe Environment** - Zod-validated env variables that fail fast on missing config
+- **Ready for Deployment** - Tailwind, VSCode settings, and production optimizations included
 
 ## ...why?
 
@@ -43,12 +43,18 @@ pnpm dev
 
 This will prompt you for:
 
-- Project name
-- Database provider (Turso/None)
-- ORM choice (Drizzle/None)
-- Nix flake initialization
-- Git repository initialization
-- Dependency installation
+- **Project name** - What to call your app
+- **Backend setup** - Choose from:
+  - `DB + Drizzle + BetterAuth` - Full-stack with database, ORM, and authentication
+  - `Supabase` - (coming soon)
+  - `None` - Frontend-only
+- **Database provider** - If you chose the full-stack option:
+  - `Turso (SQLite)` - Edge database (implemented)
+  - `Neon (Postgres)` - (coming soon)
+  - `Docker Postgres` - (coming soon)
+- **Nix flake** - Optional reproducible dev environment
+- **Install dependencies** - Run `pnpm install` automatically
+- **Git repository** - Initialize git with initial commit
 
 ### Command Line Options
 
@@ -67,10 +73,10 @@ Options:
 ### Examples
 
 ```bash
-# Create a new project with prompts
+# Create a new project with prompts (recommended)
 pnpm dev my-awesome-app
 
-# Create with defaults (skip prompts)
+# Create with defaults (frontend-only, no prompts)
 pnpm dev my-app --default
 
 # Create without git and dependency installation
@@ -99,8 +105,8 @@ Every generated project includes:
 
 ### Optional Addons
 
-- **Turso Database** - Edge SQLite database
-- **Drizzle ORM** - Type-safe database operations
+- **Full-Stack Backend** - Turso database + Drizzle ORM + BetterAuth authentication
+- **Supabase Integration** - (coming soon)
 - **Nix Flake** - Reproducible development environment
 
 ## Project Structure
@@ -122,62 +128,54 @@ my-project/
 ├── .vscode/
 │   ├── extensions.json
 │   └── settings.json
-├── flake.nix              # (if Nix enabled)
-├── drizzle.config.ts      # (if Drizzle enabled)
+├── flake.nix              # (if --nix flag used)
+├── drizzle.config.ts      # (if backend setup chosen)
 ├── next.config.ts
 ├── package.json
 ├── tailwind.config.ts
 ├── tsconfig.json
-└── .env           # (if database enabled)
+└── .env           # (if backend setup chosen)
 ```
 
 ## Development Status
 
 ### Implemented Features
 
-**Mandatory Per Project:**
+**Core (Every Project):**
 
-- [x] ESLint Config
-- [x] Custom default app.tsx
-- [x] Zod-validated env variables
-- [x] VS Code Config
+- [x] ESLint + Prettier configuration
+- [x] Custom Next.js app with banner
+- [x] Zod-validated environment variables
+- [ ] VS Code workspace settings
+- [x] Tailwind CSS setup
+- [x] TypeScript configuration
 
-**Optional Flags:**
+**Optional (Behind Flags or Prompts):**
 
-- [x] Setup Nix
-- [x] Database Option (Turso SQLite)
-- [x] ORM Option (Drizzle)
-- [x] Install Dependencies
-- [x] Setup Git / Stage
+- [ ] Full-stack backend (Turso + Drizzle + BetterAuth)
+- [ ] Nix development environment (--nix flag)
+- [ ] Git repository initialization
+- [ ] Dependency installation
+- [ ] Custom README generation
 
 ### In Progress
 
-- [ ] Setup Github Actions for Linting
-- [ ] Husky / lint-staged (Known issues with git config when installed via execa)
+- [ ] Improved CI/CD templates
+- [ ] Pre-commit hooks (lint-staged + husky)
 
 ### Roadmap
 
-**Auth Providers:**
+**Backend Options:**
 
-- [ ] BetterAuth integration
-- [ ] Auth.js integration(?)
+- [ ] Supabase integration
+- [ ] Neon (Postgres) support
+- [ ] Docker Postgres support
 
-**UI Libraries:**
+**Future Flags:**
 
-- [ ] Shadcn/ui integration
-- [ ] DaisyUI integration
-
-**Database Options:**
-
-- [ ] Postgres with Docker
-- [ ] Neon (Postgres)
-- [ ] PlanetScale (MySQL) (?)
-
-**Package Manager Support:**
-
-- [ ] npm
-- [ ] Bun (?)
-- [ ] Yarn (?)
+- [ ] --shadcn for UI components
+- [ ] --auth-only for auth without database
+- [ ] Package manager choice (npm, bun, yarn)
 
 ## Development
 
