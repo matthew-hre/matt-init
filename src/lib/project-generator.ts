@@ -12,7 +12,7 @@ import { setupDatabase } from "../utils/setup-database";
 import { spinner } from "../utils/spinner";
 
 export async function generateProject(options: ProjectOptions) {
-  const { projectName, projectDir, templateDir, shouldUseNix, shouldInitGit, shouldInstall, databaseProvider, ormProvider } = options;
+  const { projectName, projectDir, templateDir, shouldUseNix, shouldInitGit, shouldInstall, databaseProvider, ormProvider, authProvider } = options;
 
   // Check if directory exists and handle overwrite
   await handleExistingDirectory(projectDir);
@@ -35,7 +35,7 @@ export async function generateProject(options: ProjectOptions) {
   if (databaseProvider !== "none") {
     spinner.start("Setting up database...");
     try {
-      await setupDatabase(projectDir, templateDir, databaseProvider, ormProvider);
+      await setupDatabase(projectDir, templateDir, databaseProvider, ormProvider, authProvider);
       spinner.succeed(`Database (${chalk.green(databaseProvider)}) configured!`);
       padSteps();
     }
@@ -51,7 +51,7 @@ export async function generateProject(options: ProjectOptions) {
     // Setup environment files for projects without a database
     spinner.start("Setting up environment...");
     try {
-      await setupDatabase(projectDir, templateDir, databaseProvider, ormProvider);
+      await setupDatabase(projectDir, templateDir, databaseProvider, ormProvider, authProvider);
       spinner.succeed("Environment configured!");
       padSteps();
     }
@@ -72,6 +72,7 @@ export async function generateProject(options: ProjectOptions) {
       projectDir,
       databaseProvider,
       ormProvider,
+      authProvider,
       shouldUseNix,
     });
     spinner.succeed("README generated!");

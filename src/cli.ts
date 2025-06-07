@@ -4,7 +4,7 @@ import { Command } from "commander";
 import fs from "fs-extra";
 import path from "node:path";
 
-import type { DatabaseProvider, OrmProvider, ProjectOptions } from "./types";
+import type { AuthProvider, DatabaseProvider, OrmProvider, ProjectOptions } from "./types";
 
 import { generateProject } from "./lib/project-generator";
 
@@ -49,6 +49,7 @@ export async function runCLI() {
   let shouldUseNix = options.nix || true;
   let databaseProvider: DatabaseProvider = "none";
   let ormProvider: OrmProvider = "none";
+  let authProvider: AuthProvider = "none";
 
   // Interactive prompts if not using defaults
   if (!options.default) {
@@ -91,6 +92,20 @@ export async function runCLI() {
       });
 
       ormProvider = handleCancel(ormResult) as OrmProvider;
+
+      // Ask for auth provider if using Drizzle with Turso
+      if (databaseProvider === "turso" && ormProvider === "drizzle") {
+        const authResult = await p.select({
+          message: "Choose an authentication provider:",
+          options: [
+            { value: "betterauth", label: "Better Auth" },
+            { value: "none", label: "None" },
+          ],
+          initialValue: "none",
+        });
+
+        authProvider = handleCancel(authResult) as AuthProvider;
+      }
     }
 
     const nixResult = await p.confirm({
@@ -144,6 +159,7 @@ export async function runCLI() {
     shouldInstall,
     databaseProvider,
     ormProvider,
+    authProvider,
   };
 
   // Generate the project
