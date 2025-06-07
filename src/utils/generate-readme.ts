@@ -1,18 +1,19 @@
 import fs from "fs-extra";
 import path from "node:path";
 
-import type { DatabaseProvider, OrmProvider } from "../types";
+import type { AuthProvider, DatabaseProvider, OrmProvider } from "../types";
 
 type ReadmeOptions = {
   projectName: string;
   projectDir: string;
   databaseProvider: DatabaseProvider;
   ormProvider: OrmProvider;
+  authProvider: AuthProvider;
   shouldUseNix: boolean;
 };
 
 export async function generateReadme(options: ReadmeOptions) {
-  const { projectName, projectDir, databaseProvider, ormProvider, shouldUseNix } = options;
+  const { projectName, projectDir, databaseProvider, ormProvider, authProvider, shouldUseNix } = options;
 
   const readme = `# ${projectName}
 
@@ -29,7 +30,7 @@ Open [http://localhost:3000](http://localhost:3000) to view your application.
 - **[Next.js 15](https://nextjs.org)** - React framework with App Router
 - **[TypeScript](https://www.typescriptlang.org)** - Type safety
 - **[Tailwind CSS](https://tailwindcss.com)** - Utility-first CSS framework
-- **[ESLint](https://eslint.org)** - Code linting with @antfu/eslint-config${getDatabaseStack(databaseProvider, ormProvider)}${shouldUseNix ? "\n- **[Nix](https://nixos.org)** - Reproducible development environment" : ""}
+- **[ESLint](https://eslint.org)** - Code linting with @antfu/eslint-config${getDatabaseStack(databaseProvider, ormProvider, authProvider)}${shouldUseNix ? "\n- **[Nix](https://nixos.org)** - Reproducible development environment" : ""}
 
 ## Project Structure
 
@@ -40,10 +41,10 @@ src/
 │   ├── page.tsx
 │   └── globals.css
 ├── components/
-│   └── matt-init-banner.tsx${databaseProvider !== "none" ? "\n├── lib/\n│   ├── env.ts" : ""}${databaseProvider !== "none" && ormProvider === "drizzle" ? "\n│   └── db/\n│       └── index.ts\n│       ├── schema/" : ""}
+│   └── matt-init-banner.tsx${databaseProvider !== "none" ? "\n├── lib/\n│   ├── env.ts" : ""}${authProvider === "betterauth" ? "\n│   ├── auth.ts" : ""}${databaseProvider !== "none" && ormProvider === "drizzle" ? "\n│   └── db/\n│       └── index.ts\n│       ├── schema/" : ""}${authProvider === "betterauth" ? "\n├── middleware.ts" : ""}
 \`\`\`
 
-${getEnvironmentSection(databaseProvider)}${getDatabaseSection(databaseProvider, ormProvider, shouldUseNix)}## Development
+${getEnvironmentSection(databaseProvider)}${getDatabaseSection(databaseProvider, ormProvider, shouldUseNix)}${getAuthSection(authProvider)}## Development
 
 You can start editing the page by modifying \`src/app/page.tsx\`. The page auto-updates as you edit.
 
@@ -65,7 +66,7 @@ Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)${databaseProvider === "turso" ? "\n- [Turso Documentation](https://docs.turso.tech/)" : ""}${ormProvider === "drizzle" ? "\n- [Drizzle ORM Documentation](https://orm.drizzle.team/)" : ""}
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)${databaseProvider === "turso" ? "\n- [Turso Documentation](https://docs.turso.tech/)" : ""}${ormProvider === "drizzle" ? "\n- [Drizzle ORM Documentation](https://orm.drizzle.team/)" : ""}${authProvider === "betterauth" ? "\n- [Better Auth Documentation](https://www.better-auth.com/docs)" : ""}
 `;
 
   const readmePath = path.join(projectDir, "README.md");
@@ -105,7 +106,7 @@ pnpm dev
 \`\`\``;
 }
 
-function getDatabaseStack(databaseProvider: DatabaseProvider, ormProvider: OrmProvider): string {
+function getDatabaseStack(databaseProvider: DatabaseProvider, ormProvider: OrmProvider, authProvider: AuthProvider): string {
   if (databaseProvider === "none")
     return "";
 
@@ -117,6 +118,10 @@ function getDatabaseStack(databaseProvider: DatabaseProvider, ormProvider: OrmPr
 
   if (ormProvider === "drizzle") {
     stack += "\n- **[Drizzle ORM](https://orm.drizzle.team)** - Type-safe database operations";
+  }
+
+  if (authProvider === "betterauth") {
+    stack += "\n- **[Better Auth](https://www.better-auth.com)** - Authentication library for TypeScript";
   }
 
   return stack;
@@ -167,6 +172,31 @@ This project uses Drizzle ORM for type-safe database operations.
 - Run migrations: \`pnpm db:migrate\`
 - Generate *and* run migrations: \`pnpm db:push\`
 - Open Drizzle Studio: \`pnpm db:studio\`
+
+`;
+  }
+
+  return section;
+}
+
+function getAuthSection(authProvider: AuthProvider): string {
+  if (authProvider === "none")
+    return "";
+
+  let section = `## Authentication
+
+`;
+
+  if (authProvider === "betterauth") {
+    section += `This project uses Better Auth for authentication.
+
+- Authentication configuration is in \`src/lib/auth.ts\`
+- Auth API routes are handled automatically at \`/api/auth/*\`
+- Protected middleware is in \`src/middleware.ts\`
+- User session management is built-in
+
+Visit \`/signin\` to sign in or \`/signup\` to create an account.
+Access the protected \`/dashboard\` route after authentication.
 
 `;
   }

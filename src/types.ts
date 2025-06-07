@@ -1,5 +1,6 @@
 export type DatabaseProvider = "turso" | "none";
 export type OrmProvider = "drizzle" | "none";
+export type AuthProvider = "betterauth" | "none";
 
 export type ProjectOptions = {
   projectName: string;
@@ -10,4 +11,5 @@ export type ProjectOptions = {
   shouldInstall: boolean;
   databaseProvider: DatabaseProvider;
   ormProvider: OrmProvider;
+  authProvider: AuthProvider;
 };
