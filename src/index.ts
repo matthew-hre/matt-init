@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import chalk from "chalk";
+import pc from "picocolors";
 
 import { runCLI } from "./cli";
 
@@ -9,7 +9,7 @@ async function main() {
     await runCLI();
   }
   catch (error) {
-    console.error(chalk.red("An error occurred:"), error);
+    console.error(pc.red("An error occurred:"), error);
     process.exit(1);
   }
 }

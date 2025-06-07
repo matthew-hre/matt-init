@@ -7,20 +7,15 @@ export async function promptDatabaseProvider(): Promise<DatabaseProvider> {
     message: "Choose your database provider:",
     options: [
       {
-        value: "neon" as const,
-        label: "Neon",
-        hint: "Serverless Postgres with generous free tier",
-      },
-      {
         value: "turso" as const,
         label: "Turso",
-        hint: "Edge SQLite database",
+        hint: "Locally hostable SQLite",
       },
-      {
-        value: "postgres" as const,
-        label: "Docker Postgres",
-        hint: "Local development with Docker",
-      },
+      // {
+      //   value: "postgres" as const,
+      //   label: "Docker Postgres",
+      //   hint: "Local development with Docker",
+      // },
     ],
   });
 

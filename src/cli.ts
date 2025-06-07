@@ -10,6 +10,7 @@ import { promptBackendSetup } from "./prompts/backend-setup";
 import { promptDatabaseProvider } from "./prompts/database-provider";
 import { promptProjectName } from "./prompts/project-name";
 import { promptInitGit, promptInstallDependencies, promptUseNix } from "./prompts/yes-no";
+import { handleDirectoryConflict } from "./utils/directory-handler";
 
 const PACKAGE_ROOT = path.join(__dirname, "../");
 
@@ -21,7 +22,6 @@ export async function runCLI() {
     .option("--no-git", "Skip git initialization")
     .option("--no-install", "Skip package installation")
     .option("--nix", "Initialize with Nix flake")
-    .option("--shadcn", "Add shadcn/ui components")
     .option("-y, --default", "Use defaults, skip prompts")
     .version("1.0.0")
     .parse(process.argv);
@@ -35,7 +35,7 @@ export async function runCLI() {
   let projectName = cliProvidedName;
   let shouldInitGit = !options.noGit;
   let shouldInstall = !options.noInstall;
-  let shouldUseNix = options.nix || false;
+  let shouldUseNix = options.nix ?? true;
   let backendSetup: BackendSetup = "none";
   let databaseProvider: DatabaseProvider = "none";
 
@@ -76,6 +76,9 @@ export async function runCLI() {
 
     const projectDir = path.resolve(process.cwd(), projectName);
     const templateDir = path.join(PACKAGE_ROOT, "src", "templates");
+
+    // Handle existing directory conflicts
+    await handleDirectoryConflict(projectDir, projectName);
 
     // Prepare project options
     const projectOptions: ProjectOptions = {

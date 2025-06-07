@@ -11,3 +11,5 @@ export type ProjectOptions = {
   backendSetup: BackendSetup;
   databaseProvider: DatabaseProvider;
 };
+
+export type PackageManager = "npm" | "yarn" | "pnpm" | "bun";
