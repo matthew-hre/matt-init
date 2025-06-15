@@ -29,7 +29,8 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "test": "node dist/index.js test-project",
     "clean": "rm -rf dist",
-    "prepublishOnly": "pnpm clean && pnpm build"
+    "prepublishOnly": "pnpm clean && pnpm build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@clack/core": "^0.5.0",
@@ -55,6 +56,8 @@
     "eslint-plugin-format": "^1.0.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "next": "^15.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -62,5 +65,10 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
     "zod": "^3.25.34"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "pnpm lint"
+    ]
   }
 }

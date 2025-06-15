@@ -110,6 +110,7 @@ Every generated project includes:
 - **Nix Flake** - Reproducible development environment
 
 ## Project Structure
+
 ## Project Structure
 
 Generated projects roughly follow this structure:
@@ -147,25 +148,22 @@ my-project/
 - [x] ESLint + Prettier configuration
 - [x] Custom Next.js app with banner
 - [x] Zod-validated environment variables
-- [ ] VS Code workspace settings
+- [x] VS Code workspace settings
 - [x] Tailwind CSS setup
 - [x] TypeScript configuration
 
 **Optional (Behind Flags or Prompts):**
 
-- [ ] Full-stack backend (Turso + Drizzle + BetterAuth)
-- [ ] Nix development environment (--nix flag)
-- [ ] Git repository initialization
-- [ ] Dependency installation
+- [x] Full-stack backend (Turso + Drizzle + BetterAuth)
+- [x] Nix development environment (--nix flag)
+- [x] Git repository initialization
+- [x] Dependency installation
 - [ ] Custom README generation
 
 ### In Progress
-### In Progress
 
 - [ ] Improved CI/CD templates
-- [ ] Pre-commit hooks (lint-staged + husky)
 
-### Roadmap
 ### Roadmap
 
 **Backend Options:**
@@ -177,8 +175,7 @@ my-project/
 **Future Flags:**
 
 - [ ] --shadcn for UI components
-- [ ] --auth-only for auth without database
-- [ ] Package manager choice (npm, bun, yarn)
+- [ ] --auth-only for auth without ORM
 
 ## Development
 
@@ -214,11 +211,13 @@ pnpm dev
 - `pnpm lint:fix` - Fix ESLint issues automatically
 
 ## License
+
 ## License
 
 CC BY-SA 4.0
 
 ## Contributing
+
 ## Contributing
 
 Not taking any PRs until 1.0 is released!
