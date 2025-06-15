@@ -11,6 +11,14 @@ import { setProjectName } from "./utils";
 
 const PACKAGE_ROOT = path.resolve(__dirname, "../");
 
+/**
+ * Generates a new project based on the provided options.
+ * This function sets up the project structure, applies backend configurations,
+ * sets up VS Code settings, initializes Git, and installs dependencies.
+ *
+ * @param {ProjectOptions} options The options for generating the project.
+ * @returns {Promise<void>} A promise that resolves when the project is generated.
+ */
 export async function generateProject(options: ProjectOptions): Promise<void> {
   const targetPath = path.join(process.cwd(), options.projectName);
   await copyBaseTemplate(options.projectName);
@@ -53,6 +61,14 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
   await setProjectName(targetPath, options.projectName);
 }
 
+/**
+ * Copies the base Next.js template to the target project directory.
+ * This function uses fs-extra to copy the template files from the package root
+ * to the specified project directory.
+ *
+ * @param projectName The name of the project, which will be used as the target directory name.
+ * @returns {Promise<void>} A promise that resolves when the template has been copied.
+ */
 async function copyBaseTemplate(projectName: string): Promise<void> {
   // The base next.js template is located in src/templates/base
   const baseTemplatePath = path.join(PACKAGE_ROOT, "templates/base");
@@ -65,6 +81,16 @@ async function copyBaseTemplate(projectName: string): Promise<void> {
   });
 }
 
+/**
+ * Applies the Nix flake configuration to the project directory.
+ * This function copies the Nix flake template and applies specific configurations
+ * based on the backend setup and database provider.
+ *
+ * @param projectDir The directory where the project is located.
+ * @param backend The backend setup chosen for the project.
+ * @param dbProvider The database provider chosen for the project.
+ * @returns {Promise<void>} A promise that resolves when the Nix flake has been applied.
+ */
 async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvider: DatabaseProvider): Promise<void> {
   // Copy the Nix flake template to the project directory
   const nixTemplatePath = path.join(PACKAGE_ROOT, "templates/extras/nix/base");
@@ -84,6 +110,14 @@ async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvid
   }
 }
 
+/**
+ * Initializes a Git repository in the project directory.
+ * This function finds the Git executable, initializes a new Git repository,
+ * sets the main branch to "main", and adds all files to the staging area.
+ *
+ * @param projectDir The directory where the project is located.
+ * @returns {Promise<void>} A promise that resolves when the Git repository has been initialized.
+ */
 async function applyGitInit(projectDir: string): Promise<void> {
   const gitPath = await findGitExecutable();
 
@@ -108,6 +142,14 @@ async function applyGitInit(projectDir: string): Promise<void> {
   });
 }
 
+/**
+ * Applies VS Code settings and extensions to the project directory.
+ * This function copies the VS Code settings and extensions configuration
+ * from the package templates to the project's .vscode directory.
+ *
+ * @param projectDir The directory where the project is located.
+ * @returns {Promise<void>} A promise that resolves when the VS Code settings have been applied.
+ */
 async function applyVsCodeSettings(projectDir: string): Promise<void> {
   const vscodeSettingsPath = path.join(PACKAGE_ROOT, "templates/extras/vscode/base/_settings.json");
   const vscodeExtensionsPath = path.join(PACKAGE_ROOT, "templates/extras/vscode/base/_extensions.json");
@@ -124,6 +166,14 @@ async function applyVsCodeSettings(projectDir: string): Promise<void> {
   });
 }
 
+/**
+ * Installs project dependencies using the detected package manager.
+ * This function uses execa to run the package manager's install command
+ * in the specified project directory.
+ *
+ * @param projectDir The directory where the project is located.
+ * @returns {Promise<void>} A promise that resolves when the dependencies have been installed.
+ */
 async function installDependencies(projectDir: string): Promise<void> {
   const packageManager = detectPackageManager();
 

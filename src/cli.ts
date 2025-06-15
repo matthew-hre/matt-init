@@ -13,7 +13,12 @@ import { promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, pr
 import { handleDirectoryConflict } from "./utils/directory-handler";
 
 const PACKAGE_ROOT = path.join(__dirname, "../");
-
+/**
+ * Main CLI entry point for the matt-init tool.
+ * This sets up a Next.js app with various options based on user input or command line flags.
+ *
+ * @returns {Promise<void>} Resolves when the CLI has completed its execution.
+ */
 export async function runCLI() {
   const program = new Command()
     .name("matt-init")

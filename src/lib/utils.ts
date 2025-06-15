@@ -2,6 +2,13 @@ import fs from "fs-extra";
 import { randomBytes } from "node:crypto";
 import path from "node:path";
 
+/**
+ * Adds a package to the project's dependencies or devDependencies in package.json.
+ *
+ * @param projectDir the directory of the project
+ * @param packageName the name of the package to add
+ * @param devDependency whether to add the package as a devDependency (default: false)
+ */
 export async function addPackageToDependencies(
   projectDir: string,
   packageName: string,
@@ -22,6 +29,14 @@ export async function addPackageToDependencies(
   await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 }
 
+/**
+ * Adds a script to the project's package.json scripts section.
+ *
+ * @param projectDir the directory of the project
+ * @param scriptName the name of the script to add
+ * @param scriptCommand the command for the script
+ * @param updateExisting whether to update an existing script with the same name (default: false)
+ */
 export async function addScriptToPackageJson(
   projectDir: string,
   scriptName: string,
@@ -40,10 +55,23 @@ export async function addScriptToPackageJson(
   await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 }
 
+/**
+ * Generates a random 64-character hexadecimal string to be used as a secret.
+ *
+ * @returns {Promise<string>} A promise that resolves to a random secret string.
+ */
 export async function generateRandomSecret(): Promise<string> {
   return randomBytes(32).toString("hex");
 }
 
+/**
+ * Sets the project name in various configuration files.
+ * This function replaces the placeholder `__APP_NAME__` with the actual project name
+ * in the specified files within the project directory.
+ *
+ * @param projectDir the directory of the project
+ * @param projectName the name of the project to set
+ */
 export async function setProjectName(
   projectDir: string,
   projectName: string,

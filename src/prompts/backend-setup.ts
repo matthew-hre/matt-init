@@ -2,6 +2,11 @@ import { select } from "@clack/prompts";
 
 import type { BackendSetup } from "../types";
 
+/**
+ * Prompts the user to select a backend setup for their project.
+ *
+ * @returns {Promise<BackendSetup>} The selected backend setup.
+ */
 export async function promptBackendSetup(): Promise<BackendSetup> {
   const backendSetup = await select({
     message: "Choose your backend setup:",
