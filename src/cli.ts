@@ -9,7 +9,7 @@ import { generateProject } from "./lib/project-generator";
 import { promptBackendSetup } from "./prompts/backend-setup";
 import { promptDatabaseProvider } from "./prompts/database-provider";
 import { promptProjectName } from "./prompts/project-name";
-import { promptInitGit, promptInstallDependencies, promptUseNix } from "./prompts/yes-no";
+import { promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, promptUseNix } from "./prompts/yes-no";
 import { handleDirectoryConflict } from "./utils/directory-handler";
 
 const PACKAGE_ROOT = path.join(__dirname, "../");
@@ -21,7 +21,8 @@ export async function runCLI() {
     .argument("[dir]", "Name of the app directory")
     .option("--no-git", "Skip git initialization")
     .option("--no-install", "Skip package installation")
-    .option("--nix", "Initialize with Nix flake")
+    .option("--no-nix", "Skip Nix flake for environment management")
+    .option("--no-vscode", "Skip VS Code settings setup")
     .option("-y, --default", "Use defaults, skip prompts")
     .version("1.0.0")
     .parse(process.argv);
@@ -35,7 +36,8 @@ export async function runCLI() {
   let projectName = cliProvidedName;
   let shouldInitGit = !options.noGit;
   let shouldInstall = !options.noInstall;
-  let shouldUseNix = options.nix ?? true;
+  let shouldUseNix = !options.noNix;
+  let shouldSetupVsCode = !options.noVscode;
   let backendSetup: BackendSetup = "none";
   let databaseProvider: DatabaseProvider = "none";
 
@@ -57,8 +59,12 @@ export async function runCLI() {
       }
 
       // 4. Quick yes/no prompts
-      if (!options.nix) {
+      if (options.nix) {
         shouldUseNix = await promptUseNix();
+      }
+
+      if (options.vscode) {
+        shouldSetupVsCode = await promptSetupVsCodeSettings();
       }
 
       if (options.install !== false) {
@@ -86,6 +92,7 @@ export async function runCLI() {
       projectDir,
       templateDir,
       shouldUseNix,
+      shouldSetupVsCode,
       shouldInitGit,
       shouldInstall,
       backendSetup,

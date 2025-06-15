@@ -26,12 +26,17 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
     await applyNixFlake(targetPath, options.backendSetup, options.databaseProvider);
   }
 
-  if (options.shouldInitGit) {
-    await applyGitInit(targetPath);
+  if (options.shouldSetupVsCode) {
+    await applyVsCodeSettings(targetPath);
   }
 
   if (options.shouldInstall) {
     await installDependencies(targetPath);
+  }
+
+  // do this at the very end to ensure all files are in place
+  if (options.shouldInitGit) {
+    await applyGitInit(targetPath);
   }
 
   // clean up
@@ -97,6 +102,22 @@ async function applyGitInit(projectDir: string): Promise<void> {
   await execa(gitPath, ["add", "."], {
     cwd: projectDir,
     stdio: "pipe",
+  });
+}
+
+async function applyVsCodeSettings(projectDir: string): Promise<void> {
+  const vscodeSettingsPath = path.join(PACKAGE_ROOT, "templates/extras/vscode/base/_settings.json");
+  const vscodeExtensionsPath = path.join(PACKAGE_ROOT, "templates/extras/vscode/base/_extensions.json");
+
+  // Copy VS Code settings
+  await fs.copy(vscodeSettingsPath, path.join(projectDir, ".vscode", "settings.json"), {
+    overwrite: true,
+    errorOnExist: false,
+  });
+  // Copy VS Code extensions
+  await fs.copy(vscodeExtensionsPath, path.join(projectDir, ".vscode", "extensions.json"), {
+    overwrite: true,
+    errorOnExist: false,
   });
 }
 
