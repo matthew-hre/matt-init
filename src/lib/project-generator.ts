@@ -7,6 +7,7 @@ import { detectPackageManager } from "~/utils/package-manager";
 import type { BackendSetup, DatabaseProvider, ProjectOptions } from "../types";
 
 import { applyDrizzleTurso } from "./db";
+import { setProjectName } from "./utils";
 
 const PACKAGE_ROOT = path.resolve(__dirname, "../");
 
@@ -48,6 +49,8 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
 
   await fs.rename(gitignorePath, newGitignorePath);
   await fs.rename(eslintConfigPath, newEslintConfigPath);
+
+  await setProjectName(targetPath, options.projectName);
 }
 
 async function copyBaseTemplate(projectName: string): Promise<void> {
