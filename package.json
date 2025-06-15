@@ -67,8 +67,8 @@
     "zod": "^3.25.34"
   },
   "lint-staged": {
-    "*": [
-      "pnpm lint"
+    "*.ts": [
+      "eslint src --ext .ts"
     ]
   }
 }
