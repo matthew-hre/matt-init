@@ -110,6 +110,7 @@ Every generated project includes:
 - **Nix Flake** - Reproducible development environment
 
 ## Project Structure
+## Project Structure
 
 Generated projects roughly follow this structure:
 
@@ -159,10 +160,12 @@ my-project/
 - [ ] Custom README generation
 
 ### In Progress
+### In Progress
 
 - [ ] Improved CI/CD templates
 - [ ] Pre-commit hooks (lint-staged + husky)
 
+### Roadmap
 ### Roadmap
 
 **Backend Options:**
@@ -211,9 +214,11 @@ pnpm dev
 - `pnpm lint:fix` - Fix ESLint issues automatically
 
 ## License
+## License
 
 CC BY-SA 4.0
 
+## Contributing
 ## Contributing
 
 Not taking any PRs until 1.0 is released!
