@@ -3,6 +3,14 @@ import path from "node:path";
 
 import { addPackageToDependencies, addScriptToPackageJson, generateRandomSecret } from "./utils";
 
+/**
+ * Applies the Drizzle ORM setup for a Turso database in the specified project directory.
+ * This function installs necessary packages, copies template files, sets up environment variables,
+ * and adds scripts to package.json for database management.
+ *
+ * @param projectDir the directory of the project where Drizzle ORM will be set up
+ * @param PACKAGE_ROOT the root directory of the package containing templates
+ */
 export async function applyDrizzleTurso(projectDir: string, PACKAGE_ROOT: string): Promise<void> {
   // dependencies
   await addPackageToDependencies(projectDir, "@libsql/client");

@@ -1,6 +1,12 @@
 import fs from "fs-extra";
 
-// Helper function to handle existing directories
+/**
+ * Handles the case where the target directory already exists and is not empty.
+ *
+ * @param projectDir the directory where the project will be created
+ * @param projectName the name of the project, used for display purposes
+ * @returns "overwrite" | "merge" | "cancel"
+ */
 export async function handleExistingDirectory(projectDir: string, projectName: string): Promise<"overwrite" | "merge" | "cancel"> {
   const { select, isCancel } = await import("@clack/prompts");
 
@@ -21,6 +27,12 @@ export async function handleExistingDirectory(projectDir: string, projectName: s
   return choice as "overwrite" | "merge" | "cancel";
 }
 
+/**
+ * Handles directory conflicts when creating a new project.
+ *
+ * @param projectDir the directory where the project will be created
+ * @param projectName the name of the project, used for display purposes
+ */
 export async function handleDirectoryConflict(projectDir: string, projectName: string): Promise<void> {
   if (fs.existsSync(projectDir)) {
     const dirContents = fs.readdirSync(projectDir);

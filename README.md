@@ -111,8 +111,6 @@ Every generated project includes:
 
 ## Project Structure
 
-## Project Structure
-
 Generated projects roughly follow this structure:
 
 ```txt
@@ -212,15 +210,11 @@ pnpm dev
 
 ## License
 
-## License
-
 CC BY-SA 4.0
 
 ## Contributing
 
-## Contributing
-
-Not taking any PRs until 1.0 is released!
+Not taking any PRs until 1.0.0 is released!
 
 ## Acknowledgements
 
