@@ -4,9 +4,8 @@
   bash,
   nodejs,
   pnpm,
-
   turso-cli,
-  sqld
+  sqld,
 }:
 mkShell rec {
   name = "__APP_NAME__";
