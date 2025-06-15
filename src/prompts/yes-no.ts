@@ -38,3 +38,16 @@ export async function promptInitGit(): Promise<boolean> {
 
   return initGit;
 }
+
+export async function promptSetupVsCodeSettings(): Promise<boolean> {
+  const setupVsCode = await confirm({
+    message: "Setup VS Code settings?",
+    initialValue: true,
+  });
+
+  if (typeof setupVsCode === "symbol") {
+    process.exit(0);
+  }
+
+  return setupVsCode;
+}
