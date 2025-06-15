@@ -3,7 +3,7 @@ import { confirm } from "@clack/prompts";
 export async function promptUseNix(): Promise<boolean> {
   const useNix = await confirm({
     message: "Initialize with Nix flake?",
-    initialValue: false,
+    initialValue: true,
   });
 
   if (typeof useNix === "symbol") {

@@ -6,11 +6,11 @@ export async function promptBackendSetup(): Promise<BackendSetup> {
   const backendSetup = await select({
     message: "Choose your backend setup:",
     options: [
-      // {
-      //   value: "drizzle" as const,
-      //   label: "Database + Drizzle + BetterAuth",
-      //   hint: "Full-stack setup with type-safe DB and auth",
-      // },
+      {
+        value: "drizzle" as const,
+        label: "Database + Drizzle + BetterAuth",
+        hint: "Full-stack setup with type-safe DB and auth",
+      },
       // {
       //   value: "supabase" as const,
       //   label: "Supabase",
