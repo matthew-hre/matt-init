@@ -1,34 +1,20 @@
-import * as p from "@clack/prompts";
-import chalk from "chalk";
+import { cancel, intro, isCancel, spinner } from "@clack/prompts";
 import { Command } from "commander";
-import fs from "fs-extra";
 import path from "node:path";
+import pc from "picocolors";
 
-import type { AuthProvider, DatabaseProvider, OrmProvider, ProjectOptions } from "./types";
+import type { BackendSetup, DatabaseProvider, ProjectOptions } from "./types";
 
 import { generateProject } from "./lib/project-generator";
+import { promptBackendSetup } from "./prompts/backend-setup";
+import { promptDatabaseProvider } from "./prompts/database-provider";
+import { promptProjectName } from "./prompts/project-name";
+import { promptInitGit, promptInstallDependencies, promptUseNix } from "./prompts/yes-no";
+import { handleDirectoryConflict } from "./utils/directory-handler";
 
 const PACKAGE_ROOT = path.join(__dirname, "../");
 
-// Helper function to handle cancellation
-function handleCancel<T>(result: T | symbol): T {
-  if (p.isCancel(result)) {
-    p.cancel("Operation cancelled.");
-    process.exit(0);
-  }
-  return result as T;
-}
-
 export async function runCLI() {
-  console.log(chalk.green(`
- ███╗   ███╗ █████╗ ████████╗████████╗      ██╗███╗   ██╗██╗████████╗
- ████╗ ████║██╔══██╗╚══██╔══╝╚══██╔══╝      ██║████╗  ██║██║╚══██╔══╝
- ██╔████╔██║███████║   ██║      ██║   █████╗██║██╔██╗ ██║██║   ██║   
- ██║╚██╔╝██║██╔══██║   ██║      ██║   ╚════╝██║██║╚██╗██║██║   ██║   
- ██║ ╚═╝ ██║██║  ██║   ██║      ██║         ██║██║ ╚████║██║   ██║   
- ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝         ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   
-    `));
-
   const program = new Command()
     .name("matt-init")
     .description("Set up Next.js apps the way Matt likes 'em.")
@@ -43,125 +29,85 @@ export async function runCLI() {
   const cliProvidedName = program.args[0];
   const options = program.opts();
 
+  // Start the interactive flow
+  intro(pc.bgGreen(pc.black(" matt-init ")));
+
   let projectName = cliProvidedName;
   let shouldInitGit = !options.noGit;
   let shouldInstall = !options.noInstall;
-  let shouldUseNix = options.nix || true;
+  let shouldUseNix = options.nix ?? true;
+  let backendSetup: BackendSetup = "none";
   let databaseProvider: DatabaseProvider = "none";
-  let ormProvider: OrmProvider = "none";
-  let authProvider: AuthProvider = "none";
 
-  // Interactive prompts if not using defaults
-  if (!options.default) {
-    if (!projectName) {
-      const nameResult = await p.text({
-        message: "What will your project be called?",
-        defaultValue: "my-app",
-        placeholder: "my-app",
-        validate: (value) => {
-          if (!value)
-            return "Please enter a project name";
-          if (!/^[\w-]+$/.test(value))
-            return "Project name can only contain letters, numbers, hyphens, and underscores";
-        },
-      });
+  try {
+    // Interactive prompts if not using defaults
+    if (!options.default) {
+      // 1. Project name
+      if (!projectName) {
+        const nameResult = await promptProjectName();
+        projectName = nameResult.projectName;
+      }
 
-      projectName = handleCancel(nameResult);
-    }
+      // 2. Backend setup
+      backendSetup = await promptBackendSetup();
 
-    const dbResult = await p.select({
-      message: "Choose a database provider:",
-      options: [
-        { value: "turso", label: "Turso (SQLite)" },
-        { value: "none", label: "None" },
-      ],
-      initialValue: "none",
-    });
+      // 3. Database provider (only if drizzle backend setup chosen)
+      if (backendSetup === "drizzle") {
+        databaseProvider = await promptDatabaseProvider();
+      }
 
-    databaseProvider = handleCancel(dbResult) as DatabaseProvider;
+      // 4. Quick yes/no prompts
+      if (!options.nix) {
+        shouldUseNix = await promptUseNix();
+      }
 
-    // Ask for ORM selection if a database provider is chosen
-    if (databaseProvider !== "none") {
-      const ormResult = await p.select({
-        message: "Choose an ORM:",
-        options: [
-          { value: "drizzle", label: "Drizzle" },
-          { value: "none", label: "None" },
-        ],
-        initialValue: "none",
-      });
+      if (options.install !== false) {
+        shouldInstall = await promptInstallDependencies();
+      }
 
-      ormProvider = handleCancel(ormResult) as OrmProvider;
-
-      // Ask for auth provider if using Drizzle with Turso
-      if (databaseProvider === "turso" && ormProvider === "drizzle") {
-        const authResult = await p.select({
-          message: "Choose an authentication provider:",
-          options: [
-            { value: "betterauth", label: "Better Auth" },
-            { value: "none", label: "None" },
-          ],
-          initialValue: "none",
-        });
-
-        authProvider = handleCancel(authResult) as AuthProvider;
+      if (options.git !== false) {
+        shouldInitGit = await promptInitGit();
       }
     }
 
-    const nixResult = await p.confirm({
-      message: "Initialize with Nix flake?",
-      initialValue: true,
-    });
+    if (!projectName) {
+      projectName = "my-app";
+    }
 
-    shouldUseNix = handleCancel(nixResult);
+    const projectDir = path.resolve(process.cwd(), projectName);
+    const templateDir = path.join(PACKAGE_ROOT, "src", "templates");
 
-    const gitResult = await p.confirm({
-      message: "Initialize a git repository?",
-      initialValue: true,
-    });
+    // Handle existing directory conflicts
+    await handleDirectoryConflict(projectDir, projectName);
 
-    shouldInitGit = handleCancel(gitResult);
+    // Prepare project options
+    const projectOptions: ProjectOptions = {
+      projectName,
+      projectDir,
+      templateDir,
+      shouldUseNix,
+      shouldInitGit,
+      shouldInstall,
+      backendSetup,
+      databaseProvider,
+    };
 
-    const installResult = await p.confirm({
-      message: "Install dependencies?",
-      initialValue: true,
-    });
+    // Generate the project with spinner
+    const s = spinner();
+    s.start("Creating your Next.js project...");
 
-    shouldInstall = handleCancel(installResult);
+    await generateProject(projectOptions);
+
+    s.stop("Project created successfully!");
   }
-
-  if (!projectName)
-    projectName = "my-app";
-
-  const projectDir = path.resolve(process.cwd(), projectName);
-  const templateDir = path.join(PACKAGE_ROOT, "template");
-
-  // Handle existing directory
-  if (fs.existsSync(projectDir) && fs.readdirSync(projectDir).length > 0) {
-    const overwriteResult = await p.confirm({
-      message: `Directory ${chalk.cyan(projectName)} already exists and is not empty. Overwrite?`,
-      initialValue: false,
-    });
-
-    if (!handleCancel(overwriteResult)) {
-      p.cancel("Operation cancelled.");
+  catch (error) {
+    if (isCancel(error)) {
+      cancel("Operation cancelled.");
       process.exit(0);
     }
+
+    cancel("Something went wrong!");
+    console.error(error);
+    process.exit(1);
   }
-
-  // Prepare project options
-  const projectOptions: ProjectOptions = {
-    projectName,
-    projectDir,
-    templateDir,
-    shouldUseNix,
-    shouldInitGit,
-    shouldInstall,
-    databaseProvider,
-    ormProvider,
-    authProvider,
-  };
-
-  // Generate the project
-  await generateProject(projectOptions);
 }

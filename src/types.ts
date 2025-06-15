@@ -1,6 +1,5 @@
-export type DatabaseProvider = "turso" | "none";
-export type OrmProvider = "drizzle" | "none";
-export type AuthProvider = "betterauth" | "none";
+export type BackendSetup = "none" | "drizzle" | "supabase";
+export type DatabaseProvider = "none" | "turso" | "neon" | "postgres";
 
 export type ProjectOptions = {
   projectName: string;
@@ -9,7 +8,8 @@ export type ProjectOptions = {
   shouldUseNix: boolean;
   shouldInitGit: boolean;
   shouldInstall: boolean;
+  backendSetup: BackendSetup;
   databaseProvider: DatabaseProvider;
-  ormProvider: OrmProvider;
-  authProvider: AuthProvider;
 };
+
+export type PackageManager = "npm" | "yarn" | "pnpm" | "bun";

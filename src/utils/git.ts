@@ -1,10 +1,11 @@
-import { execa } from "execa";
+export async function findGitExecutable(): Promise<string | Error> {
+  const { execa } = await import("execa");
 
-export async function setupGit(
-  projectDir: string,
-) {
-  await execa("git", ["init"], { cwd: projectDir });
-  await execa("git", ["branch", "-m", "main"], { cwd: projectDir });
-  await execa("git", ["add", "."], { cwd: projectDir });
-  await execa("git", ["commit", "-m", "Initial commit"], { cwd: projectDir });
+  try {
+    const { stdout } = await execa("which", ["git"]);
+    return stdout.trim();
+  }
+  catch (error) {
+    return error as Error;
+  }
 }
