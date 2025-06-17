@@ -119,10 +119,6 @@ async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvid
 async function applyGitInit(projectDir: string): Promise<void> {
   const gitPath = await findGitExecutable();
 
-  if (!gitPath || typeof gitPath !== "string") {
-    throw new Error("Git is not installed or not found in PATH.");
-  }
-
   const { execa } = await import("execa");
   await execa(gitPath, ["init"], {
     cwd: projectDir,

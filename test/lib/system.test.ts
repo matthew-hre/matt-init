@@ -10,6 +10,17 @@ describe("git utils", () => {
     expect(typeof gitPath).toBe("string");
     expect(gitPath).toMatch(/git/);
   });
+
+  it("findGitExecutable throws an error if git is not found", async () => {
+    // Temporarily set PATH to a non-existent directory
+    const originalPath = process.env.PATH;
+    process.env.PATH = "/non/existent/path";
+
+    await expect(findGitExecutable()).rejects.toThrow("Git executable not found in PATH");
+
+    // Restore original PATH
+    process.env.PATH = originalPath;
+  });
 });
 
 describe("package manager utils", () => {

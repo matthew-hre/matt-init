@@ -6,7 +6,14 @@ export default defineConfig({
     environment: "node",
     coverage: {
       reporter: ["text", "html"],
+      exclude: [
+        "**/templates/**",
+        "*.config.*",
+        "**/test/**",
+        "**/dist/**",
+      ],
     },
+
     alias: {
       "~/": new URL("./src/", import.meta.url).pathname,
     },
