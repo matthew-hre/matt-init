@@ -25,8 +25,10 @@ function baseOptions(): ProjectOptions {
   };
 }
 
+const mockExeca = vi.fn();
+
 vi.mock("execa", () => ({
-  execa: vi.fn(),
+  execa: mockExeca,
 }));
 
 vi.mock("~/lib/utils", async (importOriginal) => {
@@ -36,6 +38,10 @@ vi.mock("~/lib/utils", async (importOriginal) => {
     setProjectName: vi.fn(),
   };
 });
+
+vi.mock("../../src/utils/package-manager", () => ({
+  detectPackageManager: vi.fn(() => "npm"),
+}));
 
 describe("generateProject", () => {
   beforeEach(() => {
@@ -67,6 +73,73 @@ describe("generateProject", () => {
 
     await generateProject(options);
     expect(setProjectName).toHaveBeenCalledWith(options.projectDir, options.projectName);
+  });
+
+  it("handles missing optional steps gracefully", async () => {
+    const options = {
+      ...baseOptions(),
+      shouldUseNix: false,
+      shouldSetupVsCode: false,
+      shouldInitGit: false,
+      shouldInstall: false,
+    };
+
+    await expect(generateProject(options)).resolves.not.toThrow();
+  });
+
+  it("handles Nix setup for different backend combinations", async () => {
+    const options = {
+      ...baseOptions(),
+      shouldUseNix: true,
+      backendSetup: "none" as const,
+      databaseProvider: "none" as const,
+    };
+
+    await expect(generateProject(options)).resolves.not.toThrow();
+  });
+
+  it("calls the correct package manager install function", async () => {
+    const options = {
+      ...baseOptions(),
+      shouldInstall: true,
+    };
+
+    await generateProject(options);
+    expect(mockExeca).toHaveBeenCalledWith("npm", ["install"], expect.anything());
+  });
+
+  it("installs dependencies when shouldInstall is true", async () => {
+    const options = {
+      ...baseOptions(),
+      shouldInstall: true,
+    };
+
+    const { detectPackageManager } = await import("../../src/utils/package-manager");
+    vi.mocked(detectPackageManager).mockReturnValue("npm");
+
+    await generateProject(options);
+
+    expect(mockExeca).toHaveBeenCalledWith("npm", ["install"], {
+      cwd: options.projectDir,
+      stdio: "pipe",
+    });
+  });
+
+  it("does not install dependencies when shouldInstall is false", async () => {
+    const options = {
+      ...baseOptions(),
+      shouldInstall: false,
+    };
+
+    await generateProject(options);
+
+    const packageManagerCalls = mockExeca.mock.calls.filter(call =>
+      ["npm", "yarn", "pnpm", "bun"].includes(call[0])
+      && Array.isArray(call[1])
+      && call[1].includes("install"),
+    );
+
+    expect(packageManagerCalls).toHaveLength(0);
   });
 
   afterEach(() => {

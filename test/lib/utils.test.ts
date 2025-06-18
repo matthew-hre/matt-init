@@ -53,6 +53,17 @@ describe("utils", () => {
     expect(pkg.scripts.dev).toBe("next start");
   });
 
+  it("skips adding script when it already exists and updateExisting is false", async () => {
+    const dir = createTempProject();
+    const pkg = { scripts: { test: "existing-script" } };
+    await fs.writeJson(path.join(dir, "package.json"), pkg);
+
+    await addScriptToPackageJson(dir, "test", "new-script", false);
+
+    const updatedPkg = await fs.readJson(path.join(dir, "package.json"));
+    expect(updatedPkg.scripts.test).toBe("existing-script");
+  });
+
   it("addPackageToDependencies adds to dependencies", async () => {
     const dir = createTempProject();
     await addPackageToDependencies(dir, "chalk");

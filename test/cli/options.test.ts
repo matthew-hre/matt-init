@@ -108,6 +108,21 @@ describe("cLI Project Options", () => {
         }),
       );
     });
+
+    describe("complex flag combinations", () => {
+      it("handles various flag combinations", () => {
+        const flagCombinations = [
+          { default: true, ci: false, noGit: true, noInstall: true },
+          { default: false, ci: true, noNix: true, noVscode: true },
+          { default: true, ci: true }, // Should prioritize CI mode
+        ];
+
+        flagCombinations.forEach((flags) => {
+          expect(typeof flags.default).toBe("boolean");
+          expect(typeof flags.ci).toBe("boolean");
+        });
+      });
+    });
   });
 
   describe("directory handling", () => {

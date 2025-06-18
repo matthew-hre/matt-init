@@ -49,4 +49,38 @@ describe("package manager utils", () => {
     delete process.env.npm_config_user_agent;
     expect(detectPackageManager()).toBe("npm");
   });
+
+  it("defaults to npm when no user agent is available", () => {
+    delete process.env.npm_config_user_agent;
+    expect(detectPackageManager()).toBe("npm");
+  });
+
+  it("defaults to npm when user agent doesn't match known patterns", () => {
+    process.env.npm_config_user_agent = "unknown-tool/1.0.0";
+    expect(detectPackageManager()).toBe("npm");
+  });
+
+  describe("edge cases", () => {
+    it("handles various user agent formats", () => {
+      const testCases = [
+        { userAgent: "yarn/1.22.19 npm/? node/v18.0.0 linux x64", expected: "yarn" },
+        { userAgent: "pnpm/8.0.0 npm/? node/v18.0.0 linux x64", expected: "pnpm" },
+        { userAgent: "npm/9.0.0 node/v18.0.0 linux x64", expected: "npm" },
+        { userAgent: "bun/1.0.0 node/v18.0.0 linux x64", expected: "bun" },
+        { userAgent: undefined, expected: "npm" },
+        { userAgent: "", expected: "npm" },
+      ];
+
+      for (const { userAgent, expected } of testCases) {
+        if (userAgent === undefined) {
+          delete process.env.npm_config_user_agent;
+        }
+        else {
+          process.env.npm_config_user_agent = userAgent;
+        }
+
+        expect(detectPackageManager()).toBe(expected);
+      }
+    });
+  });
 });

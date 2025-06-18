@@ -41,9 +41,27 @@ describe("prompt functions", () => {
     expect(result).toBe(false);
   });
 
+  it("promptInstallDependencies exits on cancel", async () => {
+    (confirm as any).mockResolvedValue(Symbol("cancel"));
+    await expect(promptInstallDependencies()).rejects.toThrow("process.exit");
+    expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
   it("promptInitGit returns true", async () => {
     (confirm as any).mockResolvedValue(true);
     const result = await promptInitGit();
+    expect(result).toBe(true);
+  });
+
+  it("promptInitGit exits on cancel", async () => {
+    (confirm as any).mockResolvedValue(Symbol("cancel"));
+    await expect(promptInitGit()).rejects.toThrow("process.exit");
+    expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  it("promptSetupVsCodeSettings returns true", async () => {
+    (confirm as any).mockResolvedValue(true);
+    const result = await promptSetupVsCodeSettings();
     expect(result).toBe(true);
   });
 
