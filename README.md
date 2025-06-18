@@ -64,8 +64,10 @@ matt-init [project-name] [options]
 Options:
   --no-git      Skip git initialization
   --no-install  Skip package installation
-  --nix         Initialize with Nix flake
+  --no-nix      Skip Nix flake for environment management
+  --no-vscode   Skip VS Code settings setup
   -y, --default Use defaults, skip prompts
+  --ci          Run in CI mode (non-interactive, test mode)
   -V, --version Display version number
   -h, --help    Display help
 ```
@@ -84,6 +86,9 @@ pnpm dev my-app --no-git --no-install
 
 # Create with Nix support
 pnpm dev my-app --nix
+
+# Run in CI mode (non-interactive, uses defaults, overwrites existing directories)
+pnpm dev my-app --ci
 ```
 
 ## What's Included

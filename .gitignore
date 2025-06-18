@@ -1,2 +1,12 @@
 node_modules
 dist
+
+# Vitest coverage output
+coverage/
+
+# Vitest UI snapshots
+.vitest/
+
+# Temporary test artifacts
+test/temp/
+test/output/

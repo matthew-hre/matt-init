@@ -92,8 +92,6 @@ export async function setProjectName(
       content = content.replace(/__APP_NAME__/g, projectName);
       await fs.writeFile(filePath, content, "utf-8");
     }
-    else {
-      console.warn(`Issue replacing project name in file: ${filePath}`);
-    }
+    // just skip if the file doesn't exist, this needs to be more robust
   }
 }

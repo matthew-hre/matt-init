@@ -5,9 +5,15 @@ import fs from "fs-extra";
  *
  * @param projectDir the directory where the project will be created
  * @param projectName the name of the project, used for display purposes
+ * @param isCI whether running in CI mode (non-interactive)
  * @returns "overwrite" | "merge" | "cancel"
  */
-export async function handleExistingDirectory(projectDir: string, projectName: string): Promise<"overwrite" | "merge" | "cancel"> {
+export async function handleExistingDirectory(projectDir: string, projectName: string, isCI: boolean = false): Promise<"overwrite" | "merge" | "cancel"> {
+  // In CI mode, always overwrite to avoid hanging
+  if (isCI) {
+    return "overwrite";
+  }
+
   const { select, isCancel } = await import("@clack/prompts");
 
   const choice = await select({
@@ -32,12 +38,13 @@ export async function handleExistingDirectory(projectDir: string, projectName: s
  *
  * @param projectDir the directory where the project will be created
  * @param projectName the name of the project, used for display purposes
+ * @param isCI whether running in CI mode (non-interactive)
  */
-export async function handleDirectoryConflict(projectDir: string, projectName: string): Promise<void> {
+export async function handleDirectoryConflict(projectDir: string, projectName: string, isCI: boolean = false): Promise<void> {
   if (fs.existsSync(projectDir)) {
     const dirContents = fs.readdirSync(projectDir);
     if (dirContents.length > 0) {
-      const action = await handleExistingDirectory(projectDir, projectName);
+      const action = await handleExistingDirectory(projectDir, projectName, isCI);
 
       switch (action) {
         case "overwrite": {

@@ -20,8 +20,8 @@ const PACKAGE_ROOT = path.resolve(__dirname, "../");
  * @returns {Promise<void>} A promise that resolves when the project is generated.
  */
 export async function generateProject(options: ProjectOptions): Promise<void> {
-  const targetPath = path.join(process.cwd(), options.projectName);
-  await copyBaseTemplate(options.projectName);
+  const targetPath = options.projectDir;
+  await copyBaseTemplate(options.projectDir);
   // - Apply backend setup
   // - Configure database if needed
 
@@ -66,14 +66,12 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
  * This function uses fs-extra to copy the template files from the package root
  * to the specified project directory.
  *
- * @param projectName The name of the project, which will be used as the target directory name.
+ * @param targetPath The targetPath of the project.
  * @returns {Promise<void>} A promise that resolves when the template has been copied.
  */
-async function copyBaseTemplate(projectName: string): Promise<void> {
+async function copyBaseTemplate(targetPath: string): Promise<void> {
   // The base next.js template is located in src/templates/base
   const baseTemplatePath = path.join(PACKAGE_ROOT, "templates/base");
-  const targetPath = path.join(process.cwd(), projectName);
-
   // Use fs-extra to copy the base template to the target directory
   await fs.copy(baseTemplatePath, targetPath, {
     overwrite: true,
@@ -120,10 +118,6 @@ async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvid
  */
 async function applyGitInit(projectDir: string): Promise<void> {
   const gitPath = await findGitExecutable();
-
-  if (!gitPath || typeof gitPath !== "string") {
-    throw new Error("Git is not installed or not found in PATH.");
-  }
 
   const { execa } = await import("execa");
   await execa(gitPath, ["init"], {

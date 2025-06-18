@@ -29,14 +29,17 @@ export async function runCLI() {
     .option("--no-nix", "Skip Nix flake for environment management")
     .option("--no-vscode", "Skip VS Code settings setup")
     .option("-y, --default", "Use defaults, skip prompts")
+    .option("--ci", "Run in CI mode (non-interactive, test mode)")
     .version("1.0.0")
     .parse(process.argv);
 
   const cliProvidedName = program.args[0];
   const options = program.opts();
 
-  // Start the interactive flow
-  intro(pc.bgGreen(pc.black(" matt-init ")));
+  // Start the interactive flow (skip intro in CI mode)
+  if (!options.ci) {
+    intro(pc.bgGreen(pc.black(" matt-init ")));
+  }
 
   let projectName = cliProvidedName;
   let shouldInitGit = !options.noGit;
@@ -47,8 +50,8 @@ export async function runCLI() {
   let databaseProvider: DatabaseProvider = "none";
 
   try {
-    // Interactive prompts if not using defaults
-    if (!options.default) {
+    // Interactive prompts if not using defaults or CI mode
+    if (!options.default && !options.ci) {
       // 1. Project name
       if (!projectName) {
         const nameResult = await promptProjectName();
@@ -64,19 +67,19 @@ export async function runCLI() {
       }
 
       // 4. Quick yes/no prompts
-      if (options.nix) {
+      if (!options.noNix) {
         shouldUseNix = await promptUseNix();
       }
 
-      if (options.vscode) {
+      if (!options.noVscode) {
         shouldSetupVsCode = await promptSetupVsCodeSettings();
       }
 
-      if (options.install !== false) {
+      if (!options.noInstall) {
         shouldInstall = await promptInstallDependencies();
       }
 
-      if (options.git !== false) {
+      if (!options.noGit) {
         shouldInitGit = await promptInitGit();
       }
     }
@@ -89,7 +92,7 @@ export async function runCLI() {
     const templateDir = path.join(PACKAGE_ROOT, "src", "templates");
 
     // Handle existing directory conflicts
-    await handleDirectoryConflict(projectDir, projectName);
+    await handleDirectoryConflict(projectDir, projectName, options.ci);
 
     // Prepare project options
     const projectOptions: ProjectOptions = {
@@ -104,22 +107,40 @@ export async function runCLI() {
       databaseProvider,
     };
 
-    // Generate the project with spinner
-    const s = spinner();
-    s.start("Creating your Next.js project...");
-
-    await generateProject(projectOptions);
-
-    s.stop("Project created successfully!");
+    // Generate the project with spinner (skip spinner in CI mode)
+    if (options.ci) {
+      console.log("Creating your Next.js project...");
+      await generateProject(projectOptions);
+      console.log("Project created successfully!");
+    }
+    else {
+      const s = spinner();
+      s.start("Creating your Next.js project...");
+      await generateProject(projectOptions);
+      s.stop("Project created successfully!");
+    }
   }
   catch (error) {
     if (isCancel(error)) {
-      cancel("Operation cancelled.");
-      process.exit(0);
+      if (options.ci) {
+        console.log("Operation cancelled.");
+        process.exit(0);
+      }
+      else {
+        cancel("Operation cancelled.");
+        process.exit(0);
+      }
     }
 
-    cancel("Something went wrong!");
-    console.error(error);
-    process.exit(1);
+    if (options.ci) {
+      console.error("Something went wrong!");
+      console.error(error);
+      process.exit(1);
+    }
+    else {
+      cancel("Something went wrong!");
+      console.error(error);
+      process.exit(1);
+    }
   }
 }
