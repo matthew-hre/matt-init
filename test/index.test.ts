@@ -58,8 +58,6 @@ describe("main entry point", () => {
 
     await new Promise(r => setTimeout(r, 50));
 
-    console.log("console.error calls:", vi.mocked(console.error).mock.calls);
-
     expect(console.error).toHaveBeenCalledWith("An error occurred:", error);
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
