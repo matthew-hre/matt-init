@@ -28,7 +28,9 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             node-modules-${{ runner.os }}-
-      - name: pnpm install
+      - name: pnpm install in /cli
         run: nix develop -c pnpm install
-      - name: test
+        working-directory: cli
+      - name: test in /cli
         run: nix develop -c pnpm test
+        working-directory: cli
