@@ -27,6 +27,7 @@ export function setupMocks() {
       option: vi.fn().mockReturnThis(),
       version: vi.fn().mockReturnThis(),
       parse: vi.fn().mockReturnThis(),
+      addHelpText: vi.fn().mockReturnThis(),
       args: [],
       opts: vi.fn(() => ({})),
     })),
@@ -34,8 +35,7 @@ export function setupMocks() {
 
   vi.mock("picocolors", () => ({
     default: {
-      bgGreen: vi.fn(text => text),
-      black: vi.fn(text => text),
+      green: vi.fn(text => text),
     },
   }));
 
@@ -110,6 +110,7 @@ export async function createMockCommand(context: TestContext) {
     option: vi.fn().mockReturnThis(),
     version: vi.fn().mockReturnThis(),
     parse: vi.fn().mockReturnThis(),
+    addHelpText: vi.fn().mockReturnThis(),
     args: [],
     opts: vi.fn(() => ({})),
   };

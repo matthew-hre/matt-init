@@ -10,6 +10,7 @@ import { promptBackendSetup } from "./prompts/backend-setup";
 import { promptDatabaseProvider } from "./prompts/database-provider";
 import { promptProjectName } from "./prompts/project-name";
 import { promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, promptUseNix } from "./prompts/yes-no";
+import { BANNER } from "./utils/banner";
 import { handleDirectoryConflict } from "./utils/directory-handler";
 
 const PACKAGE_ROOT = path.join(__dirname, "../");
@@ -30,15 +31,20 @@ export async function runCLI() {
     .option("--no-vscode", "Skip VS Code settings setup")
     .option("-y, --default", "Use defaults, skip prompts")
     .option("--ci", "Run in CI mode (non-interactive, test mode)")
-    .version("1.0.0")
-    .parse(process.argv);
+    .version("1.0.0");
+
+  program.addHelpText("before", `${BANNER}\n`);
+
+  program.addHelpText("after", `\nhttps://github.com/matthew-hre/matt-init`);
+
+  program.parse(process.argv);
 
   const cliProvidedName = program.args[0];
   const options = program.opts();
 
   // Start the interactive flow (skip intro in CI mode)
   if (!options.ci) {
-    intro(pc.bgGreen(pc.black(" matt-init ")));
+    intro(pc.green(BANNER));
   }
 
   let projectName = cliProvidedName;
