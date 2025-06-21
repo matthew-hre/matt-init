@@ -46,7 +46,15 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             node-modules-${{ runner.os }}-
-      - name: pnpm install
+      - name: pnpm install in /cli
         run: nix develop -c pnpm install
-      - name: lint
+        working-directory: cli
+      - name: lint in /cli
         run: nix develop -c pnpm lint
+        working-directory: cli
+      - name: pnpm install in /www
+        run: nix develop -c pnpm install
+        working-directory: www
+      - name: lint in /www
+        run: nix develop -c pnpm lint
+        working-directory: www
