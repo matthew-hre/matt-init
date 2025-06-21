@@ -27,5 +27,16 @@
     "lint:cli": "pnpm --filter ./cli lint",
     "lint:web": "pnpm --filter ./www lint",
     "lint": "pnpm lint:cli && pnpm lint:web"
+  },
+  "devDependencies": {
+    "lint-staged": "^16.1.2"
+  },
+  "lint-staged": {
+    "cli/**/*.ts": [
+      "pnpm --filter ./cli lint"
+    ],
+    "www/**/*.{ts,tsx}": [
+      "pnpm --filter ./www lint"
+    ]
   }
 }
