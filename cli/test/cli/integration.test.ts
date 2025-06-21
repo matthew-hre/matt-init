@@ -37,7 +37,7 @@ describe("cLI Integration", () => {
         shouldInstall: true, // Default is true, --no-install makes it false
         backendSetup: "none",
         databaseProvider: "none",
-      });
+      }, expect.any(String));
     });
 
     it("creates project options with interactive choices", async () => {
@@ -76,7 +76,7 @@ describe("cLI Integration", () => {
         shouldInstall: true,
         backendSetup: "drizzle",
         databaseProvider: "turso",
-      });
+      }, expect.any(String));
     });
   });
 });
