@@ -9,6 +9,7 @@ export type ProjectOptions = {
   shouldSetupVsCode?: boolean;
   shouldInitGit: boolean;
   shouldInstall: boolean;
+  shouldIncludeCI: boolean;
   backendSetup: BackendSetup;
   databaseProvider: DatabaseProvider;
 };

@@ -25,7 +25,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: node-modules-${{ runner.os }}-${{ hashFiles('__LOCK_FILE__') }}
           restore-keys: |
             node-modules-${{ runner.os }}-
       - name: pnpm install

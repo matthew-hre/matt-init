@@ -35,6 +35,10 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
     await applyNixFlake(targetPath, options.backendSetup, options.databaseProvider);
   }
 
+  if (options.shouldIncludeCI) {
+    await applyCIConfig(targetPath, options.shouldUseNix);
+  }
+
   if (options.shouldSetupVsCode) {
     await applyVsCodeSettings(targetPath);
   }
@@ -106,6 +110,34 @@ async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvid
       errorOnExist: false,
     });
   }
+}
+
+/**
+ * Applies CI configuration to the project directory.
+ * This function copies the CI configuration files from the package templates
+ * to the project's .github/workflows directory.
+ *
+ * @param projectDir The directory where the project is located.
+ * @param shouldUseNix Whether to include Nix in the CI configuration.
+ * @returns {Promise<void>} A promise that resolves when the CI configuration has been applied.
+ */
+async function applyCIConfig(projectDir: string, shouldUseNix: boolean): Promise<void> {
+  const ciTemplatePath = path.join(PACKAGE_ROOT, "templates/extras/ci/base");
+  await fs.copy(ciTemplatePath, projectDir, {
+    overwrite: true,
+    errorOnExist: false,
+  });
+
+  // If Nix is used, copy the Nix CI template
+  if (shouldUseNix) {
+    const nixCiTemplatePath = path.join(PACKAGE_ROOT, "templates/extras/ci/nix");
+    await fs.copy(nixCiTemplatePath, projectDir, {
+      overwrite: true,
+      errorOnExist: false,
+    });
+  }
+
+  // in the newly created .github/workflows/lint.yml file, replace __LOCK_FILE__ with the actual lock file name
 }
 
 /**
