@@ -28,9 +28,7 @@ Also, because enforcing harsh linting rules on hackathon teammates is more justa
 ## Installation
 
 ```bash
-# eventually this will be on npm, but for now, clone the repo
-nix develop
-pnpm i
+npx matt-init@latest [project-name] [options]
 ```
 
 ## Usage
@@ -38,7 +36,7 @@ pnpm i
 ### Interactive Mode (Recommended)
 
 ```bash
-pnpm dev
+npx matt-init@latest
 ```
 
 This will prompt you for:
@@ -54,6 +52,7 @@ This will prompt you for:
   - `Docker Postgres` - (coming soon)
 - **Nix flake** - Optional reproducible dev environment
 - **Install dependencies** - Run `pnpm install` automatically
+- **VS Code settings** - Setup workspace settings and recommended extensions
 - **Git repository** - Initialize git with initial commit
 
 ### Command Line Options
@@ -86,9 +85,6 @@ pnpm dev my-app --no-git --no-install
 
 # Create with Nix support
 pnpm dev my-app --nix
-
-# Run in CI mode (non-interactive, uses defaults, overwrites existing directories)
-pnpm dev my-app --ci
 ```
 
 ## What's Included

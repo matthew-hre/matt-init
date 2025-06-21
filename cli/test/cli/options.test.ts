@@ -33,6 +33,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           projectName: "my-custom-app",
         }),
+        expect.any(String),
       );
     });
 
@@ -48,6 +49,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           projectName: "my-app",
         }),
+        expect.any(String),
       );
     });
   });
@@ -64,6 +66,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           shouldInitGit: false,
         }),
+        expect.any(String),
       );
     });
 
@@ -78,6 +81,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           shouldInstall: false,
         }),
+        expect.any(String),
       );
     });
 
@@ -92,6 +96,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           shouldUseNix: false,
         }),
+        expect.any(String),
       );
     });
 
@@ -106,6 +111,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           shouldSetupVsCode: false,
         }),
+        expect.any(String),
       );
     });
 
@@ -141,6 +147,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           projectDir: path.resolve(tempDir, "test-project"),
         }),
+        expect.any(String),
       );
     });
 
@@ -155,6 +162,7 @@ describe("cLI Project Options", () => {
         expect.objectContaining({
           templateDir: expect.stringContaining("src/templates"),
         }),
+        expect.any(String),
       );
     });
   });

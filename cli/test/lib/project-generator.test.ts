@@ -8,6 +8,7 @@ import type { ProjectOptions } from "../../src/types";
 import { generateProject } from "../../src/lib/project-generator";
 
 const tempDirs: string[] = [];
+const PACKAGE_ROOT = path.join(__dirname, "../../src");
 
 function baseOptions(): ProjectOptions {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "proj-gen-"));
@@ -50,7 +51,7 @@ describe("generateProject", () => {
 
   it("copies the base template to the target directory", async () => {
     const options = baseOptions();
-    await generateProject(options);
+    await generateProject(options, PACKAGE_ROOT);
 
     const copied = await fs.pathExists(path.join(options.projectDir, "src/app/page.tsx"));
     expect(copied).toBe(true);
@@ -58,7 +59,7 @@ describe("generateProject", () => {
 
   it("renames special template files like _gitignore", async () => {
     const options = baseOptions();
-    await generateProject(options);
+    await generateProject(options, PACKAGE_ROOT);
 
     const gitignoreExists = await fs.pathExists(path.join(options.projectDir, ".gitignore"));
     const eslintExists = await fs.pathExists(path.join(options.projectDir, "eslint.config.mjs"));
@@ -71,7 +72,7 @@ describe("generateProject", () => {
     const options = baseOptions();
     const { setProjectName } = await import("../../src/lib/utils");
 
-    await generateProject(options);
+    await generateProject(options, PACKAGE_ROOT);
     expect(setProjectName).toHaveBeenCalledWith(options.projectDir, options.projectName);
   });
 
@@ -84,7 +85,7 @@ describe("generateProject", () => {
       shouldInstall: false,
     };
 
-    await expect(generateProject(options)).resolves.not.toThrow();
+    await expect(generateProject(options, PACKAGE_ROOT)).resolves.not.toThrow();
   });
 
   it("handles Nix setup for different backend combinations", async () => {
@@ -95,7 +96,7 @@ describe("generateProject", () => {
       databaseProvider: "none" as const,
     };
 
-    await expect(generateProject(options)).resolves.not.toThrow();
+    await expect(generateProject(options, PACKAGE_ROOT)).resolves.not.toThrow();
   });
 
   it("calls the correct package manager install function", async () => {
@@ -104,7 +105,7 @@ describe("generateProject", () => {
       shouldInstall: true,
     };
 
-    await generateProject(options);
+    await generateProject(options, PACKAGE_ROOT);
     expect(mockExeca).toHaveBeenCalledWith("npm", ["install"], expect.anything());
   });
 
@@ -117,7 +118,7 @@ describe("generateProject", () => {
     const { detectPackageManager } = await import("../../src/utils/package-manager");
     vi.mocked(detectPackageManager).mockReturnValue("npm");
 
-    await generateProject(options);
+    await generateProject(options, PACKAGE_ROOT);
 
     expect(mockExeca).toHaveBeenCalledWith("npm", ["install"], {
       cwd: options.projectDir,
@@ -131,7 +132,7 @@ describe("generateProject", () => {
       shouldInstall: false,
     };
 
-    await generateProject(options);
+    await generateProject(options, PACKAGE_ROOT);
 
     const packageManagerCalls = mockExeca.mock.calls.filter(call =>
       ["npm", "yarn", "pnpm", "bun"].includes(call[0])

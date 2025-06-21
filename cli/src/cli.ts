@@ -13,7 +13,7 @@ import { promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, pr
 import { BANNER } from "./utils/banner";
 import { handleDirectoryConflict } from "./utils/directory-handler";
 
-const PACKAGE_ROOT = path.join(__dirname, "../");
+const PACKAGE_ROOT = path.join(__dirname, "./");
 /**
  * Main CLI entry point for the matt-init tool.
  * This sets up a Next.js app with various options based on user input or command line flags.
@@ -116,13 +116,13 @@ export async function runCLI() {
     // Generate the project with spinner (skip spinner in CI mode)
     if (options.ci) {
       console.log("Creating your Next.js project...");
-      await generateProject(projectOptions);
+      await generateProject(projectOptions, PACKAGE_ROOT);
       console.log("Project created successfully!");
     }
     else {
       const s = spinner();
       s.start("Creating your Next.js project...");
-      await generateProject(projectOptions);
+      await generateProject(projectOptions, PACKAGE_ROOT);
       s.stop("Project created successfully!");
     }
   }

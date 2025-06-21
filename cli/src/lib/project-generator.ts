@@ -9,19 +9,18 @@ import type { BackendSetup, DatabaseProvider, ProjectOptions } from "../types";
 import { applyDrizzleTurso } from "./db";
 import { setProjectName } from "./utils";
 
-const PACKAGE_ROOT = path.resolve(__dirname, "../");
-
 /**
  * Generates a new project based on the provided options.
  * This function sets up the project structure, applies backend configurations,
  * sets up VS Code settings, initializes Git, and installs dependencies.
  *
  * @param {ProjectOptions} options The options for generating the project.
+ * @param {string} PACKAGE_ROOT The root directory of the package, used to locate templates.
  * @returns {Promise<void>} A promise that resolves when the project is generated.
  */
-export async function generateProject(options: ProjectOptions): Promise<void> {
+export async function generateProject(options: ProjectOptions, PACKAGE_ROOT: string): Promise<void> {
   const targetPath = options.projectDir;
-  await copyBaseTemplate(options.projectDir);
+  await copyBaseTemplate(options.projectDir, PACKAGE_ROOT);
   // - Apply backend setup
   // - Configure database if needed
 
@@ -32,11 +31,11 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
   }
 
   if (options.shouldUseNix) {
-    await applyNixFlake(targetPath, options.backendSetup, options.databaseProvider);
+    await applyNixFlake(targetPath, options.backendSetup, options.databaseProvider, PACKAGE_ROOT);
   }
 
   if (options.shouldSetupVsCode) {
-    await applyVsCodeSettings(targetPath);
+    await applyVsCodeSettings(targetPath, PACKAGE_ROOT);
   }
 
   if (options.shouldInstall) {
@@ -69,7 +68,7 @@ export async function generateProject(options: ProjectOptions): Promise<void> {
  * @param targetPath The targetPath of the project.
  * @returns {Promise<void>} A promise that resolves when the template has been copied.
  */
-async function copyBaseTemplate(targetPath: string): Promise<void> {
+async function copyBaseTemplate(targetPath: string, PACKAGE_ROOT: string): Promise<void> {
   // The base next.js template is located in src/templates/base
   const baseTemplatePath = path.join(PACKAGE_ROOT, "templates/base");
   // Use fs-extra to copy the base template to the target directory
@@ -89,7 +88,7 @@ async function copyBaseTemplate(targetPath: string): Promise<void> {
  * @param dbProvider The database provider chosen for the project.
  * @returns {Promise<void>} A promise that resolves when the Nix flake has been applied.
  */
-async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvider: DatabaseProvider): Promise<void> {
+async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvider: DatabaseProvider, PACKAGE_ROOT: string): Promise<void> {
   // Copy the Nix flake template to the project directory
   const nixTemplatePath = path.join(PACKAGE_ROOT, "templates/extras/nix/base");
   await fs.copy(nixTemplatePath, projectDir, {
@@ -144,7 +143,7 @@ async function applyGitInit(projectDir: string): Promise<void> {
  * @param projectDir The directory where the project is located.
  * @returns {Promise<void>} A promise that resolves when the VS Code settings have been applied.
  */
-async function applyVsCodeSettings(projectDir: string): Promise<void> {
+async function applyVsCodeSettings(projectDir: string, PACKAGE_ROOT: string): Promise<void> {
   const vscodeSettingsPath = path.join(PACKAGE_ROOT, "templates/extras/vscode/base/_settings.json");
   const vscodeExtensionsPath = path.join(PACKAGE_ROOT, "templates/extras/vscode/base/_extensions.json");
 

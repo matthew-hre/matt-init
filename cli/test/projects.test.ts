@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import { generateProject } from "../src/lib/project-generator";
 
+const PACKAGE_ROOT = path.join(__dirname, "../src");
+
 const bool = [true, false];
 const backendConfigs = [
   { backendSetup: "none" as const, databaseProvider: "none" as const },
@@ -45,7 +47,7 @@ describe.each(combinations)(
         ...options,
         projectDir,
         templateDir: "",
-      });
+      }, PACKAGE_ROOT);
 
       expect(await fs.pathExists(projectDir)).toBe(true);
 
