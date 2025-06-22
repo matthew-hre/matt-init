@@ -111,24 +111,27 @@ export default function Terminal() {
   return (
     <div
       ref={terminalRef}
-      className="bg-primary/[0.05] border border-muted rounded-lg p-4 font-mono text-sm text-primary w-full"
+      className={`
+        bg-primary/[0.05] border-muted text-primary w-full rounded-lg border p-4
+        font-mono text-sm
+      `}
       style={{ minHeight: maxHeight }}
       role="region"
       aria-label="Terminal simulation"
       aria-live="polite"
     >
-      <div className="flex items-center gap-2 mb-2 text-gray-300">
+      <div className="mb-2 flex items-center gap-2 text-gray-300">
         <div className="flex gap-1" role="img" aria-label="Terminal window controls">
-          <div className="w-3 h-3 bg-red-500 rounded-full" aria-label="Close"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full" aria-label="Minimize"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full" aria-label="Maximize"></div>
+          <div className="h-3 w-3 rounded-full bg-red-500" aria-label="Close"></div>
+          <div className="h-3 w-3 rounded-full bg-yellow-500" aria-label="Minimize"></div>
+          <div className="h-3 w-3 rounded-full bg-green-500" aria-label="Maximize"></div>
         </div>
       </div>
       <div
         className="relative"
         style={{ minHeight: `calc(${maxHeight} - 3rem)` }}
       >
-        <pre className="text-xs leading-relaxed absolute top-0 left-0 w-full">
+        <pre className="absolute top-0 left-0 w-full text-xs leading-relaxed">
           {STEPS[currentStep]}
         </pre>
       </div>

@@ -3,18 +3,44 @@ import MattInitBanner from "~/components/matt-init-banner";
 
 export default function Hero() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center max-h-screen h-full p-8 pb-20 gap-16 sm:p-40 font-sans">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="hidden md:block">
+    <div className={`
+      grid h-full max-h-screen grid-rows-[20px_1fr_20px] items-center
+      justify-items-center gap-16 p-8 pb-20 font-sans
+      sm:p-40
+    `}
+    >
+      <main className={`
+        row-start-2 flex flex-col items-center gap-[32px]
+        sm:items-start
+      `}
+      >
+        <div className={`
+          hidden
+          md:block
+        `}
+        >
           <MattInitBanner />
         </div>
-        <h1 className="md:hidden text-6xl sm:text-6xl font-bold text-center sm:text-left">
+        <h1 className={`
+          text-center text-6xl font-bold
+          sm:text-left sm:text-6xl
+          md:hidden
+        `}
+        >
           matt-init
         </h1>
-        <h2 className="list-inside list-decimal text-md text-center sm:text-left font-mono mx-auto">
+        <h2 className={`
+          text-md mx-auto list-inside list-decimal text-center font-mono
+          sm:text-left
+        `}
+        >
           A CLI tool for scaffolding Next.js projects the way Matt likes 'em.
         </h2>
-        <div className="w-full flex flex-row items-center justify-center sm:justify-start">
+        <div className={`
+          flex w-full flex-row items-center justify-center
+          sm:justify-start
+        `}
+        >
           <CopyableCommand />
         </div>
       </main>
