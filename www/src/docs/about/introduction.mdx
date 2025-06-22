@@ -1,0 +1,46 @@
+---
+title: "Introduction"
+description: "matt-init is a CLI tool for scaffolding Next.js projects the way Matt likes 'em."
+order: 1
+---
+
+## Another Next.js scaffolding tool?
+
+Yeah, yeah, I know: Everyone's got a Next.js starter these days. Tech stacks are like assholes: everyone's got one. But this one's mine.
+
+Most scaffolding tools chase trends like “type safety” or “DX” or “the bleeding edge.” That stuff's nice, but they often forget something more basic: working with other people sucks. Especially during a hackathon.
+
+That's where matt-init attempts to help. It's a CLI tool for scaffolding Next.js projects the way I like them: semi-strict linting, sensible defaults, and zero decision fatigue. It's opinionated on purpose.
+
+> **Disclaimer:** This is a personal tool that got out of hand. It's opinionated, unpolished, and built for an audience of one (me). Expect bugs and questionable decisions. Use at your own risk.
+
+## Why I built this
+
+As of writing this, on my laptop, `/home/matthew_hre/projects/nextjs-apps` has 72 folders in it — hackathons, side projects, throwaway ideas. And they all had one thing in common: the first hour or two was a mess.
+
+You know the drill:
+- Someone forgot to set up linting, so now there's a 100-line PR diff just from formatting.
+- CI is broken because the GitHub workflowis running the linter directly instead of the linting script.
+- Someone renames index.tsx to home.tsx and now routing is broken.
+- You burn 45 minutes debating whether to use Tabs or Spaces, instead of building anything.
+- You finally get to writing backend logic and get stuck debugging auth for the third time this month.
+
+Or, in the case of personal projects: you spend an evening wiring up Drizzle, Zod, and auth... and then get burnt out and never touch it again.
+
+This tool exists to skip all that. It gives me a fresh, clean, and consistent starting point so I can actually focus on building — not configuring.
+
+### Why I *really* built this
+
+Ok, ok, I admit: I originally built this to enforce my own harsh linting rules on hackathon teammates. I started this project as preparation for Hack the 6ix 2025, where I wanted to ensure everyone was on the same page with code quality and structure.
+
+I probably *could* have just written a bunch of helper methods and copy-pasted them into the project during the hackathon, but that felt morally ambiguous. It felt less like cheating to dedicate almost two months to designing, building, and publishing an NPM package to template said helper methods for me.
+
+...now writing this out, I realize I am no more morally just than before. Oops.
+
+## Who it's (hopefully) for
+- Hackathon teams who want to start knocking out features right away without stepping on each other's toes.
+- Solo devs who are sick of setting up the same stack over and over again.
+- People who like strong opinions — this starter doesn't ask what linting rules you want. It tells you what you're getting.
+- Me.
+
+If you like having options for every tiny detail, this probably isn't the tool for you. If you like writing code without spending half your energy on setup — this is your jam.

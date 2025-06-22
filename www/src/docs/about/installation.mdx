@@ -1,0 +1,99 @@
+---
+title: "Installation"
+description: "How to use matt-init CLI"
+order: 2
+---
+
+## Interactive Mode (recommended)
+
+Just run the CLI without any flags:
+
+```bash
+npx matt-init@latest
+```
+
+You'll get a few prompts:
+
+* **Project name**: What do you want to call the thing?
+* **Backend setup**
+  * `DB + Drizzle + BetterAuth` (full-stack)
+  * `Supabase` (coming soon)
+  * `None` (frontend-only)
+* **Database provider**
+  * `Turso (SQLite)`: edge DB
+  * `Neon (Postgres)`: (coming soon)
+  * `Docker Postgres`: (coming soon)
+* **Nix flake**: Set up a reproducible Nix flake for dev environment
+* **Install dependencies**: Skip or run `pnpm install`
+* **VS Code settings**: Adds recommended extensions and workspace config
+* **Git repo**: Optionally initializes git and makes the first commit
+
+---
+
+## CLI Options
+
+```bash
+matt-init [project-name] [options]
+```
+<div className="w-full overflow-x-auto">
+    <table className="w-full border-collapse border border-muted bg-background">
+        <thead>
+            <tr className="bg-muted">
+                <th className="border border-muted px-4 py-3 text-left font-medium">Option</th>
+                <th className="border border-muted px-4 py-3 text-left font-medium">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>--no-git</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Skip git repo initialization</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>--no-install</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Skip installing dependencies</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>--no-nix</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Skip setting up the Nix flake</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>--no-vscode</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Skip VS Code workspace and extension setup</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>--ci</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">CI mode: non-interactive, skips prompts</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>-y</code>, <code>--default</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Use all default answers</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>-V</code>, <code>--version</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Print version number</td>
+            </tr>
+            <tr>
+                <td className="border border-muted px-4 py-3 bg-background"><code>-h</code>, <code>--help</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Show CLI help</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+---
+
+## Examples
+
+```bash
+# Recommended: run with prompts
+npx matt-init@latest
+
+# Create a new frontend-only app with defaults
+npx matt-init@latest my-app --default
+
+# Skip git and dependency installation
+npx matt-init@latest my-app --no-git --no-install
+
+# Skip Nix flake setup
+npx matt-init@latest my-app --no-nix
+```

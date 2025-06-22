@@ -1,8 +1,8 @@
-import About from "~/components/landing/about";
-import Components from "~/components/landing/components";
-import Footer from "~/components/landing/footer";
-import Header from "~/components/landing/header";
-import Hero from "~/components/landing/hero";
+import About from "./(components)/about";
+import Components from "./(components)/components";
+import Footer from "./(components)/footer";
+import Header from "./(components)/header";
+import Hero from "./(components)/hero";
 
 export default function Home() {
   return (
