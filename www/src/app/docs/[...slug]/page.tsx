@@ -27,8 +27,12 @@ export default async function DocsPage({ params }: DocsPageProps) {
     return (
       <article className="prose prose-lg max-w-none">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">{frontmatter.title}</h1>
-          {frontmatter.description && <p className="text-lg text-muted-foreground">{frontmatter.description}</p>}
+          <h1 className="mb-2 text-4xl font-bold">{frontmatter.title}</h1>
+          {frontmatter.description && (
+            <p className="text-muted-foreground text-lg">
+              {frontmatter.description}
+            </p>
+          )}
         </header>
         <hr className="mt-8" />
         <MDXRemote source={content} components={components} />

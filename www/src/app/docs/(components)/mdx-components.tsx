@@ -4,41 +4,99 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 export const components: MDXComponents = {
-  h1: ({ children }: { children: ReactNode }) => <h1 className="text-foreground text-3xl font-bold mb-6 mt-8 first:mt-0">{children}</h1>,
-  h2: ({ children }: { children: ReactNode }) => <h2 className="text-foreground text-2xl font-semibold mb-4 mt-8">{children}</h2>,
-  h3: ({ children }: { children: ReactNode }) => <h3 className="text-foreground text-xl font-semibold mb-3 mt-6">{children}</h3>,
-  p: ({ children }: { children: ReactNode }) => <p className="text-muted-foreground mb-4 leading-relaxed">{children}</p>,
-  ul: ({ children }: { children: ReactNode }) => <ul className="list-disc list-outside mb-4 text-muted-foreground space-y-1">{children}</ul>,
-  ol: ({ children }: { children: ReactNode }) => <ol className="list-decimal list-outside mb-4 text-muted-foreground space-y-1">{children}</ol>,
-  li: ({ children }: { children: ReactNode }) => <li className="text-muted-foreground ml-4">{children}</li>,
+  h1: ({ children }: { children: ReactNode }) => (
+    <h1 className={`
+      text-foreground mt-8 mb-6 text-3xl font-bold
+      first:mt-0
+    `}
+    >
+      {children}
+    </h1>
+  ),
+  h2: ({ children }: { children: ReactNode }) => (
+    <h2 className="text-foreground mt-8 mb-4 text-2xl font-semibold">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }: { children: ReactNode }) => (
+    <h3 className="text-foreground mt-6 mb-3 text-xl font-semibold">
+      {children}
+    </h3>
+  ),
+  p: ({ children }: { children: ReactNode }) => (
+    <p className="text-muted-foreground mb-4 leading-relaxed">
+      {children}
+    </p>
+  ),
+  ul: ({ children }: { children: ReactNode }) => (
+    <ul className="text-muted-foreground mb-4 list-outside list-disc space-y-1">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }: { children: ReactNode }) => (
+    <ol className={`
+      text-muted-foreground mb-4 list-outside list-decimal space-y-1
+    `}
+    >
+      {children}
+    </ol>
+  ),
+  li: ({ children }: { children: ReactNode }) => (
+    <li className="text-muted-foreground ml-4">
+      {children}
+    </li>
+  ),
   Link: ({ href, children }: { href?: string; children: ReactNode }) => (
     <Link
       href={href || "#"}
-      className="underline hover:text-foreground transition-colors"
+      className={`
+        underline transition-colors
+        hover:text-foreground
+      `}
     >
       {children}
     </Link>
   ),
   code: ({ children }: { children: ReactNode }) => (
-    <code className="text-sm font-mono">{children}</code>
+    <code className="font-mono text-sm">{children}</code>
   ),
   pre: ({ children }: { children: ReactNode }) => (
-    <pre className="bg-foreground/[0.05] py-4 px-6 rounded-lg overflow-x-auto mb-4 border w-max">{children}</pre>
+    <pre className={`
+      bg-foreground/[0.05] mb-4 w-max overflow-x-auto rounded-lg border px-6
+      py-4
+    `}
+    >
+      {children}
+    </pre>
   ),
   blockquote: ({ children }: { children: ReactNode }) => (
-    <blockquote className="border-l-4 border-foreground pl-4 italic text-muted-foreground mb-4">{children}</blockquote>
+    <blockquote className={`
+      border-foreground text-muted-foreground mb-4 border-l-4 pl-4 italic
+    `}
+    >
+      {children}
+    </blockquote>
   ),
   a: ({ href, children }: { href?: string; children: ReactNode }) => (
-    <a href={href} className="underline hover:text-foreground transition-colors">
+    <a
+      href={href}
+      className={`
+        underline transition-colors
+        hover:text-foreground
+      `}
+    >
       {children}
     </a>
   ),
   CardLink: ({ title, description, href }: { title: string; description: string; href: string }) => (
     <Link
-      className="border border-muted rounded-lg p-6 hover:bg-foreground/[0.05] transition-colors"
+      className={`
+        border-muted rounded-lg border p-6 transition-colors
+        hover:bg-foreground/[0.05]
+      `}
       href={href}
     >
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <h3 className="mb-2 text-xl font-semibold">{title}</h3>
       <p className="text-muted-foreground mb-4">{description}</p>
     </Link>
   ),

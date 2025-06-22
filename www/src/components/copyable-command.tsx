@@ -22,15 +22,28 @@ export default function CopyableCommand() {
 
   return (
     <div className="relative mx-auto w-full max-w-md">
-      <div className="flex items-center gap-2 bg-primary/[0.05] p-4 rounded-lg border font-mono text-sm">
+      <div className={`
+        bg-primary/[0.05] flex items-center gap-2 rounded-lg border p-4
+        font-mono text-sm
+      `}
+      >
         <span className="text-muted-foreground">$</span>
         <code className="flex-1">{command}</code>
-        <Button variant="outline" size="sm" onClick={copyToClipboard} className="h-8 w-8 p-0 cursor-pointer">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={copyToClipboard}
+          className="h-8 w-8 cursor-pointer p-0"
+        >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
       {copied && (
-        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded">
+        <div className={`
+          bg-foreground text-background absolute -top-8 left-1/2
+          -translate-x-1/2 transform rounded px-2 py-1 text-xs
+        `}
+        >
           Copied!
         </div>
       )}

@@ -38,21 +38,35 @@ export function Sidebar({ structure }: SidebarProps) {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-background border-r border-muted overflow-y-auto">
-      <Link href="/" className="flex items-center pb-6 p-6 border-b border-muted">
+    <aside className={`
+      bg-background border-muted fixed top-0 left-0 h-screen w-64
+      overflow-y-auto border-r
+    `}
+    >
+      <Link
+        href="/"
+        className="border-muted flex items-center border-b p-6 pb-6"
+      >
         <h2 className="text-lg font-bold">matt-init</h2>
       </Link>
 
       <nav>
         <Link
           href="/docs"
-          className={`flex items-center text-sm py-2 px-3 transition-colors border-b border-muted ${
-            pathname === "/docs"
-              ? "bg-muted text-foreground"
-              : "text-muted-foreground hover:text-foreground hover:bg-primary/[0.05]"
-          }`}
+          className={`
+            border-muted flex items-center border-b px-3 py-2 text-sm
+            transition-colors
+            ${
+    pathname === "/docs"
+      ? "bg-muted text-foreground"
+      : `
+        text-muted-foreground
+        hover:text-foreground hover:bg-primary/[0.05]
+      `
+    }
+          `}
         >
-          <Book className="w-4 h-4 mr-2" />
+          <Book className="mr-2 h-4 w-4" />
           matt-init docs
         </Link>
 
@@ -61,14 +75,18 @@ export function Sidebar({ structure }: SidebarProps) {
             <button
               type="button"
               onClick={() => toggleSection(section.title)}
-              className="flex items-center w-full text-left text-sm font-medium text-foreground py-2 px-3 hover:underline transition-colors border-b border-muted"
+              className={`
+                text-foreground border-muted flex w-full items-center border-b
+                px-3 py-2 text-left text-sm font-medium transition-colors
+                hover:underline
+              `}
             >
               {expandedSections.has(section.title)
                 ? (
-                    <ChevronDown className="w-4 h-4 mr-2" />
+                    <ChevronDown className="mr-2 h-4 w-4" />
                   )
                 : (
-                    <ChevronRight className="w-4 h-4 mr-2" />
+                    <ChevronRight className="mr-2 h-4 w-4" />
                   )}
 
               {section.title}
@@ -80,11 +98,18 @@ export function Sidebar({ structure }: SidebarProps) {
                   <li key={item.slug}>
                     <Link
                       href={item.path}
-                      className={`pl-9 block text-sm py-2 px-3 transition-colors border-b border-muted ${
-                        pathname === item.path
-                          ? "bg-muted text-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.05]"
-                      }`}
+                      className={`
+                        border-muted block border-b px-3 py-2 pl-9 text-sm
+                        transition-colors
+                        ${
+                  pathname === item.path
+                    ? "bg-muted text-foreground"
+                    : `
+                      text-muted-foreground
+                      hover:text-foreground hover:bg-foreground/[0.05]
+                    `
+                  }
+                      `}
                     >
                       {item.title}
                     </Link>

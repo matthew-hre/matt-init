@@ -14,8 +14,8 @@ export default async function DocsLayout({
     <div className="min-h-screen">
       <div className="flex">
         <Sidebar structure={docsStructure} />
-        <main className="flex-1 ml-64">
-          <div className="max-w-4xl mx-auto px-8 py-12">{children}</div>
+        <main className="ml-64 flex-1">
+          <div className="mx-auto max-w-4xl px-8 py-12">{children}</div>
         </main>
       </div>
     </div>
