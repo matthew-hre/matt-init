@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { CodeBlock } from "~/components/code-block";
+import { ProjectStructure } from "~/components/project-structure";
+import { ProjectStructureWithDocs } from "~/components/project-structure-with-docs";
 
 export const components: MDXComponents = {
   h1: ({ children }: { children: ReactNode }) => (
@@ -64,14 +66,9 @@ export const components: MDXComponents = {
       {children}
     </code>
   ),
-  pre: ({ children, ...props }: { children: ReactNode } & React.HTMLAttributes<HTMLPreElement>) => {
+  pre: ({ children, ...props }: { children: any } & React.HTMLAttributes<HTMLPreElement>) => {
     if (
-      children
-      && typeof children === "object"
-      && "props" in children
-      && children.props
-      && typeof children.props === "object"
-      && "children" in children.props
+      children?.props?.children
     ) {
       const { className, children: codeChildren } = children.props as { className?: string; children: ReactNode };
       return (
@@ -122,4 +119,6 @@ export const components: MDXComponents = {
       <p className="text-muted-foreground mb-4">{description}</p>
     </Link>
   ),
+  ProjectStructure,
+  ProjectStructureWithDocs,
 };
