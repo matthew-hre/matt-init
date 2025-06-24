@@ -1,0 +1,464 @@
+---
+title: "Tailwind CSS"
+description: "Styling with Tailwind CSS v4 in your matt-init project"
+order: 6
+---
+
+# Tailwind CSS
+
+matt-init projects use Tailwind CSS v4, the latest version that introduces CSS-first configuration and improved performance. No separate config file needed!
+
+## What's Included
+
+### **Tailwind CSS v4**
+- **CSS-first configuration** - No `tailwind.config.js` file
+- **Improved performance** with native CSS features
+- **Dark mode support** built-in
+- **All utility classes** available out of the box
+
+### **Configuration Files**
+- **`src/app/globals.css`** - Contains Tailwind configuration and custom styles
+- **`postcss.config.mjs`** - PostCSS configuration for Tailwind processing
+
+### **Dark Mode Setup**
+Dark mode is pre-configured and ready to use with the `dark:` prefix.
+
+## Configuration
+
+### **Global Styles (globals.css)**
+```css
+/* src/app/globals.css */
+@import "tailwindcss";
+
+/* Custom CSS variables for theming */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  /* ... more CSS variables */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  /* ... dark mode variables */
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+}
+```
+
+### **No Config File Needed**
+Unlike previous versions, Tailwind v4 doesn't require a separate configuration file. Everything is handled through CSS:
+
+```css
+/* Configure Tailwind directly in CSS */
+@import "tailwindcss";
+
+/* Custom spacing scale */
+@theme {
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
+}
+```
+
+## Using Tailwind Classes
+
+### **Basic Styling**
+```typescript
+// Basic utility classes
+<div className="bg-white p-4 rounded-lg shadow-md">
+  <h1 className="text-2xl font-bold text-gray-900">
+    Hello World
+  </h1>
+  <p className="text-gray-600 mt-2">
+    This is styled with Tailwind CSS
+  </p>
+</div>
+```
+
+### **Responsive Design**
+```typescript
+// Mobile-first responsive design
+<div className="
+  w-full 
+  md:w-1/2 
+  lg:w-1/3 
+  xl:w-1/4
+  p-4 
+  sm:p-6 
+  lg:p-8
+">
+  <img 
+    className="w-full h-48 sm:h-64 lg:h-72 object-cover rounded-lg"
+    src="/image.jpg" 
+    alt="Responsive image"
+  />
+</div>
+```
+
+### **Dark Mode**
+```typescript
+// Dark mode utilities
+<div className="
+  bg-white dark:bg-gray-800 
+  text-gray-900 dark:text-white
+  border border-gray-200 dark:border-gray-700
+">
+  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+    Dark Mode Ready
+  </h2>
+</div>
+```
+
+## Dark Mode Implementation
+
+### **System Preference Detection**
+```typescript
+// components/theme-toggle.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+
+export function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check system preference
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setIsDark(mediaQuery.matches);
+
+    // Listen for changes
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    // Apply dark class to document
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+
+  return (
+    <button
+      onClick={() => setIsDark(!isDark)}
+      className="p-2 rounded-md bg-gray-200 dark:bg-gray-700"
+    >
+      {isDark ? "🌞" : "🌙"}
+    </button>
+  );
+}
+```
+
+### **Persistent Theme Storage**
+```typescript
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Theme = "light" | "dark" | "system";
+
+export function useTheme() {
+  const [theme, setTheme] = useState<Theme>("system");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme") as Theme;
+    if (stored) setTheme(stored);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const applyTheme = () => {
+        document.documentElement.classList.toggle("dark", mediaQuery.matches);
+      };
+      
+      applyTheme();
+      mediaQuery.addEventListener("change", applyTheme);
+      return () => mediaQuery.removeEventListener("change", applyTheme);
+    } else {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+  }, [theme]);
+
+  return { theme, setTheme };
+}
+```
+
+## Common Patterns
+
+### **Layout Components**
+```typescript
+// components/layout/container.tsx
+interface ContainerProps {
+  children: React.ReactNode;
+  size?: "sm" | "md" | "lg" | "xl";
+}
+
+export function Container({ children, size = "lg" }: ContainerProps) {
+  const sizeClasses = {
+    sm: "max-w-2xl",
+    md: "max-w-4xl", 
+    lg: "max-w-6xl",
+    xl: "max-w-7xl",
+  };
+
+  return (
+    <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${sizeClasses[size]}`}>
+      {children}
+    </div>
+  );
+}
+```
+
+### **Button Variants**
+```typescript
+// components/ui/button.tsx
+import { cva, type VariantProps } from "class-variance-authority";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {}
+
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+  return (
+    <button
+      className={buttonVariants({ variant, size, className })}
+      {...props}
+    />
+  );
+}
+```
+
+### **Form Styling**
+```typescript
+// components/ui/form.tsx
+export function FormField({ 
+  label, 
+  error, 
+  children 
+}: { 
+  label: string; 
+  error?: string; 
+  children: React.ReactNode; 
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        {label}
+      </label>
+      {children}
+      {error && (
+        <p className="text-sm text-destructive">{error}</p>
+      )}
+    </div>
+  );
+}
+
+export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      className={`
+        flex h-10 w-full rounded-md border border-input 
+        bg-background px-3 py-2 text-sm ring-offset-background 
+        file:border-0 file:bg-transparent file:text-sm file:font-medium 
+        placeholder:text-muted-foreground 
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 
+        disabled:cursor-not-allowed disabled:opacity-50
+        ${className}
+      `}
+      {...props}
+    />
+  );
+}
+```
+
+## Custom CSS Integration
+
+### **Adding Custom Styles**
+```css
+/* src/app/globals.css */
+
+/* Custom component styles */
+@layer components {
+  .card {
+    @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+  }
+  
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+  
+  .card-content {
+    @apply p-6 pt-0;
+  }
+  
+  .prose {
+    @apply max-w-none text-foreground;
+  }
+  
+  .prose h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  
+  .prose h2 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
+  }
+  
+  .border-gradient {
+    border: 1px solid transparent;
+    background: linear-gradient(theme(colors.background), theme(colors.background)) padding-box,
+                linear-gradient(45deg, theme(colors.primary), theme(colors.secondary)) border-box;
+  }
+}
+```
+
+### **Animation Classes**
+```css
+/* Custom animations */
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+## Performance Tips
+
+### **Purging Unused Styles**
+Tailwind v4 automatically purges unused styles in production. No configuration needed!
+
+### **Using CSS Variables**
+```css
+/* Leverage CSS variables for dynamic theming */
+:root {
+  --primary-hue: 240;
+  --primary-saturation: 5.9%;
+  --primary-lightness: 10%;
+}
+
+.theme-blue {
+  --primary-hue: 210;
+  --primary-saturation: 100%;
+  --primary-lightness: 50%;
+}
+
+/* Use in Tailwind classes */
+.bg-primary {
+  background-color: hsl(var(--primary-hue) var(--primary-saturation) var(--primary-lightness));
+}
+```
+
+### **Conditional Classes**
+```typescript
+// Use libraries like clsx for conditional classes
+import { clsx } from "clsx";
+
+function Button({ variant, size, disabled }: ButtonProps) {
+  return (
+    <button
+      className={clsx(
+        "px-4 py-2 rounded-md font-medium",
+        {
+          "bg-blue-500 text-white": variant === "primary",
+          "bg-gray-200 text-gray-800": variant === "secondary",
+          "opacity-50 cursor-not-allowed": disabled,
+        },
+        size === "lg" && "px-6 py-3 text-lg",
+        size === "sm" && "px-2 py-1 text-sm"
+      )}
+    />
+  );
+}
+```
+
+## Resources
+
+- **[Tailwind CSS v4 Docs](https://tailwindcss.com/)** - Official documentation
+- **[Tailwind UI](https://tailwindui.com/)** - Premium component library
+- **[Headless UI](https://headlessui.com/)** - Unstyled, accessible components
+- **[class-variance-authority](https://cva.style/)** - Component variant utilities
+- **[clsx](https://github.com/lukeed/clsx)** - Conditional class utility

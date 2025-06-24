@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 import Link from "next/link";
 
+import { CodeBlock } from "~/components/code-block";
+
 export const components: MDXComponents = {
   h1: ({ children }: { children: ReactNode }) => (
     <h1 className={`
@@ -62,15 +64,33 @@ export const components: MDXComponents = {
       {children}
     </code>
   ),
-  pre: ({ children }: { children: ReactNode }) => (
-    <pre className={`
-      bg-foreground/[0.05] mb-4 w-max overflow-x-auto rounded-lg border px-6
-      py-4
-    `}
-    >
-      {children}
-    </pre>
-  ),
+  pre: ({ children, ...props }: { children: ReactNode } & React.HTMLAttributes<HTMLPreElement>) => {
+    if (
+      children
+      && typeof children === "object"
+      && "props" in children
+      && children.props
+      && typeof children.props === "object"
+      && "children" in children.props
+    ) {
+      const { className, children: codeChildren } = children.props as { className?: string; children: ReactNode };
+      return (
+        <CodeBlock className={className} language={className?.replace("language-", "")}>
+          {String(codeChildren)}
+        </CodeBlock>
+      );
+    }
+    return (
+      <pre
+        className={`
+          bg-foreground/[0.05] mb-4 w-max overflow-x-auto rounded-lg px-6 py-4
+        `}
+        {...props}
+      >
+        {children}
+      </pre>
+    );
+  },
   blockquote: ({ children }: { children: ReactNode }) => (
     <blockquote className={`
       border-foreground text-muted-foreground mb-4 border-l-4 pl-4 italic

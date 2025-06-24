@@ -1,0 +1,110 @@
+---
+title: "Included Tools"
+description: "Overview of the tools and technologies included in every matt-init project"
+order: 5
+---
+
+# Included Tools
+
+Every matt-init project comes pre-configured with a carefully selected set of tools and technologies. Here's what's included and why:
+
+## Core Stack (Every Project)
+
+### **Next.js 15**
+- **What it is:** React framework with App Router, Server Components, and modern features
+- **Why I chose it:** Production-ready, excellent DX, strong ecosystem
+- **Version:** 15.3.2 with Turbopack for fast development
+
+### **TypeScript**
+- **What it is:** Typed superset of JavaScript
+- **Why I chose it:** Catches errors early, improves code quality, excellent IDE support
+- **Configuration:** Strict mode enabled with path aliases (`~/` instead of `../../../`)
+
+### **Tailwind CSS v4**
+- **What it is:** Utility-first CSS framework
+- **Why I chose it:** Rapid styling, consistent design, excellent developer experience
+- **Configuration:** CSS-based configuration (no separate config file needed)
+
+### **ESLint + @antfu/eslint-config**
+- **What it is:** Comprehensive linting setup with opinionated rules
+- **Why I chose it:** Enforces code quality, catches common mistakes, formats code consistently
+- **Includes:** React rules, TypeScript rules, import sorting, filename conventions
+
+## Environment & Validation
+
+### **Zod**
+- **What it is:** TypeScript-first schema declaration and validation library
+- **Why I chose it:** Type-safe environment variables, runtime validation, great DX
+- **Usage:** Environment variable validation in `src/lib/env.ts`
+
+### **Environment Management**
+- **What it is:** Type-safe environment variable handling
+- **Why I chose it:** Fail-fast on missing config, prevents runtime errors
+- **Files:** `.env`, `.env.example`, `src/lib/env.ts`
+
+## Development Tools
+
+### **VS Code Integration** (Optional)
+- **What it is:** Workspace settings and recommended extensions
+- **Why I chose it:** Consistent team experience, auto-formatting, helpful extensions
+- **Includes:** ESLint, Tailwind IntelliSense, TypeScript optimizations
+
+### **Nix Development Environment** (Optional)
+- **What it is:** Reproducible development shell with all dependencies
+- **Why I chose it:** Consistent environment across machines, version pinning
+- **Includes:** Node.js, pnpm, database tools (when backend enabled)
+
+## Backend Stack (Optional)
+
+### **Drizzle ORM**
+- **What it is:** TypeScript ORM with excellent developer experience
+- **Why I chose it:** Type-safe database queries, excellent migrations, lightweight
+- **Learn more:** [Drizzle documentation](/docs/usage/drizzle)
+
+### **Turso Database**
+- **What it is:** Edge-compatible SQLite database
+- **Why I chose it:** Fast, scalable, works everywhere, great for development
+- **Learn more:** [Database documentation](/docs/usage/databases)
+
+### **Better Auth**
+- **What it is:** Modern authentication library for TypeScript
+- **Why I chose it:** Type-safe, framework agnostic, extensive provider support
+- **Learn more:** [Better Auth documentation](/docs/usage/better-auth)
+
+## Why These Tools?
+
+### **Opinionated by Design**
+matt-init deliberately limits choices to avoid decision fatigue. These tools work well together and provide a solid foundation for most projects.
+
+### **Battle-Tested**
+All tools are proven in production environments and have active communities and maintenance.
+
+### **Type Safety First**
+Every tool in the stack prioritizes TypeScript integration and type safety, reducing runtime errors.
+
+### **Developer Experience**
+Tools are chosen for their excellent documentation, helpful error messages, and overall developer experience.
+
+## What's NOT Included
+
+### **UI Component Libraries**
+- No shadcn/ui, Chakra UI, or other component libraries by default
+- You can add these later based on your needs
+
+### **State Management**
+- No Redux, Zustand, or other global state libraries
+- Start with React's built-in state, add complexity only when needed
+
+### **Testing Frameworks**
+- No Jest, Vitest, or testing libraries by default
+- Add testing setup based on your project requirements
+
+### **Additional Databases**
+- Only Turso (SQLite) is currently implemented
+- Neon (Postgres) and Docker Postgres are planned for future releases
+
+## Next Steps
+
+- **[Quick Start](/docs/usage/quick-start)** - Get your first project running
+- **[Configuration](/docs/about/configuration)** - Customize your setup
+- **[Tooling Guides](/docs/usage/)** - Learn more about specific tools

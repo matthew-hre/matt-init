@@ -1,0 +1,390 @@
+---
+title: "Better Auth"
+description: "Authentication with Better Auth in your matt-init project"
+order: 4
+---
+
+# Better Auth
+
+Better Auth is a modern authentication library that provides type-safe authentication for TypeScript applications. When you choose the backend option, matt-init sets up Better Auth with email/password authentication and session management.
+
+## What's Included
+
+### **Pre-configured Authentication**
+- **Email/Password authentication** with built-in validation
+- **Session management** with secure cookies
+- **Database integration** with Drizzle ORM
+- **Type-safe API** throughout your application
+
+### **Authentication Pages**
+- **`/signin`** - Login form with email/password
+- **`/signup`** - Registration form with validation
+- **`/dashboard`** - Protected route example
+
+### **API Routes**
+- **`/api/auth/[...all]`** - Handles all authentication endpoints
+- **Session management** built into the API layer
+
+## Authentication Flow
+
+### **1. User Registration**
+```typescript
+// /signup page functionality
+const { data, error } = await authClient.signUp.email({
+  email: "user@example.com",
+  password: "securePassword123",
+  name: "John Doe",
+});
+```
+
+### **2. User Login**
+```typescript
+// /signin page functionality
+const { data, error } = await authClient.signIn.email({
+  email: "user@example.com",
+  password: "securePassword123",
+});
+```
+
+### **3. Session Check**
+```typescript
+// In Server Components or API routes
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
+
+const headersList = await headers();
+const session = await auth.api.getSession({
+  headers: headersList,
+});
+
+if (session) {
+  // User is authenticated
+  console.log("User:", session.user);
+} else {
+  // User is not authenticated
+  redirect("/signin");
+}
+```
+
+## Working with Sessions
+
+### **Server Components**
+```typescript
+// app/dashboard/page.tsx
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+export default async function Dashboard() {
+  const headersList = await headers();
+  const session = await auth.api.getSession({
+    headers: headersList,
+  });
+
+  if (!session) {
+    redirect("/signin");
+  }
+
+  return (
+    <div>
+      <h1>Welcome, {session.user.name}!</h1>
+      <p>Email: {session.user.email}</p>
+    </div>
+  );
+}
+```
+
+### **Client Components**
+```typescript
+// Client-side session handling
+"use client";
+
+import { useSession } from "better-auth/react";
+
+export function UserProfile() {
+  const { data: session, isPending } = useSession();
+
+  if (isPending) return <div>Loading...</div>;
+  
+  if (!session) return <div>Please sign in</div>;
+
+  return (
+    <div>
+      <h2>{session.user.name}</h2>
+      <p>{session.user.email}</p>
+    </div>
+  );
+}
+```
+
+### **API Routes**
+```typescript
+// app/api/protected/route.ts
+import { auth } from "~/lib/auth";
+import { NextRequest } from "next/server";
+
+export async function GET(request: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Handle authenticated request
+  return Response.json({ 
+    message: "Hello " + session.user.name 
+  });
+}
+```
+
+## Middleware Protection
+
+The included middleware protects routes automatically:
+
+```typescript
+// middleware.ts
+import { auth } from "~/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function middleware(request: NextRequest) {
+  // Protect /dashboard routes
+  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/dashboard/:path*"],
+};
+```
+
+## User Management
+
+### **Getting User Data**
+```typescript
+// Get current user in any server context
+const session = await auth.api.getSession({ headers });
+const user = session?.user;
+
+// User object includes:
+// - id: string
+// - email: string
+// - name: string
+// - emailVerified: boolean
+// - image: string | null
+// - createdAt: Date
+// - updatedAt: Date
+```
+
+### **Updating User Profile**
+```typescript
+// Update user information
+await authClient.updateUser({
+  name: "New Name",
+  image: "https://example.com/avatar.jpg",
+});
+```
+
+### **Password Management**
+```typescript
+// Change password (requires current password)
+await authClient.changePassword({
+  currentPassword: "oldPassword",
+  newPassword: "newSecurePassword",
+});
+```
+
+## Logout Functionality
+
+### **Client-side Logout**
+```typescript
+"use client";
+
+import { authClient } from "~/lib/auth-client";
+
+export function LogoutButton() {
+  const handleLogout = async () => {
+    await authClient.signOut();
+    window.location.href = "/";
+  };
+
+  return (
+    <button onClick={handleLogout}>
+      Sign Out
+    </button>
+  );
+}
+```
+
+### **Server-side Logout**
+```typescript
+// In a Server Action
+import { auth } from "~/lib/auth";
+import { redirect } from "next/navigation";
+
+export async function logoutAction() {
+  await auth.api.signOut();
+  redirect("/");
+}
+```
+
+## Customization
+
+### **Adding Custom Fields**
+Extend the user schema in `src/lib/db/schema/auth.ts`:
+
+```typescript
+export const users = sqliteTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  // Add custom fields
+  avatar: text("avatar"),
+  role: text("role").default("user"),
+  preferences: text("preferences"), // JSON string
+  // ... existing fields
+});
+```
+
+### **Custom Authentication Providers**
+Better Auth supports many providers. Add them in `src/lib/auth.ts`:
+
+```typescript
+import { betterAuth } from "better-auth";
+import { github, google } from "better-auth/providers";
+
+export const auth = betterAuth({
+  // ... existing config
+  providers: [
+    github({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
+    google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+});
+```
+
+### **Email Verification**
+Enable email verification:
+
+```typescript
+export const auth = betterAuth({
+  // ... existing config
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+  },
+});
+```
+
+## Security Best Practices
+
+### **Environment Variables**
+```env
+# Required for Better Auth
+BETTER_AUTH_SECRET=your-32-character-secret-key
+BETTER_AUTH_URL=https://yourdomain.com
+
+# Generate secret with:
+# openssl rand -hex 32
+```
+
+### **Session Security**
+- Sessions are stored in HTTP-only cookies
+- CSRF protection is enabled by default
+- Session tokens are regularly rotated
+
+### **Password Requirements**
+The default setup includes basic password validation. Enhance it:
+
+```typescript
+// Custom password validation
+const passwordSchema = z.string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Password must contain uppercase letter")
+  .regex(/[a-z]/, "Password must contain lowercase letter")
+  .regex(/\d/, "Password must contain a number");
+```
+
+## Testing Authentication
+
+### **Testing Authenticated Routes**
+```typescript
+// In your tests
+const mockSession = {
+  user: {
+    id: "test-user-id",
+    email: "test@example.com",
+    name: "Test User",
+  },
+};
+
+// Mock the auth check
+jest.mock("~/lib/auth", () => ({
+  auth: {
+    api: {
+      getSession: jest.fn(() => Promise.resolve(mockSession)),
+    },
+  },
+}));
+```
+
+## Common Patterns
+
+### **Role-based Access**
+```typescript
+// Check user role
+function requireRole(session: Session, role: string) {
+  if (!session?.user?.role?.includes(role)) {
+    throw new Error("Insufficient permissions");
+  }
+}
+
+// In your API route
+const session = await auth.api.getSession({ headers });
+requireRole(session, "admin");
+```
+
+### **Protected API Wrapper**
+```typescript
+// utils/auth-wrapper.ts
+export function withAuth(handler: Function) {
+  return async (request: NextRequest) => {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    return handler(request, session);
+  };
+}
+
+// Usage in API routes
+export const GET = withAuth(async (request, session) => {
+  // Your protected logic here
+});
+```
+
+## Resources
+
+- **[Better Auth Documentation](https://www.better-auth.com/)** - Official docs
+- **[Better Auth GitHub](https://github.com/better-auth/better-auth)** - Source code and examples
+- **[Database Guide](/docs/usage/databases)** - Database integration
+- **[Drizzle Guide](/docs/usage/drizzle)** - ORM integration

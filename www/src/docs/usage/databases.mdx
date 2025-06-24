@@ -1,0 +1,234 @@
+---
+title: "Databases"
+description: "Working with databases in your matt-init project"
+order: 3
+---
+
+# Databases
+
+matt-init currently supports Turso as the database provider when you choose the backend option. Turso provides an edge-compatible SQLite database that's perfect for modern applications.
+
+## Turso (SQLite)
+
+### **What is Turso?**
+Turso is a distributed SQLite platform that brings SQLite to the edge. It's compatible with standard SQLite but adds features like replication, backups, and global distribution.
+
+### **Why SQLite/Turso?**
+- **Fast:** SQLite is incredibly fast for most use cases
+- **Simple:** No complex setup or configuration
+- **Portable:** Database is just a file, easy to backup and move
+- **Edge-compatible:** Works in serverless environments
+- **Cost-effective:** Generous free tier, pay-as-you-go pricing
+
+## Local Development
+
+### **Starting the Database**
+When you run `pnpm dev` with backend enabled, two things happen:
+
+```bash
+pnpm dev
+# [0] sqld listening on port 8080
+# [1] ▲ Next.js ready at http://localhost:3000
+```
+
+- **[0]** - Turso local server (`sqld`) on port 8080
+- **[1]** - Next.js development server on port 3000
+
+### **Database File**
+Your local database is stored as `local.db` in your project root. This file contains all your data and can be:
+- Backed up by copying the file
+- Reset by deleting the file (will be recreated on next `pnpm dev`)
+- Shared with teammates (though not recommended for sensitive data)
+
+### **Environment Variables**
+```env
+# Local development
+TURSO_DATABASE_URL=http://127.0.0.1:8080
+TURSO_AUTH_TOKEN=  # Empty for local development
+```
+
+## Production Setup
+
+### **1. Create a Turso Account**
+Visit [turso.tech](https://turso.tech) and create an account.
+
+### **2. Install Turso CLI**
+```bash
+# Using curl
+curl -sSfL https://get.tur.so/install.sh | bash
+
+# Using brew (macOS)
+brew install tursodatabase/tap/turso
+
+# Using nix (if you have Nix)
+nix profile install nixpkgs#turso-cli
+```
+
+### **3. Login and Create Database**
+```bash
+# Login to Turso
+turso auth login
+
+# Create your production database
+turso db create my-app-prod
+
+# Get the database URL
+turso db show my-app-prod --url
+
+# Create an auth token
+turso db tokens create my-app-prod
+```
+
+### **4. Update Environment Variables**
+```env
+# Production
+TURSO_DATABASE_URL=libsql://your-database-url.turso.io
+TURSO_AUTH_TOKEN=your-auth-token-here
+```
+
+### **5. Run Migrations**
+```bash
+# Generate migrations if you haven't already
+pnpm db:generate
+
+# Apply migrations to production
+pnpm db:migrate
+```
+
+## Database Operations
+
+### **Schema Changes**
+```bash
+# 1. Modify your schema files in src/lib/db/schema/
+# 2. Generate migration
+pnpm db:generate
+
+# 3. Review the generated migration in drizzle/ folder
+# 4. Apply migration
+pnpm db:migrate
+```
+
+### **Data Management**
+```bash
+# Push schema changes directly (development only)
+pnpm db:push
+
+# Open database studio
+pnpm db:studio
+
+# Generate TypeScript types from schema
+pnpm db:generate
+```
+
+### **Backup and Restore**
+```bash
+# Backup local database
+cp local.db backup-$(date +%Y%m%d).db
+
+# Dump database to SQL
+turso db shell my-app-prod ".dump" > backup.sql
+
+# Restore from SQL (create new database first)
+turso db shell my-app-restored < backup.sql
+```
+
+## Common Patterns
+
+### **Connection Management**
+The database client is already set up in `src/lib/db/index.ts`:
+
+```typescript
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
+import { env } from "~/lib/env";
+
+const client = createClient({
+  url: env.TURSO_DATABASE_URL,
+  authToken: env.TURSO_AUTH_TOKEN,
+});
+
+export const db = drizzle(client);
+```
+
+### **Environment-Specific Logic**
+```typescript
+// Different behavior for local vs production
+if (env.NODE_ENV === "development") {
+  // Local development logic
+  console.log("Using local database");
+} else {
+  // Production logic
+  console.log("Using Turso production database");
+}
+```
+
+### **Database Seeding**
+Create a seed script for initial data:
+
+```typescript
+// scripts/seed.ts
+import { db } from "../src/lib/db";
+import { users } from "../src/lib/db/schema";
+
+async function seed() {
+  await db.insert(users).values({
+    id: crypto.randomUUID(),
+    name: "Admin User",
+    email: "admin@example.com",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+}
+
+seed().catch(console.error);
+```
+
+## Troubleshooting
+
+### **Port 8080 Already in Use**
+If you have something else running on port 8080:
+
+1. **Change the port in package.json:**
+```json
+{
+  "scripts": {
+    "dev:db": "turso dev --db-file local.db --port 8081"
+  }
+}
+```
+
+2. **Update your .env file:**
+```env
+TURSO_DATABASE_URL=http://127.0.0.1:8081
+```
+
+### **Database Connection Errors**
+- Ensure `pnpm dev:db` is running before starting your app
+- Check that `TURSO_DATABASE_URL` matches your local server
+- For production, verify your auth token is valid
+
+### **Migration Issues**
+```bash
+# Reset local database (development only)
+rm local.db
+pnpm db:push
+
+# Check migration status
+pnpm db:migrate --dry-run
+```
+
+## Future Database Options
+
+### **Coming Soon**
+- **Neon (Postgres)** - Serverless Postgres with modern features
+- **Docker Postgres** - Local Postgres development with Docker
+
+### **Why Not Available Yet?**
+matt-init focuses on shipping working solutions. Turso + SQLite provides an excellent foundation that works for most applications. Additional database options will be added based on user feedback and demand.
+
+## Resources
+
+- **[Turso Documentation](https://docs.turso.tech/)** - Official Turso docs
+- **[SQLite Documentation](https://www.sqlite.org/docs.html)** - SQLite reference
+- **[Drizzle Guide](/docs/usage/drizzle)** - Working with Drizzle ORM
+- **[libSQL](https://github.com/libsql/libsql)** - Enhanced SQLite (what Turso uses)

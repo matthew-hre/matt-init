@@ -1,0 +1,733 @@
+---
+title: "Common Patterns"
+description: "Best practices and common patterns for matt-init projects"
+order: 2
+---
+
+# Common Patterns
+
+This guide covers common patterns, conventions, and best practices for building applications with matt-init. These patterns help maintain code quality and consistency as your project grows.
+
+## Project Structure Patterns
+
+### **Feature-based Organization**
+As your app grows, organize by features rather than file types:
+
+```txt
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── signin/
+│   │   └── signup/
+│   ├── dashboard/
+│   └── profile/
+├── features/
+│   ├── auth/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── types/
+│   │   └── utils/
+│   ├── posts/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── api/
+│   └── users/
+├── shared/
+│   ├── components/
+│   ├── hooks/
+│   ├── utils/
+│   └── types/
+└── lib/
+    ├── auth.ts
+    ├── db/
+    └── env.ts
+```
+
+### **API Route Organization**
+```txt
+app/api/
+├── auth/
+│   └── [...all]/
+├── users/
+│   ├── route.ts          # GET /api/users, POST /api/users
+│   └── [id]/
+│       ├── route.ts      # GET /api/users/[id], PUT /api/users/[id]
+│       └── posts/
+│           └── route.ts  # GET /api/users/[id]/posts
+├── posts/
+│   ├── route.ts
+│   └── [id]/
+└── webhooks/
+    ├── stripe/
+    └── clerk/
+```
+
+## Database Patterns
+
+### **Schema Organization**
+```typescript
+// src/lib/db/schema/index.ts
+export * from './auth';
+export * from './posts';
+export * from './comments';
+export * from './subscriptions';
+
+// Define relations in separate files
+export * from './relations';
+```
+
+### **Repository Pattern**
+```typescript
+// src/lib/repositories/posts.ts
+import { db } from '~/lib/db';
+import { posts, users } from '~/lib/db/schema';
+import { eq, desc, and } from 'drizzle-orm';
+
+export class PostRepository {
+  static async findById(id: string) {
+    const result = await db.select()
+      .from(posts)
+      .where(eq(posts.id, id))
+      .leftJoin(users, eq(posts.authorId, users.id))
+      .limit(1);
+    
+    return result[0] || null;
+  }
+
+  static async findByAuthor(authorId: string, limit = 10) {
+    return db.select()
+      .from(posts)
+      .where(eq(posts.authorId, authorId))
+      .orderBy(desc(posts.createdAt))
+      .limit(limit);
+  }
+
+  static async create(data: {
+    title: string;
+    content: string;
+    authorId: string;
+  }) {
+    const [post] = await db.insert(posts).values({
+      id: crypto.randomUUID(),
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    
+    return post;
+  }
+
+  static async update(id: string, data: Partial<{
+    title: string;
+    content: string;
+  }>) {
+    const [post] = await db.update(posts)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(posts.id, id))
+      .returning();
+    
+    return post;
+  }
+
+  static async delete(id: string) {
+    await db.delete(posts).where(eq(posts.id, id));
+  }
+}
+```
+
+### **Database Utilities**
+```typescript
+// src/lib/db/utils.ts
+import { sql } from 'drizzle-orm';
+
+export function withPagination<T>(
+  query: T,
+  page: number,
+  limit: number
+) {
+  const offset = (page - 1) * limit;
+  return (query as any).limit(limit).offset(offset);
+}
+
+export function withSearch<T>(
+  query: T,
+  searchTerm: string,
+  columns: any[]
+) {
+  if (!searchTerm) return query;
+  
+  const searchConditions = columns.map(col => 
+    sql`${col} LIKE ${`%${searchTerm}%`}`
+  );
+  
+  return (query as any).where(sql`${sql.join(searchConditions, sql` OR `)}`);
+}
+
+// Usage
+const posts = await withPagination(
+  withSearch(
+    db.select().from(posts),
+    searchTerm,
+    [posts.title, posts.content]
+  ),
+  page,
+  limit
+);
+```
+
+## Authentication Patterns
+
+### **Protected Route Wrapper**
+```typescript
+// src/lib/auth/protect.ts
+import { auth } from '~/lib/auth';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+export async function requireAuth() {
+  const headersList = await headers();
+  const session = await auth.api.getSession({
+    headers: headersList,
+  });
+
+  if (!session) {
+    redirect('/signin');
+  }
+
+  return session;
+}
+
+export async function requireRole(role: string) {
+  const session = await requireAuth();
+  
+  if (!session.user.role?.includes(role)) {
+    throw new Error('Insufficient permissions');
+  }
+
+  return session;
+}
+```
+
+### **API Route Protection**
+```typescript
+// src/lib/api/with-auth.ts
+import { auth } from '~/lib/auth';
+import { NextRequest } from 'next/server';
+
+export function withAuth<T extends any[]>(
+  handler: (request: NextRequest, session: Session, ...args: T) => Promise<Response>
+) {
+  return async (request: NextRequest, ...args: T) => {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return Response.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    return handler(request, session, ...args);
+  };
+}
+
+// Usage
+export const GET = withAuth(async (request, session) => {
+  // session is guaranteed to exist
+  return Response.json({ user: session.user });
+});
+```
+
+### **Role-based Access Control**
+```typescript
+// src/lib/auth/rbac.ts
+type Permission = 'posts:read' | 'posts:write' | 'users:admin';
+
+type Role = {
+  name: string;
+  permissions: Permission[];
+};
+
+const roles: Record<string, Role> = {
+  user: {
+    name: 'User',
+    permissions: ['posts:read'],
+  },
+  author: {
+    name: 'Author',
+    permissions: ['posts:read', 'posts:write'],
+  },
+  admin: {
+    name: 'Admin',
+    permissions: ['posts:read', 'posts:write', 'users:admin'],
+  },
+};
+
+export function hasPermission(
+  userRole: string,
+  permission: Permission
+): boolean {
+  const role = roles[userRole];
+  return role?.permissions.includes(permission) ?? false;
+}
+
+export function requirePermission(permission: Permission) {
+  return async (request: NextRequest) => {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session || !hasPermission(session.user.role, permission)) {
+      return Response.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    return null; // Continue with the request
+  };
+}
+```
+
+## Form Handling Patterns
+
+### **Server Actions**
+```typescript
+// src/lib/actions/posts.ts
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
+import { PostRepository } from '~/lib/repositories/posts';
+import { requireAuth } from '~/lib/auth/protect';
+
+const createPostSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(1).max(5000),
+});
+
+export async function createPost(formData: FormData) {
+  const session = await requireAuth();
+  
+  const result = createPostSchema.safeParse({
+    title: formData.get('title'),
+    content: formData.get('content'),
+  });
+
+  if (!result.success) {
+    return {
+      error: 'Invalid form data',
+      issues: result.error.issues,
+    };
+  }
+
+  try {
+    const post = await PostRepository.create({
+      ...result.data,
+      authorId: session.user.id,
+    });
+
+    revalidatePath('/dashboard');
+    redirect(`/posts/${post.id}`);
+  } catch (error) {
+    return {
+      error: 'Failed to create post',
+    };
+  }
+}
+```
+
+### **Client-side Form Handling**
+```typescript
+// components/forms/post-form.tsx
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const postSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
+  content: z.string().min(1, 'Content is required').max(5000, 'Content too long'),
+});
+
+type PostForm = z.infer<typeof postSchema>;
+
+export function PostForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<PostForm>({
+    resolver: zodResolver(postSchema),
+  });
+
+  const onSubmit = async (data: PostForm) => {
+    const response = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Failed to create post:', error);
+      return;
+    }
+
+    const post = await response.json();
+    window.location.href = `/posts/${post.id}`;
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <label htmlFor="title">Title</label>
+        <input
+          {...register('title')}
+          type="text"
+          id="title"
+          className="w-full p-2 border rounded"
+        />
+        {errors.title && (
+          <p className="text-red-500 text-sm">{errors.title.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="content">Content</label>
+        <textarea
+          {...register('content')}
+          id="content"
+          rows={10}
+          className="w-full p-2 border rounded"
+        />
+        {errors.content && (
+          <p className="text-red-500 text-sm">{errors.content.message}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+      >
+        {isSubmitting ? 'Creating...' : 'Create Post'}
+      </button>
+    </form>
+  );
+}
+```
+
+## Error Handling Patterns
+
+### **Global Error Boundary**
+```typescript
+// app/global-error.tsx
+'use client';
+
+import { useEffect } from 'react';
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log error to monitoring service
+    console.error('Global error:', error);
+  }, [error]);
+
+  return (
+    <html>
+      <body>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Something went wrong!</h1>
+            <p className="text-gray-600 mb-4">
+              {error.message || 'An unexpected error occurred'}
+            </p>
+            <button
+              onClick={reset}
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      </body>
+    </html>
+  );
+}
+```
+
+### **API Error Handling**
+```typescript
+// src/lib/api/errors.ts
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+export function handleApiError(error: unknown): Response {
+  if (error instanceof ApiError) {
+    return Response.json(
+      { error: error.message, code: error.code },
+      { status: error.status }
+    );
+  }
+
+  if (error instanceof z.ZodError) {
+    return Response.json(
+      { error: 'Validation failed', issues: error.issues },
+      { status: 400 }
+    );
+  }
+
+  // Log unexpected errors
+  console.error('Unexpected API error:', error);
+
+  return Response.json(
+    { error: 'Internal server error' },
+    { status: 500 }
+  );
+}
+
+// Usage in API routes
+export async function POST(request: NextRequest) {
+  try {
+    // Your API logic here
+    return Response.json({ success: true });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+```
+
+## Component Patterns
+
+### **Compound Components**
+```typescript
+// components/ui/card.tsx
+interface CardContextType {
+  variant?: 'default' | 'outlined';
+}
+
+const CardContext = createContext<CardContextType>({});
+
+export function Card({ 
+  children, 
+  variant = 'default',
+  className,
+  ...props 
+}: {
+  children: React.ReactNode;
+  variant?: 'default' | 'outlined';
+  className?: string;
+}) {
+  return (
+    <CardContext.Provider value={{ variant }}>
+      <div
+        className={`rounded-lg ${
+          variant === 'outlined' ? 'border' : 'shadow-md'
+        } ${className}`}
+        {...props}
+      >
+        {children}
+      </div>
+    </CardContext.Provider>
+  );
+}
+
+Card.Header = function CardHeader({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`p-6 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+Card.Content = function CardContent({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`p-6 pt-0 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+// Usage
+<Card variant="outlined">
+  <Card.Header>
+    <h2>Title</h2>
+  </Card.Header>
+  <Card.Content>
+    <p>Content goes here</p>
+  </Card.Content>
+</Card>
+```
+
+### **Render Props Pattern**
+```typescript
+// components/data-fetcher.tsx
+interface DataFetcherProps<T> {
+  url: string;
+  children: (data: {
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+    refetch: () => void;
+  }) => React.ReactNode;
+}
+
+export function DataFetcher<T>({ url, children }: DataFetcherProps<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return children({ data, loading, error, refetch: fetchData });
+}
+
+// Usage
+<DataFetcher<User[]> url="/api/users">
+  {({ data, loading, error, refetch }) => (
+    <div>
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error}</div>}
+      {data && (
+        <ul>
+          {data.map(user => (
+            <li key={user.id}>{user.name}</li>
+          ))}
+        </ul>
+      )}
+      <button onClick={refetch}>Refresh</button>
+    </div>
+  )}
+</DataFetcher>
+```
+
+## Performance Patterns
+
+### **Optimistic Updates**
+```typescript
+// hooks/use-optimistic-mutation.ts
+import { useState, useTransition } from 'react';
+
+export function useOptimisticMutation<T, U>(
+  mutationFn: (data: U) => Promise<T>,
+  onSuccess?: (result: T) => void,
+  onError?: (error: Error) => void
+) {
+  const [isPending, startTransition] = useTransition();
+  const [optimisticData, setOptimisticData] = useState<T | null>(null);
+
+  const mutate = async (data: U, optimisticResult?: T) => {
+    if (optimisticResult) {
+      setOptimisticData(optimisticResult);
+    }
+
+    startTransition(async () => {
+      try {
+        const result = await mutationFn(data);
+        setOptimisticData(null);
+        onSuccess?.(result);
+      } catch (error) {
+        setOptimisticData(null);
+        onError?.(error as Error);
+      }
+    });
+  };
+
+  return { mutate, isPending, optimisticData };
+}
+```
+
+### **Infinite Scrolling**
+```typescript
+// hooks/use-infinite-scroll.ts
+import { useState, useEffect, useCallback } from 'react';
+
+interface UseInfiniteScrollOptions<T> {
+  fetchData: (page: number) => Promise<{ data: T[]; hasMore: boolean }>;
+  initialPage?: number;
+}
+
+export function useInfiniteScroll<T>({
+  fetchData,
+  initialPage = 1,
+}: UseInfiniteScrollOptions<T>) {
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(initialPage);
+
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    try {
+      const result = await fetchData(page);
+      setData(prev => [...prev, ...result.data]);
+      setHasMore(result.hasMore);
+      setPage(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to load more data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchData, page, loading, hasMore]);
+
+  useEffect(() => {
+    loadMore();
+  }, []); // Only run on mount
+
+  return { data, loading, hasMore, loadMore };
+}
+```
+
+## Resources
+
+- **[React Patterns](https://reactpatterns.com/)** - Common React patterns
+- **[Next.js Patterns](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** - Official Next.js patterns
+- **[Drizzle Best Practices](https://orm.drizzle.team/docs/goodies)** - Database patterns
+- **[TypeScript Patterns](https://www.typescriptlang.org/docs/handbook/advanced-types.html)** - Advanced TypeScript patterns

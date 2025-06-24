@@ -1,0 +1,395 @@
+---
+title: "Zod"
+description: "Type-safe validation with Zod in your matt-init project"
+order: 5
+---
+
+# Zod
+
+Zod is a TypeScript-first schema validation library that ensures type safety at runtime. Every matt-init project uses Zod for environment variable validation and provides a foundation for form validation and API input validation.
+
+## What's Included
+
+### **Environment Variable Validation**
+- **`src/lib/env.ts`** - Type-safe environment variable schema
+- **Runtime validation** that fails fast on missing or invalid config
+- **TypeScript types** automatically inferred from schema
+
+### **Helper Utilities**
+- **`src/lib/try-parse-env.ts`** - Environment parsing utilities
+- **Error handling** for missing environment variables
+
+## Environment Variable Validation
+
+### **How It Works**
+Every matt-init project validates environment variables at startup:
+
+```typescript
+// src/lib/env.ts
+import { z } from "zod";
+
+const EnvSchema = z.object({
+  NODE_ENV: z.string().default("development"),
+  // Backend-specific variables (if enabled)
+  TURSO_DATABASE_URL: z.string(),
+  TURSO_AUTH_TOKEN: z.string().optional(),
+  BETTER_AUTH_SECRET: z.string(),
+  BETTER_AUTH_URL: z.string().url(),
+});
+
+export const env = EnvSchema.parse(process.env);
+```
+
+### **Type Safety**
+The `env` object is fully typed:
+
+```typescript
+import { env } from "~/lib/env";
+
+// TypeScript knows these are strings
+env.NODE_ENV;           // string
+env.TURSO_DATABASE_URL; // string
+env.BETTER_AUTH_URL;    // string (validated as URL)
+
+// This would cause a TypeScript error
+env.NONEXISTENT_VAR; // ❌ Property doesn't exist
+```
+
+### **Adding New Environment Variables**
+1. **Add to schema:**
+```typescript
+const EnvSchema = z.object({
+  // ... existing variables
+  MY_API_KEY: z.string(),
+  MY_API_URL: z.string().url(),
+  FEATURE_FLAG: z.string().default("false"),
+});
+```
+
+2. **Add to .env.example:**
+```env
+MY_API_KEY=your-api-key-here
+MY_API_URL=https://api.example.com
+FEATURE_FLAG=false
+```
+
+3. **Use in your app:**
+```typescript
+import { env } from "~/lib/env";
+
+const apiKey = env.MY_API_KEY; // Fully typed and validated
+```
+
+## Form Validation
+
+### **Basic Form Schema**
+```typescript
+// lib/validations/auth.ts
+import { z } from "zod";
+
+export const signUpSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/[a-z]/, "Password must contain a lowercase letter")
+    .regex(/\d/, "Password must contain a number"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+export type SignUpInput = z.infer<typeof signUpSchema>;
+```
+
+### **Using with React Hook Form**
+```typescript
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpSchema, type SignUpInput } from "~/lib/validations/auth";
+
+export function SignUpForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+  });
+
+  const onSubmit = (data: SignUpInput) => {
+    // data is fully typed and validated
+    console.log(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input
+        {...register("name")}
+        placeholder="Full Name"
+      />
+      {errors.name && <span>{errors.name.message}</span>}
+
+      <input
+        {...register("email")}
+        type="email"
+        placeholder="Email"
+      />
+      {errors.email && <span>{errors.email.message}</span>}
+
+      {/* ... more fields */}
+      
+      <button type="submit">Sign Up</button>
+    </form>
+  );
+}
+```
+
+## API Validation
+
+### **Request Body Validation**
+```typescript
+// app/api/posts/route.ts
+import { z } from "zod";
+import { NextRequest } from "next/server";
+
+const createPostSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  content: z.string().min(1, "Content is required"),
+  tags: z.array(z.string()).optional().default([]),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validatedData = createPostSchema.parse(body);
+
+    // validatedData is fully typed and validated
+    const { title, content, tags } = validatedData;
+
+    // ... create post logic
+
+    return Response.json({ success: true });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return Response.json(
+        { error: "Validation failed", issues: error.issues },
+        { status: 400 }
+      );
+    }
+    
+    return Response.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### **Query Parameter Validation**
+```typescript
+// app/api/posts/route.ts
+const querySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  search: z.string().optional(),
+  tags: z.string().transform(str => str.split(',')).optional(),
+});
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  
+  try {
+    const query = querySchema.parse({
+      page: searchParams.get("page"),
+      limit: searchParams.get("limit"),
+      search: searchParams.get("search"),
+      tags: searchParams.get("tags"),
+    });
+
+    // query is fully typed: { page: number, limit: number, search?: string, tags?: string[] }
+    
+    // ... fetch posts logic
+  } catch (error) {
+    // Handle validation error
+  }
+}
+```
+
+## Advanced Patterns
+
+### **Conditional Validation**
+```typescript
+const userSchema = z.object({
+  type: z.enum(["admin", "user"]),
+  email: z.string().email(),
+  // Only admins need these fields
+  adminCode: z.string().optional(),
+  permissions: z.array(z.string()).optional(),
+}).refine((data) => {
+  if (data.type === "admin") {
+    return data.adminCode && data.permissions;
+  }
+  return true;
+}, {
+  message: "Admin users require adminCode and permissions",
+  path: ["adminCode"],
+});
+```
+
+### **Transform and Preprocess**
+```typescript
+const numberArraySchema = z.string()
+  .transform(str => str.split(','))
+  .pipe(z.array(z.coerce.number()));
+
+// "1,2,3,4" becomes [1, 2, 3, 4]
+const result = numberArraySchema.parse("1,2,3,4");
+```
+
+### **Discriminated Unions**
+```typescript
+const eventSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("user_signup"),
+    userId: z.string(),
+    email: z.string().email(),
+  }),
+  z.object({
+    type: z.literal("post_created"),
+    postId: z.string(),
+    authorId: z.string(),
+    title: z.string(),
+  }),
+]);
+
+// TypeScript will narrow the type based on the "type" field
+function handleEvent(event: z.infer<typeof eventSchema>) {
+  if (event.type === "user_signup") {
+    // event.email is available here
+    console.log(`New user: ${event.email}`);
+  } else if (event.type === "post_created") {
+    // event.title is available here
+    console.log(`New post: ${event.title}`);
+  }
+}
+```
+
+## Error Handling
+
+### **Formatted Error Messages**
+```typescript
+function formatZodError(error: z.ZodError) {
+  return error.issues.map(issue => ({
+    field: issue.path.join('.'),
+    message: issue.message,
+  }));
+}
+
+// Usage in API routes
+try {
+  const data = schema.parse(input);
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    return Response.json({
+      error: "Validation failed",
+      details: formatZodError(error),
+    }, { status: 400 });
+  }
+}
+```
+
+### **Safe Parsing**
+```typescript
+// Instead of throwing, return success/error result
+const result = schema.safeParse(input);
+
+if (result.success) {
+  // result.data is the validated data
+  console.log(result.data);
+} else {
+  // result.error is the ZodError
+  console.error(result.error.issues);
+}
+```
+
+## Common Schemas
+
+### **Reusable Base Schemas**
+```typescript
+// lib/validations/common.ts
+export const idSchema = z.string().uuid();
+export const emailSchema = z.string().email();
+export const urlSchema = z.string().url();
+export const dateSchema = z.coerce.date();
+
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
+
+export const timestampSchema = z.object({
+  createdAt: dateSchema,
+  updatedAt: dateSchema,
+});
+```
+
+### **Database Model Schemas**
+```typescript
+// lib/validations/user.ts
+export const userSchema = z.object({
+  id: idSchema,
+  name: z.string().min(2).max(50),
+  email: emailSchema,
+  avatar: urlSchema.optional(),
+  role: z.enum(["user", "admin"]).default("user"),
+}).merge(timestampSchema);
+
+export type User = z.infer<typeof userSchema>;
+```
+
+## Testing with Zod
+
+### **Schema Testing**
+```typescript
+// __tests__/validations/user.test.ts
+import { userSchema } from "~/lib/validations/user";
+
+describe("User Schema", () => {
+  it("validates correct user data", () => {
+    const validUser = {
+      id: "123e4567-e89b-12d3-a456-426614174000",
+      name: "John Doe",
+      email: "john@example.com",
+      role: "user",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    expect(() => userSchema.parse(validUser)).not.toThrow();
+  });
+
+  it("rejects invalid email", () => {
+    const invalidUser = {
+      id: "123e4567-e89b-12d3-a456-426614174000",
+      name: "John Doe",
+      email: "not-an-email",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    expect(() => userSchema.parse(invalidUser)).toThrow();
+  });
+});
+```
+
+## Resources
+
+- **[Zod Documentation](https://zod.dev/)** - Official docs with comprehensive examples
+- **[Zod GitHub](https://github.com/colinhacks/zod)** - Source code and community
+- **[React Hook Form + Zod](https://react-hook-form.com/get-started#SchemaValidation)** - Form validation guide
+- **[@hookform/resolvers](https://github.com/react-hook-form/resolvers)** - Zod resolver for React Hook Form

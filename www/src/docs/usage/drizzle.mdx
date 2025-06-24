@@ -1,0 +1,202 @@
+---
+title: "Drizzle ORM"
+description: "Working with Drizzle ORM in your matt-init project"
+order: 2
+---
+
+# Drizzle ORM
+
+Drizzle ORM is a TypeScript ORM that provides excellent developer experience with type safety and performance. When you choose the "Database + Drizzle + BetterAuth" backend option, matt-init sets up Drizzle with sensible defaults.
+
+## What's Included
+
+### **Configuration Files**
+- **`drizzle.config.ts`** - Drizzle configuration pointing to your schema and database
+- **Database scripts** in `package.json` for common operations
+
+### **Database Schema**
+- **`src/lib/db/schema/auth.ts`** - User, session, and account tables for authentication
+- **`src/lib/db/schema/index.ts`** - Schema exports and relations
+- **`src/lib/db/index.ts`** - Database connection and client setup
+
+### **Scripts Available**
+```bash
+pnpm db:generate    # Generate migration files from schema changes
+pnpm db:migrate     # Run pending migrations
+pnpm db:push        # Push schema changes directly (development)
+pnpm db:studio      # Open Drizzle Studio for database management
+```
+
+## Getting Started
+
+### **1. Understanding the Schema**
+The pre-built auth schema includes:
+
+```typescript
+// src/lib/db/schema/auth.ts
+export const users = sqliteTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: integer("emailVerified", { mode: "boolean" }),
+  image: text("image"),
+  createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull(),
+});
+
+export const sessions = sqliteTable("session", {
+  id: text("id").primaryKey(),
+  expiresAt: integer("expiresAt", { mode: "timestamp" }).notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // ... more fields
+});
+```
+
+### **2. Adding Your Own Tables**
+Create new schema files in `src/lib/db/schema/`:
+
+```typescript
+// src/lib/db/schema/posts.ts
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { users } from "./auth";
+
+export const posts = sqliteTable("posts", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  authorId: text("authorId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull(),
+});
+```
+
+Don't forget to export from `schema/index.ts`:
+
+```typescript
+// src/lib/db/schema/index.ts
+export * from "./auth";
+export * from "./posts"; // Add this line
+```
+
+### **3. Generating and Running Migrations**
+After adding new tables or modifying existing ones:
+
+```bash
+# Generate migration files
+pnpm db:generate
+
+# Apply migrations to your database
+pnpm db:migrate
+```
+
+### **4. Querying Data**
+Use the database client in your app:
+
+```typescript
+// In your API routes or Server Components
+import { db } from "~/lib/db";
+import { posts, users } from "~/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+// Get all posts with author info
+const postsWithAuthors = await db
+  .select()
+  .from(posts)
+  .leftJoin(users, eq(posts.authorId, users.id));
+
+// Create a new post
+const newPost = await db.insert(posts).values({
+  id: crypto.randomUUID(),
+  title: "My First Post",
+  content: "Hello, world!",
+  authorId: session.user.id,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
+```
+
+## Development vs Production
+
+### **Development (Local)**
+- Uses `pnpm db:push` for rapid iteration
+- Local Turso database file (`local.db`)
+- No migration files needed for experimentation
+
+### **Production**
+- Uses `pnpm db:migrate` to apply versioned migrations
+- Remote Turso database
+- Migration files tracked in version control
+
+## Common Patterns
+
+### **Relations and Joins**
+```typescript
+// Define relations
+export const usersRelations = relations(users, ({ many }) => ({
+  posts: many(posts),
+}));
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  author: one(users, {
+    fields: [posts.authorId],
+    references: [users.id],
+  }),
+}));
+
+// Query with relations
+const usersWithPosts = await db.query.users.findMany({
+  with: {
+    posts: true,
+  },
+});
+```
+
+### **Transactions**
+```typescript
+await db.transaction(async (tx) => {
+  const user = await tx.insert(users).values(newUserData);
+  const post = await tx.insert(posts).values({
+    ...newPostData,
+    authorId: user.insertId,
+  });
+});
+```
+
+### **Type-Safe Queries**
+```typescript
+// Drizzle provides full TypeScript support
+const result = await db.select({
+  postTitle: posts.title,
+  authorName: users.name,
+}).from(posts)
+  .leftJoin(users, eq(posts.authorId, users.id));
+
+// result is fully typed!
+result[0].postTitle; // string
+result[0].authorName; // string | null
+```
+
+## Drizzle Studio
+
+Open Drizzle Studio to explore your database visually:
+
+```bash
+pnpm db:studio
+```
+
+This opens a web interface where you can:
+- Browse tables and data
+- Run queries
+- Edit records
+- Explore relationships
+
+## Resources
+
+- **[Drizzle ORM Docs](https://orm.drizzle.team/)** - Official documentation
+- **[Drizzle SQLite Guide](https://orm.drizzle.team/docs/get-started-sqlite)** - SQLite-specific docs
+- **[Database Guide](/docs/usage/databases)** - Working with Turso database
+- **[Better Auth Guide](/docs/usage/better-auth)** - Authentication integration
