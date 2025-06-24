@@ -24,7 +24,7 @@ export const components: MDXComponents = {
     </h3>
   ),
   p: ({ children }: { children: ReactNode }) => (
-    <p className="text-muted-foreground mb-4 leading-relaxed">
+    <p className="text-muted-foreground mb-4 text-base leading-relaxed">
       {children}
     </p>
   ),
@@ -58,7 +58,9 @@ export const components: MDXComponents = {
     </Link>
   ),
   code: ({ children }: { children: ReactNode }) => (
-    <code className="font-mono text-sm">{children}</code>
+    <code className="font-mono">
+      {children}
+    </code>
   ),
   pre: ({ children }: { children: ReactNode }) => (
     <pre className={`
