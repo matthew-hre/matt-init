@@ -7,26 +7,64 @@ import { CodeBlock } from "~/components/code-block";
 import { ProjectStructure } from "~/components/project-structure";
 import { ProjectStructureWithDocs } from "~/components/project-structure-with-docs";
 
+function createHeadingId(children: ReactNode): string {
+  const extractText = (node: ReactNode): string => {
+    if (typeof node === "string") {
+      return node;
+    }
+    if (typeof node === "number") {
+      return node.toString();
+    }
+    if (Array.isArray(node)) {
+      return node.map(extractText).join("");
+    }
+    if (node && typeof node === "object" && "props" in node && node.props && typeof node.props === "object" && "children" in node.props) {
+      return extractText(node.props.children as ReactNode);
+    }
+    return "";
+  };
+
+  const text = extractText(children);
+  return text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+}
+
 export const components: MDXComponents = {
-  h1: ({ children }: { children: ReactNode }) => (
-    <h1 className={`
-      text-foreground mt-8 mb-6 text-3xl font-bold
-      first:mt-0
-    `}
-    >
-      {children}
-    </h1>
-  ),
-  h2: ({ children }: { children: ReactNode }) => (
-    <h2 className="text-foreground mt-8 mb-4 text-2xl font-semibold">
-      {children}
-    </h2>
-  ),
-  h3: ({ children }: { children: ReactNode }) => (
-    <h3 className="text-foreground mt-6 mb-3 text-xl font-semibold">
-      {children}
-    </h3>
-  ),
+  h1: ({ children }: { children: ReactNode }) => {
+    const id = createHeadingId(children);
+    return (
+      <h1
+        id={id}
+        className={`
+          text-foreground mt-8 mb-6 text-3xl font-bold
+          first:mt-0
+        `}
+      >
+        {children}
+      </h1>
+    );
+  },
+  h2: ({ children }: { children: ReactNode }) => {
+    const id = createHeadingId(children);
+    return (
+      <h2
+        id={id}
+        className="text-foreground mt-8 mb-4 text-2xl font-semibold"
+      >
+        {children}
+      </h2>
+    );
+  },
+  h3: ({ children }: { children: ReactNode }) => {
+    const id = createHeadingId(children);
+    return (
+      <h3
+        id={id}
+        className="text-foreground mt-6 mb-3 text-xl font-semibold"
+      >
+        {children}
+      </h3>
+    );
+  },
   p: ({ children }: { children: ReactNode }) => (
     <p className="text-muted-foreground mb-4 text-base leading-relaxed">
       {children}
@@ -80,7 +118,8 @@ export const components: MDXComponents = {
     return (
       <pre
         className={`
-          bg-foreground/[0.05] mb-4 w-max overflow-x-auto rounded-lg px-6 py-4
+          bg-foreground/[0.05] mb-4 min-w-full overflow-x-auto rounded-lg px-6
+          py-4
         `}
         {...props}
       >

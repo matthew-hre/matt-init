@@ -77,6 +77,9 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
         const highlighted = highlighter.codeToHtml(code, {
           lang: shikiLang,
           theme: theme === "dark" ? "github-dark" : "github-light",
+          colorReplacements: {
+            "#24292e": "#141416",
+          },
         });
         setHtml(highlighted);
       }
@@ -93,7 +96,8 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
   if (!html) {
     return (
       <pre className={`
-        bg-foreground/[0.05] w-max overflow-x-auto rounded-lg border px-6 py-4
+        bg-foreground/[0.05] min-w-full overflow-x-auto rounded-lg border px-6
+        py-4
       `}
       >
         <code className="font-mono text-sm">{children}</code>
@@ -103,7 +107,7 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
 
   return (
     <div
-      className="mb-4 overflow-x-auto rounded-lg"
+      className="border-muted mb-4 overflow-x-auto rounded-lg border"
       // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
       dangerouslySetInnerHTML={{ __html: html }}
     />

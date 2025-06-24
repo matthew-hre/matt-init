@@ -96,7 +96,11 @@ export function ProjectStructureWithDocs() {
           {" "}
           <code className="font-mono">concurrently</code>
           {" "}
-          to run the Next.js dev server *and* the Turso dev server at the same time. If you add new CLI tooling or frameworks later, this is one of the first files you'll touch.
+          to run the Next.js dev server
+          {" "}
+          <em>and</em>
+          {" "}
+          the Turso dev server at the same time. If you add new CLI tooling or frameworks later, this is one of the first files you'll touch.
         </p>
         <hr className="my-6" />
 
@@ -148,14 +152,17 @@ export function ProjectStructureWithDocs() {
             <strong>Note:</strong>
             {" "}
             The import alias is
+            {" "}
             <code className="font-mono">
               ~/
             </code>
             , not
+            {" "}
             <code className="font-mono">
               @/
             </code>
             . This is a personal preference, and you are more than welcome to change it to
+            {" "}
             <code className="font-mono">
               @/
             </code>
@@ -175,7 +182,11 @@ export function ProjectStructureWithDocs() {
           ,
           {" "}
           <code className="font-mono">pnpm</code>
-          , any database requirements if enabled, and other tools, so you don't have to worry about local mismatches between teammates. If you're *not* using Nix, you should be.
+          , any database requirements if enabled, and other tools, so you don't have to worry about local mismatches between teammates. If you're
+          {" "}
+          <em>not</em>
+          {" "}
+          using Nix, you should be.
         </p>
         <hr className="my-6" />
 
@@ -271,6 +282,7 @@ export function ProjectStructureWithDocs() {
             <strong>signin/</strong>
             {" "}
             and
+            {" "}
             <strong>signup/</strong>
             : Basic auth forms using BetterAuth's API.
           </li>

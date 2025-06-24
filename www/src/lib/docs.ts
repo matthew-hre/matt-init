@@ -38,7 +38,30 @@ export async function getDocsStructure(): Promise<DocSection[]> {
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name);
 
-  for (const sectionDir of sectionDirs) {
+  // Define section order - sections not listed here will appear at the end alphabetically
+  const sectionOrder = ["about", "usage", "next-steps"];
+
+  // Sort sections according to the defined order
+  const orderedSectionDirs = sectionDirs.sort((a, b) => {
+    const indexA = sectionOrder.indexOf(a);
+    const indexB = sectionOrder.indexOf(b);
+
+    // If both sections are in the order array, sort by their order
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+
+    // If only one is in the order array, prioritize it
+    if (indexA !== -1)
+      return -1;
+    if (indexB !== -1)
+      return 1;
+
+    // If neither is in the order array, sort alphabetically
+    return a.localeCompare(b);
+  });
+
+  for (const sectionDir of orderedSectionDirs) {
     const sectionPath = path.join(docsDirectory, sectionDir);
     const files = fs
       .readdirSync(sectionPath)

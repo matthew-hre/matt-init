@@ -201,10 +201,13 @@ export function ProjectStructure({ onFeaturesChange }: ProjectStructureProps = {
   // Call onFeaturesChange on mount with initial features
   useEffect(() => {
     if (onFeaturesChange) {
-      const enabledSet = new Set(
-        DEFAULT_FEATURES.filter(f => f.checked).map(f => f.id),
-      );
-      onFeaturesChange(enabledSet);
+      // Use setTimeout to defer the call until after the current render cycle
+      setTimeout(() => {
+        const enabledSet = new Set(
+          DEFAULT_FEATURES.filter(f => f.checked).map(f => f.id),
+        );
+        onFeaturesChange(enabledSet);
+      }, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
@@ -219,11 +222,14 @@ export function ProjectStructure({ onFeaturesChange }: ProjectStructureProps = {
         f.id === id ? { ...f, checked: !f.checked } : f,
       );
 
+      // Call onFeaturesChange after state update is complete
       if (onFeaturesChange) {
-        const enabledSet = new Set(
-          newFeatures.filter(f => f.checked).map(f => f.id),
-        );
-        onFeaturesChange(enabledSet);
+        setTimeout(() => {
+          const enabledSet = new Set(
+            newFeatures.filter(f => f.checked).map(f => f.id),
+          );
+          onFeaturesChange(enabledSet);
+        }, 0);
       }
 
       return newFeatures;
