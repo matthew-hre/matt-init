@@ -46,7 +46,7 @@ pnpm install # Install dependencies
 
 > If you're not using a Nix shell here, you'll need to install dependencies manually. Make sure to look at the <Link href="/docs/usage/databases#turso">Turso</Link> documentation for instructions on how to set up the CLI and database locally.
 
-Finally, fire off an `npm run dev` to start your development server. You'll see something like this:
+Finally, fire off a `pnpm dev` (or `npm run dev`) to start your development server. You'll see something like this:
 
 ```bash
 [1]    ▲ Next.js 15.3.2 (Turbopack)
@@ -64,11 +64,11 @@ Finally, fire off an `npm run dev` to start your development server. You'll see 
 ```
 
 A couple important things to note here:
-- We're technically running two commands here. `npm run dev` fires off `npm run dev:db`, which starts up Turso for us, and `npm run dev:next`, which starts up the Next.js development server. Any database output will be prefixed with `[0]`, and Next.js output will be prefixed with `[1]`.
+- We're technically running two commands here. `pnpm dev` fires off `pnpm run dev:db`, which starts up Turso for us, and `next dev --turbopack`, which starts up the Next.js development server concurrently. Any database output will be prefixed with `[0]`, and Next.js output will be prefixed with `[1]`.
 - The `sqld` server is running on port 8080, which is where your database is hosted. If you have anything else running on that port, you'll need to change it in your `package.json` scripts, as well as in your `.env`.
 - The Next.js server is running on port 3000, which is the default port for Next.js applications. You can change this in your `package.json` scripts if needed. Once again, if you have anything else running on that port, you'll need to change it in your `package.json` and in your `.env` file.
 
-We've got one more thing to do before we can call it a day: set up authentication. Luckily, matt-init comes with a pre-configured authentication system using <Link>better-auth</Link>. Pop open a new terminal, (fire off a `nix develop` if needed), and run a `npm db:push` to set up your database schema.
+We've got one more thing to do before we can call it a day: set up authentication. Luckily, matt-init comes with a pre-configured authentication system using <Link>better-auth</Link>. Pop open a new terminal, (fire off a `nix develop` if needed), and run `pnpm db:push` to set up your database schema.
 
 ## Conclusion
 

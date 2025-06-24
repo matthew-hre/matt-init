@@ -11,48 +11,49 @@ Below is the structure of a typical `matt-init` project when all features are en
 ```txt
 my-project/
 ├── .env
-├── .vscode/
+├── .env.example
+├── .gitignore
+├── .vscode/              # (if --vscode enabled)
 │   ├── extensions.json
 │   └── settings.json
-├── drizzle.config.ts
+├── drizzle.config.ts     # (if backend enabled)
 ├── eslint.config.mjs
-├── flake.lock
-├── flake.nix
+├── flake.lock            # (if --nix enabled)
+├── flake.nix             # (if --nix enabled)
 ├── next-env.d.ts
 ├── next.config.ts
 ├── package.json
 ├── postcss.config.mjs
-├── tailwind.config.ts
 ├── tsconfig.json
-├── nix/
+├── nix/                  # (if --nix enabled)
 │   └── devShell.nix
 └── src/
     ├── app/
     │   ├── globals.css
     │   ├── layout.tsx
     │   ├── page.tsx
-    │   ├── api/
+    │   ├── api/          # (if backend enabled)
     │   │   └── auth/
     │   │       └── [...all]/
     │   │           └── route.ts
-    │   ├── dashboard/
+    │   ├── dashboard/    # (if backend enabled)
     │   │   └── page.tsx
-    │   ├── signin/
+    │   ├── signin/       # (if backend enabled)
     │   │   └── page.tsx
-    │   └── signup/
+    │   └── signup/       # (if backend enabled)
     │       └── page.tsx
     ├── components/
     │   └── matt-init-banner.tsx
     ├── lib/
-    │   ├── auth.ts
+    │   ├── auth.ts       # (if backend enabled)
     │   ├── env.ts
     │   ├── try-parse-env.ts
-    │   └── db/
+    │   └── db/           # (if backend enabled)
     │       ├── index.ts
     │       └── schema/
     │           ├── auth.ts
     │           └── index.ts
-    └── middleware.ts
+    └── middleware.ts     # (if backend enabled)
 ```
 
 ---
@@ -62,6 +63,10 @@ my-project/
 ### `.env`
 
 This file contains environment variables needed for local development. It's dynamically generated when the project is scaffolded, based on your selected options (e.g. database, auth). It's also type-checked at runtime using Zod. You'll usually only need to touch this when deploying to production or if you're pointing to a different database or auth server.
+
+### `.env.example`
+
+A template file showing the structure of environment variables needed by your application. This file is safe to commit to version control and helps other developers understand what environment variables they need to set up. When backend features are enabled, this file includes placeholder values for database URLs and authentication secrets.
 
 ---
 
@@ -98,6 +103,8 @@ This file manages your project's metadata, dependencies, and scripts. It comes w
 ### `postcss.config.mjs`
 
 Tailwind uses PostCSS under the hood for its transformation pipeline. This config just loads the Tailwind plugin. You probably won't need to touch this.
+
+> **Note:** This project uses Tailwind CSS v4, which doesn't require a separate `tailwind.config.ts` file. Configuration is handled through CSS variables and `@import` statements in `globals.css`.
 
 ---
 

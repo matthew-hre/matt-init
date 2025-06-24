@@ -75,16 +75,16 @@ Options:
 
 ```bash
 # Create a new project with prompts (recommended)
-pnpm dev my-awesome-app
+npx matt-init@latest my-awesome-app
 
 # Create with defaults (frontend-only, no prompts)
-pnpm dev my-app --default
+npx matt-init@latest my-app --default
 
 # Create without git and dependency installation
-pnpm dev my-app --no-git --no-install
+npx matt-init@latest my-app --no-git --no-install
 
-# Create with Nix support
-pnpm dev my-app --nix
+# Create without Nix support (Nix is disabled by default)
+npx matt-init@latest my-app --no-nix
 ```
 
 ## What's Included
@@ -124,18 +124,20 @@ my-project/
 │   ├── components/
 │   │   └── matt-init-banner.tsx
 │   └── lib/
-│       └── env.ts
-├── public/
-├── .vscode/
+│       ├── env.ts
+│       └── try-parse-env.ts
+├── .vscode/               # (if VSCode setup chosen)
 │   ├── extensions.json
 │   └── settings.json
-├── flake.nix              # (if --nix flag used)
+├── flake.nix              # (if Nix enabled)
 ├── drizzle.config.ts      # (if backend setup chosen)
+├── .env                   # (if backend setup chosen)
+├── .env.example
+├── eslint.config.mjs
 ├── next.config.ts
 ├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-└── .env           # (if backend setup chosen)
+├── postcss.config.mjs
+└── tsconfig.json
 ```
 
 ## Development Status
@@ -197,25 +199,21 @@ nix develop
 # Install dependencies
 pnpm install
 
-# Run the tool!
-pnpm dev
+# Run the tool in development mode!
+pnpm dev:cli
 ```
 
 ### Scripts
 
-- `pnpm build` - Compile TypeScript to JavaScript
-- `pnpm dev` - Run in development mode with ts-node
-- `pnpm test` - Test the CLI by creating a test project
-- `pnpm lint` - Run ESLint
-- `pnpm lint:fix` - Fix ESLint issues automatically
+- `pnpm build:cli` - Compile CLI TypeScript to JavaScript
+- `pnpm dev:cli` - Run CLI in development mode with ts-node
+- `pnpm test:cli` - Test the CLI by creating a test project
+- `pnpm lint:cli` - Run ESLint on CLI
+- `pnpm --filter ./cli lint:fix` - Fix CLI ESLint issues automatically
 
 ## License
 
 CC BY-SA 4.0
-
-## Contributing
-
-Not taking any PRs until 1.0.0 is released!
 
 ## Acknowledgements
 

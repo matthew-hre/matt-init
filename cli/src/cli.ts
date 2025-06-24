@@ -31,7 +31,7 @@ export async function runCLI() {
     .option("--no-vscode", "Skip VS Code settings setup")
     .option("-y, --default", "Use defaults, skip prompts")
     .option("--ci", "Run in CI mode (non-interactive, test mode)")
-    .version("1.0.0");
+    .version("1.0.3");
 
   program.addHelpText("before", `${BANNER}\n`);
 
