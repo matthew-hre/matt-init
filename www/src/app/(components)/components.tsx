@@ -22,7 +22,7 @@ export default function Components() {
           description="App router, server actions, and file-based routing. No legacy pages dir."
         >
           <img
-            src="https://static-00.iconduck.com/assets.00/next-js-icon-2048x2048-5dqjgeku.png"
+            src="https://www.svgrepo.com/show/354113/nextjs-icon.svg"
             alt="Next.js logo"
             className="min-h-8 min-w-8"
           />

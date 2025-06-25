@@ -4,158 +4,124 @@ description: "Reproducible development environments with Nix in your matt-init p
 order: 8
 ---
 
-## What's Included
+## What's Nix?
 
-### **Development Shell**
-- **Node.js** - Pinned to a specific version
-- **pnpm** - Package manager
-- **Database tools** - Turso CLI and sqld (if backend enabled)
-- **Development utilities** - git, curl, and other common tools
+Nix is a wickedly powerful package manager and build system that allows you to create reproducible development environments. It ensures that your project dependencies are consistent across different machines, making it easier to onboard new developers and maintain your codebase.
 
-### **Configuration Files**
-- **`flake.nix`** - Main Nix flake definition
-- **`flake.lock`** - Locked dependency versions
-- **`nix/devShell.nix`** - Development shell configuration
+Nix uses a declarative approach to define environments, meaning you can specify exactly what tools and versions you need without worrying about conflicts or version mismatches. For matt-init projects, Nix provides a great way to manage Node.js, pnpm, and other development tools in a single configuration file.
 
 ## Getting Started
 
-### **Prerequisites**
+### Prerequisites
 1. **Install Nix** - Follow the [official installation guide](https://nixos.org/download.html)
 2. **Enable flakes** - Add to `~/.config/nix/nix.conf`:
 ```
 experimental-features = nix-command flakes
 ```
 
-### **Entering the Development Shell**
+### Entering the Development Shell
 ```bash
 # Enter the development shell
 nix develop
-
-# Or use direnv for automatic activation
-echo "use flake" > .envrc
-direnv allow
 ```
 
-### **What You Get**
+> **Note**: If this is your first time using Nix, you may not appreciate how sick that just was: in a single command, you installed all the necessary tools for your project, down to the exact version, and entered a shell with them available. It. Just. Works.
+
+### What You Get
 When you enter the shell, you'll have access to:
-- **Node.js 20** (LTS version)
+- **Node.js**
 - **pnpm** (latest stable)
-- **Turso CLI** (for database management)
-- **sqld** (local SQLite server)
-- **Development tools** (git, curl, jq, etc.)
+- **Turso CLI** (for database management) (if it was selected during setup)
+- **sqld** (local SQLite server) (if it was selected during setup)
+- **Development tools** (alejandra for formatting, etc)
 
 ## Configuration
 
-### **Main Flake (flake.nix)**
+### Main Flake (flake.nix)
+
+This isn't the exciting part. This file is the entry point for your Nix configuration. It defines the inputs (like nixpkgs and flake-utils) and outputs (like development shells and formatters).
+
 ```nix
 {
-  description = "Development environment for my-app";
+  description = "my-cool-app";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        devShells.default = import ./nix/devShell.nix { inherit pkgs; };
+  outputs = {
+    self,
+    flake-utils,
+    nixpkgs,
+    ...
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        pkgs = import nixpkgs {inherit system;};
+      in {
+        devShell = pkgs.callPackage ./nix/devShell.nix {};
+        formatter = pkgs.alejandra;
       }
     );
 }
+
 ```
 
-### **Development Shell (nix/devShell.nix)**
-```nix
-{ pkgs }:
+### Development Shell (nix/devShell.nix)
 
-pkgs.mkShell {
-  buildInputs = with pkgs; [
-    # Core development tools
-    nodejs_20
-    nodePackages.pnpm
-    
-    # Database tools (for backend projects)
+Here's the meat and potatoes of your Nix setup. This file defines the development environment, including all the tools you need for your project.
+
+```nix
+{
+  mkShell,
+  alejandra,
+  bash,
+  nodejs,
+  pnpm,
+  turso-cli,
+  sqld,
+}:
+mkShell rec {
+  name = "my-cool-app";
+
+  packages = [
+    bash
+    nodejs
+    pnpm
+
+    # Required for CI for format checking.
+    alejandra
+
     turso-cli
     sqld
-    
-    # Development utilities
-    git
-    curl
-    jq
-    
-    # Optional: Additional tools you might need
-    # sqlite
-    # postgresql
-    # redis
   ];
-
-  shellHook = ''
-    echo "🚀 Development environment loaded!"
-    echo "📦 Node.js: $(node --version)"
-    echo "📦 pnpm: $(pnpm --version)"
-    echo ""
-    echo "Available commands:"
-    echo "  pnpm dev      - Start development server"
-    echo "  pnpm build    - Build for production"
-    echo "  pnpm lint     - Run ESLint"
-    echo "  pnpm test     - Run tests"
-    
-    # Set up environment
-    export NODE_ENV=development
-    
-    # Ensure pnpm is available
-    export PATH="$PATH:$HOME/.local/share/pnpm"
-  '';
 }
 ```
 
 ## Common Operations
 
-### **Adding New Tools**
+### Adding New Tools
 Edit `nix/devShell.nix` to add more development tools:
 
 ```nix
-{ pkgs }:
+{
+  ...,
+  newPackageINeeded,
+  ...,
+}:
+mkShell rec {
+  name = "my-cool-app";
 
-pkgs.mkShell {
-  buildInputs = with pkgs; [
-    # Existing tools
-    nodejs_20
-    nodePackages.pnpm
-    
-    # Add new tools
-    docker
-    docker-compose
-    postgresql
-    redis
-    awscli2
-    terraform
-    
-    # Language servers for better editor support
-    nodePackages.typescript-language-server
-    nodePackages.vscode-langservers-extracted
+  packages = [
+    ...
+    newPackageINeeded
+    ...
   ];
 }
 ```
 
-### **Version Pinning**
-Pin specific versions by updating the flake inputs:
-
-```nix
-{
-  inputs = {
-    # Pin to a specific nixpkgs commit
-    nixpkgs.url = "github:NixOS/nixpkgs/a1291d8e13cb0adf24203d1935e328f5b7b9d0a5";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
-}
-```
-
-### **Updating Dependencies**
+### Updating Dependencies
 ```bash
 # Update all inputs to latest
 nix flake update
@@ -167,282 +133,27 @@ nix flake lock --update-input nixpkgs
 nix flake lock --update-input nixpkgs --print-build-logs
 ```
 
-## Environment Variables
-
-### **Setting Environment Variables**
-```nix
-# nix/devShell.nix
-{ pkgs }:
-
-pkgs.mkShell {
-  buildInputs = with pkgs; [
-    nodejs_20
-    nodePackages.pnpm
-  ];
-
-  shellHook = ''
-    # Set development environment variables
-    export NODE_ENV=development
-    export DATABASE_URL="file:./local.db"
-    export PORT=3000
-    
-    # Add custom PATH entries
-    export PATH="$PWD/node_modules/.bin:$PATH"
-    
-    # Source .env file if it exists
-    if [ -f .env ]; then
-      set -o allexport
-      source .env
-      set +o allexport
-    fi
-  '';
-}
-```
-
-### **Conditional Configuration**
-```nix
-# nix/devShell.nix
-{ pkgs }:
-
-let
-  # Check if we're in a backend project
-  hasBackend = builtins.pathExists ../drizzle.config.ts;
-  
-  backendTools = with pkgs; [
-    turso-cli
-    sqld
-    sqlite
-  ];
-  
-  baseTools = with pkgs; [
-    nodejs_20
-    nodePackages.pnpm
-    git
-  ];
-in
-pkgs.mkShell {
-  buildInputs = baseTools ++ (if hasBackend then backendTools else []);
-  
-  shellHook = ''
-    echo "🚀 Development environment loaded!"
-    ${if hasBackend then ''
-      echo "🗄️  Backend tools available: turso, sqld, sqlite"
-    '' else ''
-      echo "🎨 Frontend-only environment"
-    ''}
-  '';
-}
-```
-
-## IDE Integration
-
-### **VS Code + direnv**
-1. **Install direnv extension** in VS Code
-2. **Create .envrc file:**
-```bash
-use flake
-```
-3. **Allow direnv:**
-```bash
-direnv allow
-```
-
-Now VS Code will automatically load the Nix environment.
-
-### **Manual Integration**
-```json
-// .vscode/settings.json
-{
-  "terminal.integrated.defaultProfile.linux": "nix-shell",
-  "terminal.integrated.profiles.linux": {
-    "nix-shell": {
-      "path": "nix",
-      "args": ["develop", "--command", "bash"]
-    }
-  }
-}
-```
-
-## Team Collaboration
-
-### **Onboarding New Developers**
-1. **Install Nix** (one-time setup)
-2. **Clone repository**
-3. **Enter development shell:**
-```bash
-nix develop
-```
-
-That's it! No need to install Node.js, pnpm, or any other tools manually.
-
-### **Consistent Environments**
-- **Same Node.js version** across all machines
-- **Same package manager** version
-- **Same development tools** available
-- **Locked dependencies** via `flake.lock`
-
-### **Cross-platform Support**
-```nix
-# Support multiple platforms
-{
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachSystem [
-      "x86_64-linux"
-      "aarch64-linux"
-      "x86_64-darwin"
-      "aarch64-darwin"
-    ] (system:
-      # ... configuration
-    );
-}
-```
-
-## CI/CD Integration
-
-### **GitHub Actions with Nix**
-```yaml
-# .github/workflows/ci.yml
-name: CI
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v22
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run tests
-        run: |
-          nix develop --command pnpm install
-          nix develop --command pnpm test
-          nix develop --command pnpm build
-```
-
-### **Cachix for Faster Builds**
-```yaml
-- uses: cachix/install-nix-action@v22
-- uses: cachix/cachix-action@v12
-  with:
-    name: my-cache
-    authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-```
-
-## Advanced Usage
-
-### **Multiple Development Shells**
-```nix
-# flake.nix
-{
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
-        devShells = {
-          # Default development shell
-          default = import ./nix/devShell.nix { inherit pkgs; };
-          
-          # Backend-only shell
-          backend = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              nodejs_20
-              nodePackages.pnpm
-              turso-cli
-              sqld
-              postgresql
-            ];
-          };
-          
-          # Frontend-only shell
-          frontend = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              nodejs_20
-              nodePackages.pnpm
-            ];
-          };
-        };
-      }
-    );
-}
-```
-
-Use specific shells:
-```bash
-nix develop .#backend
-nix develop .#frontend
-```
-
-### **Custom Packages**
-```nix
-# nix/custom-packages.nix
-{ pkgs }:
-
-{
-  # Custom script
-  dev-setup = pkgs.writeShellScriptBin "dev-setup" ''
-    echo "Setting up development environment..."
-    pnpm install
-    pnpm db:push
-    echo "✅ Ready to develop!"
-  '';
-  
-  # Custom Node.js with specific version
-  nodejs-custom = pkgs.nodejs_20.overrideAttrs (oldAttrs: {
-    version = "20.10.0";
-  });
-}
-```
-
-## Troubleshooting
-
-### **Common Issues**
-
-**Nix command not found:**
-```bash
-# Add to shell profile
-echo 'export PATH="/nix/var/nix/profiles/default/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-**Flakes not enabled:**
-```bash
-# Add to ~/.config/nix/nix.conf
-experimental-features = nix-command flakes
-```
-
-**Permission denied:**
-```bash
-# Fix nix directory permissions
-sudo chown -R $(whoami) /nix
-```
-
-**Shell doesn't activate automatically:**
-```bash
-# Install and configure direnv
-nix-env -iA nixpkgs.direnv
-echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
-```
-
-### **Getting Help**
-```bash
-# Show available development shells
-nix flake show
-
-# Debug shell environment
-nix develop --command env
-
-# Verbose output for debugging
-nix develop --verbose --show-trace
-```
-
 ## Resources
 
-- **[Nix Manual](https://nixos.org/manual/nix/stable/)** - Official documentation
-- **[Nix Flakes](https://nixos.wiki/wiki/Flakes)** - Flakes guide
-- **[devenv](https://devenv.sh/)** - Alternative Nix development environments
-- **[direnv](https://direnv.net/)** - Automatic environment loading
-- **[Zero to Nix](https://zero-to-nix.com/)** - Beginner-friendly Nix guide
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://nixos.org/manual/nix/stable/"
+    title="Nix Manual"
+    description="Official Nix documentation"
+  />
+  <CardLink
+    href="https://nixos.wiki/wiki/Flakes"
+    title="Nix Flakes Guide"
+    description="Learn about Nix Flakes and how to use them"
+  />
+  <CardLink
+    href="https://zero-to-nix.com/"
+    title="Zero to Nix"
+    description="Beginner-friendly guide to Nix"
+  />
+  <CardLink
+    href="https://mitchellh.com/writing/nix-with-dockerfiles"
+    title="Nix with Dockerfiles"
+    description="A bit tangential, but a great read if you're on the fence about Nix"
+  />
+</div>

@@ -1,35 +1,24 @@
 ---
 title: "Deployment"
-description: "Deploy your matt-init project to production"
+description: "Deploy your matt-init project to production with Vercel and Turso"
 order: 1
 ---
 
-## Vercel (Recommended)
+## Vercel Deployment
 
-Vercel is the easiest deployment option for Next.js applications and works seamlessly with matt-init projects.
+Vercel is the recommended deployment platform for matt-init projects, as it's the most straightforward way to deploy Next.js applications.
 
-### **Quick Deploy**
+### Quick Deploy
+
 1. **Push to GitHub** (if not already done)
 2. **Connect to Vercel:**
    - Visit [vercel.com](https://vercel.com)
    - Import your GitHub repository
    - Vercel auto-detects Next.js configuration
+3. **Set Environment Variables:** It pains me to say this, but *please do not use the same environment variables as your local development*. Instead, create *new* environment variables for production. This should include any auth secrets, API keys, etc.
+4. **Deploy!** Vercel automatically builds and deploys your app.
 
-3. **Set Environment Variables:**
-  ```env
-  # Required for all projects
-  NODE_ENV=production
-  BETTER_AUTH_URL=https://your-domain.vercel.app
-
-  # Required for backend projects
-  TURSO_DATABASE_URL=libsql://your-database.turso.io
-  TURSO_AUTH_TOKEN=your-auth-token
-  BETTER_AUTH_SECRET=your-32-character-secret
-  ```
-
-Finally, **Deploy!** Vercel automatically builds and deploys your app.
-
-### **Custom Domain**
+### Custom Domain
 ```bash
 # Using Vercel CLI
 npm i -g vercel
@@ -37,8 +26,8 @@ vercel --prod
 vercel domains add yourdomain.com
 ```
 
-### **Vercel Configuration**
-Create `vercel.json` for advanced configuration:
+### Advanced Configuration
+Create `vercel.json` for custom settings:
 
 ```json
 {
@@ -56,165 +45,11 @@ Create `vercel.json` for advanced configuration:
 }
 ```
 
-## Netlify
+## Turso Database Setup
 
-Great alternative with excellent edge functions support.
+### Create Production Database
 
-### **Deploy Steps**
-1. **Build Configuration:**
-```toml
-# netlify.toml
-[build]
-  command = "pnpm build"
-  publish = ".next"
-
-[build.environment]
-  NODE_VERSION = "20"
-  NPM_FLAGS = "--version"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-```
-
-2. **Environment Variables:**
-Set in Netlify dashboard or CLI:
-```bash
-# Install Netlify CLI
-npm install -g netlify-cli
-
-# Set environment variables
-netlify env:set NODE_ENV production
-netlify env:set BETTER_AUTH_URL https://your-site.netlify.app
-```
-
-## Railway
-
-Perfect for full-stack applications with database needs.
-
-### **Deploy Configuration**
-1. **Create `railway.toml`:**
-```toml
-[build]
-builder = "nixpacks"
-
-[deploy]
-startCommand = "pnpm start"
-healthcheckPath = "/"
-healthcheckTimeout = 100
-restartPolicyType = "on_failure"
-
-[environments.production.variables]
-NODE_ENV = "production"
-PORT = "$PORT"
-```
-
-2. **Database Setup:**
-Railway can provision a PostgreSQL database, but since we use Turso:
-```bash
-# Use your existing Turso database
-# Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in Railway dashboard
-```
-
-3. **Deploy:**
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway link
-railway up
-```
-
-## Self-Hosted (Docker)
-
-Deploy anywhere with Docker.
-
-### **Dockerfile**
-```dockerfile
-# Dockerfile
-FROM node:20-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
-
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-ENV NEXT_TELEMETRY_DISABLED 1
-RUN corepack enable pnpm && pnpm build
-
-# Production image
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-CMD ["node", "server.js"]
-```
-
-### **Docker Compose**
-```yaml
-# docker-compose.yml
-version: '3.8'
-
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - BETTER_AUTH_URL=https://yourdomain.com
-      - TURSO_DATABASE_URL=${TURSO_DATABASE_URL}
-      - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
-    restart: unless-stopped
-
-  # Optional: Add nginx reverse proxy
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-    depends_on:
-      - app
-    restart: unless-stopped
-```
-
-## Database Deployment
-
-### **Turso Production Setup**
-
-1. **Create Production Database:**
+1. **Create and configure database:**
 ```bash
 # Create production database
 turso db create my-app-prod
@@ -238,190 +73,33 @@ pnpm db:migrate
 
 3. **Backup Strategy:**
 ```bash
-# Regular backups
+# Manual backup
 turso db shell my-app-prod ".dump" > backup-$(date +%Y%m%d).sql
 
-# Automated backups (add to CI/CD)
-# Turso Pro includes automatic backups
+# Turso Pro includes automatic backups (if you feel like spending money)
 ```
-
-### **Environment Variables Management**
-
-**Development:**
-```env
-# .env.local
-NODE_ENV=development
-TURSO_DATABASE_URL=http://127.0.0.1:8080
-TURSO_AUTH_TOKEN=
-BETTER_AUTH_SECRET=dev-secret-key
-BETTER_AUTH_URL=http://localhost:3000
-```
-
-**Production:**
-```env
-# Production environment
-NODE_ENV=production
-TURSO_DATABASE_URL=libsql://your-database.turso.io
-TURSO_AUTH_TOKEN=your-production-token
-BETTER_AUTH_SECRET=your-secure-32-char-secret
-BETTER_AUTH_URL=https://yourdomain.com
-```
-
-## CI/CD Pipeline
-
-### **GitHub Actions**
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      
-      - name: Run linting
-        run: pnpm lint
-      
-      - name: Run type checking
-        run: pnpm build
-      
-      - name: Run database migrations
-        run: pnpm db:migrate
-        env:
-          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-      
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
-          vercel-args: '--prod'
-```
-
-### **Pre-deployment Checklist**
-
-**Environment Variables:**
-- [ ] `NODE_ENV=production`
-- [ ] `BETTER_AUTH_URL` (your production domain)
-- [ ] `BETTER_AUTH_SECRET` (secure 32-character string)
-- [ ] `TURSO_DATABASE_URL` (production database)
-- [ ] `TURSO_AUTH_TOKEN` (production token)
-
-**Database:**
-- [ ] Production database created
-- [ ] Migrations applied
-- [ ] Auth tokens generated
-- [ ] Backup strategy in place
-
-**Security:**
-- [ ] Environment variables secured
-- [ ] HTTPS enabled
-- [ ] Auth secret is cryptographically secure
-- [ ] Database tokens have appropriate permissions
-
-**Performance:**
-- [ ] Build optimization verified
-- [ ] Images optimized
-- [ ] Bundle size checked
-- [ ] Database queries optimized
-
-## Monitoring and Maintenance
-
-### **Health Checks**
-```typescript
-// app/api/health/route.ts
-import { db } from '~/lib/db';
-
-export async function GET() {
-  try {
-    // Check database connection
-    await db.select().from(users).limit(1);
-    
-    return Response.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: 'connected',
-    });
-  } catch (error) {
-    return Response.json({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      database: 'disconnected',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
-  }
-}
-```
-
-### **Error Tracking**
-```typescript
-// lib/monitoring.ts
-export function reportError(error: Error, context?: Record<string, any>) {
-  if (process.env.NODE_ENV === 'production') {
-    // Send to error tracking service
-    console.error('Production Error:', {
-      message: error.message,
-      stack: error.stack,
-      context,
-      timestamp: new Date().toISOString(),
-    });
-  }
-}
-```
-
-### **Performance Monitoring**
-```typescript
-// app/api/metrics/route.ts
-export async function GET() {
-  const metrics = {
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    timestamp: new Date().toISOString(),
-  };
-  
-  return Response.json(metrics);
-}
-```
-
-## Scaling Considerations
-
-### **Database Scaling**
-- **Turso automatically scales** with your application
-- **Use read replicas** for global applications
-- **Connection pooling** is handled by Turso
-- **Monitor query performance** with Drizzle Studio
-
-### **Application Scaling**
-- **Serverless by default** on Vercel/Netlify
-- **Edge deployment** available on most platforms
-- **Static generation** for non-dynamic pages
-- **Image optimization** built into Next.js
-
-### **Monitoring Dashboard**
-Consider adding:
-- **Uptime monitoring** (UptimeRobot, Pingdom)
-- **Error tracking** (Sentry, LogRocket)
-- **Performance monitoring** (Web Vitals, Lighthouse CI)
-- **Database monitoring** (Turso dashboard)
 
 ## Resources
 
-- **[Next.js Deployment](https://nextjs.org/docs/deployment)** - Official deployment docs
-- **[Vercel Documentation](https://vercel.com/docs)** - Vercel-specific guides
-- **[Turso Deployment](https://docs.turso.tech/sdk/ts/orm/drizzle)** - Database deployment
-- **[Better Auth Production](https://www.better-auth.com/docs/deployment)** - Auth deployment guide
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://nextjs.org/docs/deployment"
+    title="Next.js Deployment Docs"
+    description="Official Next.js deployment documentation."
+  />
+  <CardLink
+    href="https://vercel.com/docs"
+    title="Vercel Documentation"
+    description="Learn how to deploy and manage your Next.js apps on Vercel."
+  />
+  <CardLink
+    href="https://docs.turso.tech/sdk/ts/orm/drizzle"
+    title="Turso Deployment Guide"
+    description="Official guide for deploying Turso databases."
+  />
+  <CardLink
+    href="https://www.better-auth.com/docs/deployment"
+    title="Better Auth Production Guide"
+    description="Learn how to deploy Better Auth in production."
+  />
+</div>

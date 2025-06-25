@@ -6,65 +6,53 @@ order: 4
 
 ## What's Included
 
-### **Pre-configured Authentication**
+### Pre-configured Authentication
 - **Email/Password authentication** with built-in validation
 - **Session management** with secure cookies
 - **Database integration** with Drizzle ORM
 - **Type-safe API** throughout your application
 
-### **Authentication Pages**
+### Authentication Pages
 - **`/signin`** - Login form with email/password
 - **`/signup`** - Registration form with validation
 - **`/dashboard`** - Protected route example
 
-### **API Routes**
+### API Routes
 - **`/api/auth/[...all]`** - Handles all authentication endpoints
 - **Session management** built into the API layer
 
 ## Authentication Flow
 
-### **1. User Registration**
+### User Registration
 ```typescript
-// /signup page functionality
-const { data, error } = await authClient.signUp.email({
-  email: "user@example.com",
-  password: "securePassword123",
-  name: "John Doe",
-});
-```
-
-### **2. User Login**
-```typescript
-// /signin page functionality
-const { data, error } = await authClient.signIn.email({
-  email: "user@example.com",
-  password: "securePassword123",
-});
-```
-
-### **3. Session Check**
-```typescript
-// In Server Components or API routes
 import { auth } from "~/lib/auth";
-import { headers } from "next/headers";
 
-const headersList = await headers();
-const session = await auth.api.getSession({
-  headers: headersList,
+const { data, error } = await auth.api.signUpEmail({
+  body: {
+    name: "John Doe",
+    email: "user@example.com",
+    password: "securePassword123",
+  },
 });
-
-if (session) {
-  // User is authenticated
-  console.log("User:", session.user);
-} else {
-  // User is not authenticated
-  redirect("/signin");
-}
 ```
+
+### User Login
+```typescript
+import { auth } from "~/lib/auth";
+
+const { data, error } = await auth.api.signInEmail({
+  body: {
+    email: "user@example.com",
+    password: "securePassword123",
+  },
+});
+```
+
+> **Note**: See how we're using the `auth.api` methods to handle user login / signup? The better-auth api provides server-side access to authentication methods, meaning Next.js can handle this securely without exposing sensitive logic to the client.
 
 ## Working with Sessions
 
-### **Server Components**
+### Server Components
 ```typescript
 // app/dashboard/page.tsx
 import { auth } from "~/lib/auth";
@@ -90,18 +78,16 @@ export default async function Dashboard() {
 }
 ```
 
-### **Client Components**
+### Client Components
 ```typescript
 // Client-side session handling
 "use client";
 
-import { useSession } from "better-auth/react";
+import { auth } from "~/lib/auth";
 
 export function UserProfile() {
-  const { data: session, isPending } = useSession();
+  const { data: session } = auth.getSession();
 
-  if (isPending) return <div>Loading...</div>;
-  
   if (!session) return <div>Please sign in</div>;
 
   return (
@@ -113,274 +99,79 @@ export function UserProfile() {
 }
 ```
 
-### **API Routes**
-```typescript
-// app/api/protected/route.ts
-import { auth } from "~/lib/auth";
-import { NextRequest } from "next/server";
-
-export async function GET(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-
-  if (!session) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Handle authenticated request
-  return Response.json({ 
-    message: "Hello " + session.user.name 
-  });
-}
-```
-
 ## Middleware Protection
 
 The included middleware protects routes automatically:
 
 ```typescript
 // middleware.ts
-import { auth } from "~/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
-
-export async function middleware(request: NextRequest) {
-  // Protect /dashboard routes
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session) {
-      return NextResponse.redirect(new URL("/signin", request.url));
-    }
-  }
-
-  return NextResponse.next();
-}
-
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard"], // Protected routes are specified here
 };
 ```
 
-## User Management
+### Custom Authentication Providers
+Better Auth supports many providers. Add them in `src/lib/auth.ts`.
 
-### **Getting User Data**
-```typescript
-// Get current user in any server context
-const session = await auth.api.getSession({ headers });
-const user = session?.user;
+As an example, here's how to add GitHub authentication:
 
-// User object includes:
-// - id: string
-// - email: string
-// - name: string
-// - emailVerified: boolean
-// - image: string | null
-// - createdAt: Date
-// - updatedAt: Date
+First, create a GitHub OAuth app via the [GitHub Developer Portal](https://github.com/settings/developers).
+
+Next, add your GitHub client ID and secret to your environment variables:
+```env
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
 ```
 
-### **Updating User Profile**
+Once that's included, update your `src/lib/env.ts` to include the GitHub provider:
 ```typescript
-// Update user information
-await authClient.updateUser({
-  name: "New Name",
-  image: "https://example.com/avatar.jpg",
+// src/lib/env.ts
+const EnvSchema = z.object({
+  // ... existing variables
+  GITHUB_CLIENT_ID: z.string(),
+  GITHUB_CLIENT_SECRET: z.string(),
 });
 ```
-
-### **Password Management**
-```typescript
-// Change password (requires current password)
-await authClient.changePassword({
-  currentPassword: "oldPassword",
-  newPassword: "newSecurePassword",
-});
-```
-
-## Logout Functionality
-
-### **Client-side Logout**
-```typescript
-"use client";
-
-import { authClient } from "~/lib/auth-client";
-
-export function LogoutButton() {
-  const handleLogout = async () => {
-    await authClient.signOut();
-    window.location.href = "/";
-  };
-
-  return (
-    <button onClick={handleLogout}>
-      Sign Out
-    </button>
-  );
-}
-```
-
-### **Server-side Logout**
-```typescript
-// In a Server Action
-import { auth } from "~/lib/auth";
-import { redirect } from "next/navigation";
-
-export async function logoutAction() {
-  await auth.api.signOut();
-  redirect("/");
-}
-```
-
-## Customization
-
-### **Adding Custom Fields**
-Extend the user schema in `src/lib/db/schema/auth.ts`:
-
-```typescript
-export const users = sqliteTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  // Add custom fields
-  avatar: text("avatar"),
-  role: text("role").default("user"),
-  preferences: text("preferences"), // JSON string
-  // ... existing fields
-});
-```
-
-### **Custom Authentication Providers**
-Better Auth supports many providers. Add them in `src/lib/auth.ts`:
+Now, update your `src/lib/auth.ts` to include the GitHub provider:
 
 ```typescript
 import { betterAuth } from "better-auth";
-import { github, google } from "better-auth/providers";
+import { env } from "~/lib/env";
 
 export const auth = betterAuth({
   // ... existing config
-  providers: [
-    github({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
-    google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
-});
-```
-
-### **Email Verification**
-Enable email verification:
-
-```typescript
-export const auth = betterAuth({
-  // ... existing config
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-  },
-});
-```
-
-## Security Best Practices
-
-### **Environment Variables**
-```env
-# Required for Better Auth
-BETTER_AUTH_SECRET=your-32-character-secret-key
-BETTER_AUTH_URL=https://yourdomain.com
-
-# Generate secret with:
-# openssl rand -hex 32
-```
-
-### **Session Security**
-- Sessions are stored in HTTP-only cookies
-- CSRF protection is enabled by default
-- Session tokens are regularly rotated
-
-### **Password Requirements**
-The default setup includes basic password validation. Enhance it:
-
-```typescript
-// Custom password validation
-const passwordSchema = z.string()
-  .min(8, "Password must be at least 8 characters")
-  .regex(/[A-Z]/, "Password must contain uppercase letter")
-  .regex(/[a-z]/, "Password must contain lowercase letter")
-  .regex(/\d/, "Password must contain a number");
-```
-
-## Testing Authentication
-
-### **Testing Authenticated Routes**
-```typescript
-// In your tests
-const mockSession = {
-  user: {
-    id: "test-user-id",
-    email: "test@example.com",
-    name: "Test User",
-  },
-};
-
-// Mock the auth check
-jest.mock("~/lib/auth", () => ({
-  auth: {
-    api: {
-      getSession: jest.fn(() => Promise.resolve(mockSession)),
+  socialProviders: {
+    github: {
+      clientId: env.GITHUB_CLIENT_ID as string,
+      clientSecret: env.GITHUB_CLIENT_SECRET as string,
     },
   },
-}));
+});
 ```
 
-## Common Patterns
+That's it! Your application now supports GitHub authentication. Signing in with a social provider is incredibly similar to email/password authentication:
 
-### **Role-based Access**
 ```typescript
-// Check user role
-function requireRole(session: Session, role: string) {
-  if (!session?.user?.role?.includes(role)) {
-    throw new Error("Insufficient permissions");
-  }
-}
+import { auth } from "~/lib/auth";
 
-// In your API route
-const session = await auth.api.getSession({ headers });
-requireRole(session, "admin");
-```
-
-### **Protected API Wrapper**
-```typescript
-// utils/auth-wrapper.ts
-export function withAuth(handler: Function) {
-  return async (request: NextRequest) => {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    return handler(request, session);
-  };
-}
-
-// Usage in API routes
-export const GET = withAuth(async (request, session) => {
-  // Your protected logic here
+const { data, error } = await auth.api.signInSocial({
+  body: {
+    provider: "github", // or any other provider you've configured
+  },
 });
 ```
 
 ## Resources
 
-- **[Better Auth Documentation](https://www.better-auth.com/)** - Official docs
-- **[Better Auth GitHub](https://github.com/better-auth/better-auth)** - Source code and examples
-- **[Database Guide](/docs/usage/databases)** - Database integration
-- **[Drizzle Guide](/docs/usage/drizzle)** - ORM integration
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://www.better-auth.com/"
+    title="Better Auth Documentation"
+    description="Official documentation for Better Auth, covering setup, configuration, and usage."
+  />
+  <CardLink
+    href="https://github.com/better-auth/better-auth"
+    title="Better Auth Github"
+    description="Source code and examples for Better Auth, including integration guides and API references."
+  />
+</div>

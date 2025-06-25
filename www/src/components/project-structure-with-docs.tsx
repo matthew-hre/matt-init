@@ -116,16 +116,19 @@ export function ProjectStructureWithDocs() {
             <strong>Note:</strong>
             {" "}
             This project uses Tailwind CSS v4, which doesn't require a separate
+            {" "}
             <code className="font-mono">
               tailwind.config.ts
             </code>
             {" "}
             file. Configuration is handled through CSS variables and
+            {" "}
             <code className="font-mono">
               @import
             </code>
             {" "}
             statements in
+            {" "}
             <code className="font-mono">
               globals.css
             </code>

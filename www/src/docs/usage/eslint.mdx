@@ -4,86 +4,9 @@ description: "Code quality and formatting with ESLint in your matt-init project"
 order: 7
 ---
 
-## What's Included
-
-### **@antfu/eslint-config**
-- **TypeScript support** with strict type checking
-- **React/Next.js rules** for modern React development
-- **Import sorting** and organization
-- **Filename conventions** (kebab-case enforced)
-- **Automatic formatting** (replaces Prettier)
-
-### **Configuration File**
-- **`eslint.config.mjs`** - Modern flat config format
-- **Pre-configured rules** for TypeScript, React, and Next.js
-- **Import sorting** and unused import removal
-
 ## Configuration Overview
 
-### **ESLint Config (eslint.config.mjs)**
-```javascript
-// eslint.config.mjs
-import antfu from '@antfu/eslint-config'
-
-export default antfu(
-  {
-    type: 'app',
-    typescript: true,
-    formatters: true,
-    react: true,
-  },
-  {
-    rules: {
-      // Custom overrides
-      'style/semi': ['error', 'always'],
-      'ts/consistent-type-definitions': ['error', 'interface'],
-      'react-refresh/only-export-components': 'warn',
-      
-      // Filename conventions
-      'unicorn/filename-case': [
-        'error',
-        {
-          case: 'kebabCase',
-          ignore: ['^\\[[\\w\\[\\]]+\\]\\.'],
-        },
-      ],
-      
-      // Import organization
-      'perfectionist/sort-imports': [
-        'error',
-        {
-          type: 'natural',
-          order: 'asc',
-          groups: [
-            'type',
-            ['builtin', 'external'],
-            'internal-type',
-            'internal',
-            ['parent-type', 'sibling-type', 'index-type'],
-            ['parent', 'sibling', 'index'],
-            'object',
-            'unknown',
-          ],
-        },
-      ],
-    },
-  },
-)
-```
-
-### **Package.json Scripts**
-```json
-{
-  "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  }
-}
-```
-
-## Key Features
-
-### **Automatic Import Sorting**
+### Automatic Import Sorting
 ESLint automatically organizes your imports:
 
 ```typescript
@@ -96,16 +19,18 @@ import type { Session } from 'better-auth';
 import { NextRequest } from 'next/server';
 
 // After ESLint fix (organized)
-import type { Session } from 'better-auth';
-import type { NextRequest } from 'next/server';
-import { useState } from 'react';
+import type { Session } from "better-auth";
+import type { NextRequest } from "next/server";
 
-import type { User } from '~/lib/types';
-import { auth } from '~/lib/auth';
-import { db } from '~/lib/db';
+import { useState } from "react";
+
+import type { User } from "~/lib/types";
+
+import { auth } from "~/lib/auth";
+import { db } from "~/lib/db";
 ```
 
-### **Filename Conventions**
+### Filename Conventions
 All files must use kebab-case:
 
 ```bash
@@ -124,20 +49,10 @@ app/users/[user-id]/page.tsx
 app/posts/[...slug]/page.tsx
 ```
 
-### **TypeScript Integration**
-Strict TypeScript rules are enforced:
+### TypeScript Integration
+Semi-strict TypeScript rules are enforced:
 
 ```typescript
-// ✅ Good - explicit return type for exported functions
-export function calculateTotal(items: Item[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0);
-}
-
-// ❌ Bad - missing return type
-export function calculateTotal(items: Item[]) {
-  return items.reduce((sum, item) => sum + item.price, 0);
-}
-
 // ✅ Good - interface definition
 interface User {
   id: string;
@@ -153,20 +68,12 @@ type User = {
 };
 ```
 
-### **React/Next.js Rules**
+> Semi-strict? Typescript and I have an abusive relationship. Sometimes you need to throw an `any` type around to get things done. I'm not sorry.
+
+### React/Next.js Rules
 Specific rules for React development:
 
 ```typescript
-// ✅ Good - proper hook dependencies
-useEffect(() => {
-  fetchUser(userId);
-}, [userId, fetchUser]);
-
-// ❌ Bad - missing dependencies
-useEffect(() => {
-  fetchUser(userId);
-}, []);
-
 // ✅ Good - component naming
 export function UserProfile() {
   return <div>Profile</div>;
@@ -180,7 +87,7 @@ export const UserProfile = () => {
 
 ## Running ESLint
 
-### **Check for Issues**
+### Check for Issues
 ```bash
 # Check all files
 pnpm lint
@@ -192,7 +99,7 @@ pnpm lint src/components/user-profile.tsx
 pnpm lint --format=detailed
 ```
 
-### **Auto-fix Issues**
+### Auto-fix Issues
 ```bash
 # Fix all auto-fixable issues
 pnpm lint:fix
@@ -204,12 +111,12 @@ pnpm lint:fix src/components/
 pnpm lint:fix --dry-run
 ```
 
-### **IDE Integration**
-The setup works automatically with VS Code when you enable the workspace settings (included with matt-init).
+### IDE Integration
+The setup works automatically with VSCode when you enable the workspace settings (included with matt-init).
 
 ## Customizing Rules
 
-### **Adding Custom Rules**
+### Adding Custom Rules
 ```javascript
 // eslint.config.mjs
 export default antfu(
@@ -238,7 +145,7 @@ export default antfu(
 )
 ```
 
-### **File-specific Overrides**
+### File-specific Overrides
 ```javascript
 // eslint.config.mjs
 export default antfu(
@@ -266,7 +173,7 @@ export default antfu(
 )
 ```
 
-### **Ignoring Files**
+### Ignoring Files
 ```javascript
 // eslint.config.mjs
 export default antfu(
@@ -288,168 +195,17 @@ export default antfu(
 )
 ```
 
-## Common Issues and Solutions
-
-### **Import Path Errors**
-```typescript
-// ❌ Problem: Relative imports in deep files
-import { auth } from '../../../lib/auth';
-
-// ✅ Solution: Use path aliases
-import { auth } from '~/lib/auth';
-
-// Configure in tsconfig.json (already set up)
-{
-  "compilerOptions": {
-    "paths": {
-      "~/*": ["./src/*"]
-    }
-  }
-}
-```
-
-### **Unused Imports**
-```typescript
-// ❌ Problem: Unused imports
-import { useState, useEffect, useCallback } from 'react';
-
-function Component() {
-  const [count, setCount] = useState(0);
-  return <div>{count}</div>;
-}
-
-// ✅ Solution: Remove unused imports (auto-fixed)
-import { useState } from 'react';
-
-function Component() {
-  const [count, setCount] = useState(0);
-  return <div>{count}</div>;
-}
-```
-
-### **Type Import/Export Issues**
-```typescript
-// ❌ Problem: Missing type-only imports
-import { User, Session } from '~/lib/types';
-
-function component(user: User, session: Session) {
-  // ...
-}
-
-// ✅ Solution: Use type-only imports
-import type { User, Session } from '~/lib/types';
-
-function component(user: User, session: Session) {
-  // ...
-}
-```
-
-## VS Code Integration
-
-### **Settings (Already Included)**
-The project includes VS Code settings for ESLint:
-
-```json
-// .vscode/settings.json
-{
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ]
-}
-```
-
-### **Recommended Extensions**
-```json
-// .vscode/extensions.json
-{
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "bradlc.vscode-tailwindcss",
-    "ms-vscode.vscode-typescript-next"
-  ]
-}
-```
-
-## Pre-commit Hooks
-
-### **Husky + lint-staged (Included)**
-Automatically runs ESLint on changed files before commit:
-
-```json
-// package.json
-{
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
-    ]
-  }
-}
-```
-
-### **Git Hooks**
-```bash
-# Husky setup (already configured)
-.husky/
-  pre-commit  # Runs lint-staged
-```
-
-## CI/CD Integration
-
-### **GitHub Actions Example**
-```yaml
-# .github/workflows/ci.yml
-name: CI
-
-on: [push, pull_request]
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm install
-      - run: npm run lint
-```
-
-## Performance Tips
-
-### **Faster Linting**
-```bash
-# Only lint changed files
-git diff --name-only --cached | grep -E '\.(js|jsx|ts|tsx)$' | xargs npx eslint
-
-# Use ESLint cache
-pnpm lint --cache
-
-# Parallel processing
-pnpm lint --max-warnings 0 --cache --cache-location .eslintcache
-```
-
-### **Editor Performance**
-```json
-// .vscode/settings.json - for large projects
-{
-  "eslint.options": {
-    "cache": true,
-    "cacheLocation": ".eslintcache"
-  },
-  "eslint.format.enable": true,
-  "eslint.lintTask.enable": true
-}
-```
-
 ## Resources
 
-- **[@antfu/eslint-config](https://github.com/antfu/eslint-config)** - Configuration details
-- **[ESLint Rules](https://eslint.org/docs/rules/)** - Complete rule reference  
-- **[TypeScript ESLint](https://typescript-eslint.io/)** - TypeScript-specific rules
-- **[ESLint React Plugin](https://github.com/jsx-eslint/eslint-plugin-react)** - React-specific rules
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://eslint.org/docs/latest/user-guide/configuring"
+    title="ESLint Configuration Guide"
+    description="Official guide on configuring ESLint for your project."
+  />
+  <CardLink
+    href="https://github.com/antfu/eslint-config"
+    title="antfu/eslint-config"
+    description="Antfu's ESLint configuration, used in matt-init projects."
+  />
+</div>
