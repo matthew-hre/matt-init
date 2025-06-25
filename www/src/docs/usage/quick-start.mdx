@@ -1,0 +1,96 @@
+---
+title: "Quick Start"
+description: "Get up and running with matt-init in minutes"
+order: 1
+---
+
+## Create Your First Project
+
+```bash
+npx matt-init@latest
+```
+
+## Interactive Setup
+
+The CLI will guide you through a series of prompts:
+
+### Project Name
+Set your project name. I'll be using `test-app` for this example.
+
+### Backend Setup
+Choose between full-stack or frontend-only. For this example, select `Database + Drizzle + BetterAuth`.
+
+### Database Provider
+Select your preferred database (currently there's only one). For this example, we'll use `Turso`.
+
+### Additional Options
+Choose whatever extra tooling or configuration you want. I'll be using:
+   - Nix development environment, to manage dependencies like Node, pnpm, Drizzle, sqld, etc.
+   - VS Code settings, to enable linting on save, auto-formatting, and recommended extensions.
+   - Initialize a Git repository, so I can track changes.
+   - Install dependencies automatically.
+
+## Running the Project
+
+Once your project is created, make sure to `cd` into your project directory and install dependencies:
+
+```bash
+cd test-app
+nix develop # Enter the Nix shell
+pnpm install # Install dependencies
+```
+
+> If you're not using a Nix shell here, you'll need to install dependencies manually. Make sure to look at the <Link href="/docs/usage/databases#turso">Turso</Link> documentation for instructions on how to set up the CLI and database locally.
+
+Finally, fire off a `pnpm dev` (or `npm run dev`) to start your development server. You'll see something like this:
+
+```bash
+[1]    ▲ Next.js 15.3.2 (Turbopack)
+[1]    - Local:        http://localhost:3000
+[1]    - Network:      http://192.168.1.226:3000
+[1]    - Environments: .env
+[1]
+[0] sqld listening on port 8080.
+[0] Use the following URL to configure your libSQL client SDK for local development:
+[0]
+[0]     http://127.0.0.1:8080
+[0]
+[0] Using database file local.db.
+[1]  ✓ Ready in 782ms
+```
+
+A couple important things to note here:
+- We're technically running two commands here. `pnpm dev` fires off `pnpm run dev:db`, which starts up Turso for us, and `next dev --turbopack`, which starts up the Next.js development server concurrently. Any database output will be prefixed with `[0]`, and Next.js output will be prefixed with `[1]`.
+- The `sqld` server is running on port 8080, which is where your database is hosted. If you have anything else running on that port, you'll need to change it in your `package.json` scripts, as well as in your `.env`.
+- The Next.js server is running on port 3000, which is the default port for Next.js applications. You can change this in your `package.json` scripts if needed. Once again, if you have anything else running on that port, you'll need to change it in your `package.json` and in your `.env` file.
+
+We've got one more thing to do before we can call it a day: set up authentication. Luckily, matt-init comes with a pre-configured authentication system using [better-auth](/docs/usage/better-auth). Pop open a new terminal, (fire off a `nix develop` if needed), and run `pnpm db:push` to set up your database schema.
+
+## Conclusion
+
+That's it! You've got a fully functional Next.js app with a database and authentication set up in around three minutes. From here, you can start building out your features and customizing your app as needed.
+
+## Next Steps
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+    <CardLink
+        title="Project Structure"
+        description="Understand the layout of a matt-init project."
+        href="/docs/about/project-structure"
+    />
+        <CardLink
+        title="Configuration"
+        description="Customize your matt-init setup."
+        href="/docs/about/configuration"
+    />
+    <CardLink
+        title="Database Setup"
+        description="Learn how to configure and use Turso with matt-init."
+        href="/docs/usage/databases"
+    />
+    <CardLink
+        title="Authentication"
+        description="Set up and customize BetterAuth for your app."
+        href="/docs/usage/better-auth"
+    />
+</div>

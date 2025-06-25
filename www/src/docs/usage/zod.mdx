@@ -1,0 +1,143 @@
+---
+title: "Zod"
+description: "Type-safe validation with Zod in your matt-init project"
+order: 5
+---
+
+## Environment Variable Validation
+
+If you've never used Zod before, the first place you'll encounter it in a matt-init project is in the environment variable validation. This ensures that your application has all the necessary environment variables set up correctly, and provides type safety for them.
+
+### How It Works
+Every matt-init project validates environment variables at startup:
+
+```typescript
+// src/lib/env.ts
+import { z } from "zod";
+
+const EnvSchema = z.object({
+  NODE_ENV: z.string(),
+  // Backend-specific variables (if enabled)
+  TURSO_DATABASE_URL: z.string(),
+  TURSO_AUTH_TOKEN: z.string(),
+  BETTER_AUTH_SECRET: z.string(),
+  BETTER_AUTH_URL: z.string(),
+});
+
+export const env = EnvSchema.parse(process.env);
+```
+
+"Huh? What?" I hear you say. Let's break it down:
+- **Zod Schema**: We define a schema using `z.object()` that describes the expected environment variables. This includes their types and any validation rules. In this case, all variables are required strings.
+- **Validation**: When the app starts, `EnvSchema.parse(process.env)` checks that all required variables are present and valid.
+- **Exporting `env`**: The validated environment variables are exported as a typed object, so you can access them safely throughout your application.
+
+### Type Safety
+The `env` object is fully typed:
+
+```typescript
+import { env } from "~/lib/env";
+
+// TypeScript knows these are strings
+env.NODE_ENV;           // string
+env.TURSO_DATABASE_URL; // string
+env.BETTER_AUTH_URL;    // string
+
+// This would cause a TypeScript error
+env.NONEXISTENT_VAR; // ❌ Property doesn't exist
+```
+
+### Adding New Environment Variables
+
+In order to add new environment variables, you'll need to:
+
+- **Update the Zod Schema:**
+
+```typescript
+const EnvSchema = z.object({
+  // ... existing variables
+  MY_API_KEY: z.string(),
+  MY_API_URL: z.string().url(),
+  FEATURE_FLAG: z.string().default("false"),
+});
+```
+
+- **Add to your `.env`:**
+```env
+MY_API_KEY=your-api-key-here
+MY_API_URL=https://api.example.com
+FEATURE_FLAG=false
+```
+
+- **Use in your app:**
+```typescript
+import { env } from "~/lib/env";
+
+const apiKey = env.MY_API_KEY; // Fully typed and validated
+```
+
+> **Note:** Notice how we're not using `process.env.MY_API_KEY` directly. Instead, we access it through the `env` object, which ensures type safety and validation. If you try to use `process.env.MY_API_KEY` directly, the linter will be very upset.
+
+## Form Validation
+
+Of course, Zod isn't just for environment variables. It's also a powerful tool for validating form data in your application. This is especially useful when you're using libraries like [React Hook Form](https://react-hook-form.com/), which can integrate seamlessly with Zod for schema-based validation. Take a look at the [Zod documentation](https://zod.dev/) for more details on how to use it effectively, but here's a tl;dr:
+
+```typescript
+// Firstly, import Zod
+import { z } from "zod";
+
+// Next, define your schema.
+// This schema describes the shape of your form data.
+const FormSchema = z.object({
+  // Name must be a non-empty string
+  name: z.string().min(1, "Name is required"),
+  // Email must be a valid email
+  email: z.string().email("Invalid email address"), 
+  // Age must be a non-negative number
+  age: z.number().min(0, "Age must be a positive number"), 
+});
+
+// Then, you can use this schema to validate your form data:
+const validateFormData = (data: unknown) => {
+  try {
+    const validData = FormSchema.parse(data);
+    console.log("Valid data:", validData);
+    return { success: true, data: validData };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.log("Validation errors:", error.errors);
+      return { success: false, errors: error.errors };
+    }
+    throw error;
+  }
+};
+
+// Usage example
+const formData = { name: "John", email: "john@example.com", age: 25 };
+const result = validateFormData(formData);
+```
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://zod.dev/"
+    title="Zod Documentation"
+    description="Official documentation for Zod, covering schema definitions, validation, and more."
+  />
+  <CardLink
+    href="https://github.com/colinhacks/zod"
+    title="Zod GitHub"
+    description="Source code and community discussions for Zod."
+  />
+  <CardLink
+    href="https://react-hook-form.com/get-started#SchemaValidation"
+    title="React Hook Form + Zod"
+    description="Guide on integrating Zod with React Hook Form for schema-based validation."
+  />
+  <CardLink
+    href="https://github.com/react-hook-form/resolvers"
+    title="@hookform/resolvers"
+    description="Zod resolver for React Hook Form, enabling easy schema validation."
+  />
+</div>

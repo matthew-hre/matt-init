@@ -1,0 +1,211 @@
+---
+title: "ESLint"
+description: "Code quality and formatting with ESLint in your matt-init project"
+order: 7
+---
+
+## Configuration Overview
+
+### Automatic Import Sorting
+ESLint automatically organizes your imports:
+
+```typescript
+// Before (messy imports)
+import { useState } from 'react';
+import { db } from '~/lib/db';
+import type { User } from '~/lib/types';
+import { auth } from '~/lib/auth';
+import type { Session } from 'better-auth';
+import { NextRequest } from 'next/server';
+
+// After ESLint fix (organized)
+import type { Session } from "better-auth";
+import type { NextRequest } from "next/server";
+
+import { useState } from "react";
+
+import type { User } from "~/lib/types";
+
+import { auth } from "~/lib/auth";
+import { db } from "~/lib/db";
+```
+
+### Filename Conventions
+All files must use kebab-case:
+
+```bash
+# ✅ Correct
+components/user-profile.tsx
+lib/auth-utils.ts
+pages/sign-in.tsx
+
+# ❌ Will cause lint errors
+components/UserProfile.tsx
+lib/authUtils.ts
+pages/signIn.tsx
+
+# ✅ Exception: Next.js dynamic routes
+app/users/[user-id]/page.tsx
+app/posts/[...slug]/page.tsx
+```
+
+### TypeScript Integration
+Semi-strict TypeScript rules are enforced:
+
+```typescript
+// ✅ Good - interface definition
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// ❌ Bad - type alias (prefer interface)
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+```
+
+> Semi-strict? Typescript and I have an abusive relationship. Sometimes you need to throw an `any` type around to get things done. I'm not sorry.
+
+### React/Next.js Rules
+Specific rules for React development:
+
+```typescript
+// ✅ Good - component naming
+export function UserProfile() {
+  return <div>Profile</div>;
+}
+
+// ❌ Bad - arrow function for components
+export const UserProfile = () => {
+  return <div>Profile</div>;
+};
+```
+
+## Running ESLint
+
+### Check for Issues
+```bash
+# Check all files
+pnpm lint
+
+# Check specific files
+pnpm lint src/components/user-profile.tsx
+
+# Check with more details
+pnpm lint --format=detailed
+```
+
+### Auto-fix Issues
+```bash
+# Fix all auto-fixable issues
+pnpm lint:fix
+
+# Fix specific files
+pnpm lint:fix src/components/
+
+# Preview what would be fixed (dry run)
+pnpm lint:fix --dry-run
+```
+
+### IDE Integration
+The setup works automatically with VSCode when you enable the workspace settings (included with matt-init).
+
+## Customizing Rules
+
+### Adding Custom Rules
+```javascript
+// eslint.config.mjs
+export default antfu(
+  {
+    type: 'app',
+    typescript: true,
+    formatters: true,
+    react: true,
+  },
+  {
+    rules: {
+      // Disable a rule
+      'no-console': 'off',
+      
+      // Change rule severity
+      '@typescript-eslint/no-unused-vars': 'warn',
+      
+      // Add custom rule configuration
+      'max-len': ['error', { code: 100, ignoreUrls: true }],
+      
+      // Project-specific rules
+      'prefer-const': 'error',
+      'no-var': 'error',
+    },
+  },
+)
+```
+
+### File-specific Overrides
+```javascript
+// eslint.config.mjs
+export default antfu(
+  {
+    type: 'app',
+    typescript: true,
+    formatters: true,
+    react: true,
+  },
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      // Relax rules for test files
+      '@typescript-eslint/no-explicit-any': 'off',
+      'max-len': 'off',
+    },
+  },
+  {
+    files: ['scripts/**/*.ts'],
+    rules: {
+      // Allow console in scripts
+      'no-console': 'off',
+    },
+  },
+)
+```
+
+### Ignoring Files
+```javascript
+// eslint.config.mjs
+export default antfu(
+  {
+    type: 'app',
+    typescript: true,
+    formatters: true,
+    react: true,
+    ignores: [
+      'dist/',
+      'build/',
+      '.next/',
+      'node_modules/',
+      '*.config.js',
+      'public/',
+    ],
+  },
+  // ... rest of config
+)
+```
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://eslint.org/docs/latest/user-guide/configuring"
+    title="ESLint Configuration Guide"
+    description="Official guide on configuring ESLint for your project."
+  />
+  <CardLink
+    href="https://github.com/antfu/eslint-config"
+    title="antfu/eslint-config"
+    description="Antfu's ESLint configuration, used in matt-init projects."
+  />
+</div>

@@ -1,0 +1,159 @@
+---
+title: "Nix"
+description: "Reproducible development environments with Nix in your matt-init project"
+order: 8
+---
+
+## What's Nix?
+
+Nix is a wickedly powerful package manager and build system that allows you to create reproducible development environments. It ensures that your project dependencies are consistent across different machines, making it easier to onboard new developers and maintain your codebase.
+
+Nix uses a declarative approach to define environments, meaning you can specify exactly what tools and versions you need without worrying about conflicts or version mismatches. For matt-init projects, Nix provides a great way to manage Node.js, pnpm, and other development tools in a single configuration file.
+
+## Getting Started
+
+### Prerequisites
+1. **Install Nix** - Follow the [official installation guide](https://nixos.org/download.html)
+2. **Enable flakes** - Add to `~/.config/nix/nix.conf`:
+```
+experimental-features = nix-command flakes
+```
+
+### Entering the Development Shell
+```bash
+# Enter the development shell
+nix develop
+```
+
+> **Note**: If this is your first time using Nix, you may not appreciate how sick that just was: in a single command, you installed all the necessary tools for your project, down to the exact version, and entered a shell with them available. It. Just. Works.
+
+### What You Get
+When you enter the shell, you'll have access to:
+- **Node.js**
+- **pnpm** (latest stable)
+- **Turso CLI** (for database management) (if it was selected during setup)
+- **sqld** (local SQLite server) (if it was selected during setup)
+- **Development tools** (alejandra for formatting, etc)
+
+## Configuration
+
+### Main Flake (flake.nix)
+
+This isn't the exciting part. This file is the entry point for your Nix configuration. It defines the inputs (like nixpkgs and flake-utils) and outputs (like development shells and formatters).
+
+```nix
+{
+  description = "my-cool-app";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs = {
+    self,
+    flake-utils,
+    nixpkgs,
+    ...
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        pkgs = import nixpkgs {inherit system;};
+      in {
+        devShell = pkgs.callPackage ./nix/devShell.nix {};
+        formatter = pkgs.alejandra;
+      }
+    );
+}
+
+```
+
+### Development Shell (nix/devShell.nix)
+
+Here's the meat and potatoes of your Nix setup. This file defines the development environment, including all the tools you need for your project.
+
+```nix
+{
+  mkShell,
+  alejandra,
+  bash,
+  nodejs,
+  pnpm,
+  turso-cli,
+  sqld,
+}:
+mkShell rec {
+  name = "my-cool-app";
+
+  packages = [
+    bash
+    nodejs
+    pnpm
+
+    # Required for CI for format checking.
+    alejandra
+
+    turso-cli
+    sqld
+  ];
+}
+```
+
+## Common Operations
+
+### Adding New Tools
+Edit `nix/devShell.nix` to add more development tools:
+
+```nix
+{
+  ...,
+  newPackageINeeded,
+  ...,
+}:
+mkShell rec {
+  name = "my-cool-app";
+
+  packages = [
+    ...
+    newPackageINeeded
+    ...
+  ];
+}
+```
+
+### Updating Dependencies
+```bash
+# Update all inputs to latest
+nix flake update
+
+# Update specific input
+nix flake lock --update-input nixpkgs
+
+# Check what changed
+nix flake lock --update-input nixpkgs --print-build-logs
+```
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://nixos.org/manual/nix/stable/"
+    title="Nix Manual"
+    description="Official Nix documentation"
+  />
+  <CardLink
+    href="https://nixos.wiki/wiki/Flakes"
+    title="Nix Flakes Guide"
+    description="Learn about Nix Flakes and how to use them"
+  />
+  <CardLink
+    href="https://zero-to-nix.com/"
+    title="Zero to Nix"
+    description="Beginner-friendly guide to Nix"
+  />
+  <CardLink
+    href="https://mitchellh.com/writing/nix-with-dockerfiles"
+    title="Nix with Dockerfiles"
+    description="A bit tangential, but a great read if you're on the fence about Nix"
+  />
+</div>

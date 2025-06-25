@@ -1,0 +1,105 @@
+---
+title: "Deployment"
+description: "Deploy your matt-init project to production with Vercel and Turso"
+order: 1
+---
+
+## Vercel Deployment
+
+Vercel is the recommended deployment platform for matt-init projects, as it's the most straightforward way to deploy Next.js applications.
+
+### Quick Deploy
+
+1. **Push to GitHub** (if not already done)
+2. **Connect to Vercel:**
+   - Visit [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel auto-detects Next.js configuration
+3. **Set Environment Variables:** It pains me to say this, but *please do not use the same environment variables as your local development*. Instead, create *new* environment variables for production. This should include any auth secrets, API keys, etc.
+4. **Deploy!** Vercel automatically builds and deploys your app.
+
+### Custom Domain
+```bash
+# Using Vercel CLI
+npm i -g vercel
+vercel --prod
+vercel domains add yourdomain.com
+```
+
+### Advanced Configuration
+Create `vercel.json` for custom settings:
+
+```json
+{
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}
+```
+
+## Turso Database Setup
+
+### Create Production Database
+
+1. **Create and configure database:**
+```bash
+# Create production database
+turso db create my-app-prod
+
+# Get database URL
+turso db show my-app-prod --url
+
+# Create auth token
+turso db tokens create my-app-prod
+```
+
+2. **Run Migrations:**
+```bash
+# Set production environment variables
+export TURSO_DATABASE_URL="libsql://your-database.turso.io"
+export TURSO_AUTH_TOKEN="your-auth-token"
+
+# Run migrations
+pnpm db:migrate
+```
+
+3. **Backup Strategy:**
+```bash
+# Manual backup
+turso db shell my-app-prod ".dump" > backup-$(date +%Y%m%d).sql
+
+# Turso Pro includes automatic backups (if you feel like spending money)
+```
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://nextjs.org/docs/deployment"
+    title="Next.js Deployment Docs"
+    description="Official Next.js deployment documentation."
+  />
+  <CardLink
+    href="https://vercel.com/docs"
+    title="Vercel Documentation"
+    description="Learn how to deploy and manage your Next.js apps on Vercel."
+  />
+  <CardLink
+    href="https://docs.turso.tech/sdk/ts/orm/drizzle"
+    title="Turso Deployment Guide"
+    description="Official guide for deploying Turso databases."
+  />
+  <CardLink
+    href="https://www.better-auth.com/docs/deployment"
+    title="Better Auth Production Guide"
+    description="Learn how to deploy Better Auth in production."
+  />
+</div>

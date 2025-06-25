@@ -1,0 +1,83 @@
+---
+title: "Databases"
+description: "Working with databases in your matt-init project"
+order: 3
+---
+
+## Turso (SQLite)
+
+### What is Turso?
+Turso is a distributed SQLite platform that brings SQLite to the edge. It's compatible with standard SQLite but adds features like replication, backups, and global distribution.
+
+### Why SQLite/Turso?
+- **Fast:** SQLite is incredibly fast for most use cases
+- **Simple:** No complex setup or configuration
+- **Portable:** Database is just a file, easy to backup and move
+- **Edge-compatible:** Works in serverless environments
+- **Cost-effective:** Generous free tier, pay-as-you-go pricing
+
+## Local Development
+
+### Pre-requisites
+- **Turso CLI** - Install via [Nix](/docs/usage/nix), or download from [Turso Downloads](https://docs.turso.tech/cli/introduction). 
+
+### Starting the Database
+When you run `pnpm dev` with backend enabled, two things happen:
+
+```bash
+pnpm dev
+# [0] sqld listening on port 8080
+# [1] ▲ Next.js ready at http://localhost:3000
+```
+
+- **[0]** - Turso local server (`sqld`) on port 8080
+- **[1]** - Next.js development server on port 3000
+
+### Database File
+Your local database is stored as `local.db` in your project root. This file contains all your data and can be:
+- Backed up by copying the file
+- Reset by deleting the file (will be recreated on next `pnpm dev`)
+- Shared with teammates (though not recommended for sensitive data)
+
+### Environment Variables
+```env
+# Local development
+TURSO_DATABASE_URL=http://127.0.0.1:8080
+TURSO_AUTH_TOKEN=  # Empty for local development
+```
+
+## Database Operations
+
+Database operations are handled using Drizzle ORM, which provides a type-safe way to interact with your SQLite database. Check the documentation for [Drizzle ORM](/docs/usage/drizzle) to learn how to define schemas, run queries, and manage migrations.
+
+## Future Database Options
+
+### Coming Soon
+- **Neon (Postgres)** - Serverless Postgres with modern features
+- **Docker Postgres** - Local Postgres development with Docker
+- **Supabase** - Full-stack Postgres with auth and storage
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://www.turso.tech/"
+    title="Turso Homepage"
+    description="Learn more about Turso and its features."
+  />
+  <CardLink
+    href="https://www.turso.tech/cli/introduction"
+    title="Turso CLI Documentation"
+    description="Official documentation for the Turso CLI."
+  />
+  <CardLink
+    href="/docs/usage/drizzle"
+    title="Drizzle ORM Guide"
+    description="Learn how to use Drizzle ORM with Turso."
+  />
+  <CardLink
+    href="https://github.com/tursodatabase/libsql"
+    title="libSQL GitHub"
+    description="The underlying library that powers Turso."
+  />
+</div>  

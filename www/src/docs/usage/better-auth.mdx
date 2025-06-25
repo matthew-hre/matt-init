@@ -1,0 +1,177 @@
+---
+title: "Better Auth"
+description: "Authentication with Better Auth in your matt-init project"
+order: 4
+---
+
+## What's Included
+
+### Pre-configured Authentication
+- **Email/Password authentication** with built-in validation
+- **Session management** with secure cookies
+- **Database integration** with Drizzle ORM
+- **Type-safe API** throughout your application
+
+### Authentication Pages
+- **`/signin`** - Login form with email/password
+- **`/signup`** - Registration form with validation
+- **`/dashboard`** - Protected route example
+
+### API Routes
+- **`/api/auth/[...all]`** - Handles all authentication endpoints
+- **Session management** built into the API layer
+
+## Authentication Flow
+
+### User Registration
+```typescript
+import { auth } from "~/lib/auth";
+
+const { data, error } = await auth.api.signUpEmail({
+  body: {
+    name: "John Doe",
+    email: "user@example.com",
+    password: "securePassword123",
+  },
+});
+```
+
+### User Login
+```typescript
+import { auth } from "~/lib/auth";
+
+const { data, error } = await auth.api.signInEmail({
+  body: {
+    email: "user@example.com",
+    password: "securePassword123",
+  },
+});
+```
+
+> **Note**: See how we're using the `auth.api` methods to handle user login / signup? The better-auth api provides server-side access to authentication methods, meaning Next.js can handle this securely without exposing sensitive logic to the client.
+
+## Working with Sessions
+
+### Server Components
+```typescript
+// app/dashboard/page.tsx
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+export default async function Dashboard() {
+  const headersList = await headers();
+  const session = await auth.api.getSession({
+    headers: headersList,
+  });
+
+  if (!session) {
+    redirect("/signin");
+  }
+
+  return (
+    <div>
+      <h1>Welcome, {session.user.name}!</h1>
+      <p>Email: {session.user.email}</p>
+    </div>
+  );
+}
+```
+
+### Client Components
+```typescript
+// Client-side session handling
+"use client";
+
+import { auth } from "~/lib/auth";
+
+export function UserProfile() {
+  const { data: session } = auth.getSession();
+
+  if (!session) return <div>Please sign in</div>;
+
+  return (
+    <div>
+      <h2>{session.user.name}</h2>
+      <p>{session.user.email}</p>
+    </div>
+  );
+}
+```
+
+## Middleware Protection
+
+The included middleware protects routes automatically:
+
+```typescript
+// middleware.ts
+export const config = {
+  matcher: ["/dashboard"], // Protected routes are specified here
+};
+```
+
+### Custom Authentication Providers
+Better Auth supports many providers. Add them in `src/lib/auth.ts`.
+
+As an example, here's how to add GitHub authentication:
+
+First, create a GitHub OAuth app via the [GitHub Developer Portal](https://github.com/settings/developers).
+
+Next, add your GitHub client ID and secret to your environment variables:
+```env
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+Once that's included, update your `src/lib/env.ts` to include the GitHub provider:
+```typescript
+// src/lib/env.ts
+const EnvSchema = z.object({
+  // ... existing variables
+  GITHUB_CLIENT_ID: z.string(),
+  GITHUB_CLIENT_SECRET: z.string(),
+});
+```
+Now, update your `src/lib/auth.ts` to include the GitHub provider:
+
+```typescript
+import { betterAuth } from "better-auth";
+import { env } from "~/lib/env";
+
+export const auth = betterAuth({
+  // ... existing config
+  socialProviders: {
+    github: {
+      clientId: env.GITHUB_CLIENT_ID as string,
+      clientSecret: env.GITHUB_CLIENT_SECRET as string,
+    },
+  },
+});
+```
+
+That's it! Your application now supports GitHub authentication. Signing in with a social provider is incredibly similar to email/password authentication:
+
+```typescript
+import { auth } from "~/lib/auth";
+
+const { data, error } = await auth.api.signInSocial({
+  body: {
+    provider: "github", // or any other provider you've configured
+  },
+});
+```
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://www.better-auth.com/"
+    title="Better Auth Documentation"
+    description="Official documentation for Better Auth, covering setup, configuration, and usage."
+  />
+  <CardLink
+    href="https://github.com/better-auth/better-auth"
+    title="Better Auth Github"
+    description="Source code and examples for Better Auth, including integration guides and API references."
+  />
+</div>

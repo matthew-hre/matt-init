@@ -1,4 +1,5 @@
 import { Book, Github } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -8,7 +9,8 @@ export default function Header() {
       sm:p-4
     `}
     >
-      <a
+      <Link
+        href="/docs"
         className={`
           bg-foreground text-background flex h-10 w-auto items-center
           justify-center gap-2 rounded-full border border-solid
@@ -16,9 +18,6 @@ export default function Header() {
           hover:bg-muted-foreground
           sm:h-12 sm:px-5 sm:text-base
         `}
-        href="https://github.com/matthew-hre/matt-init"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         <Book className={`
           h-4 w-4
@@ -26,7 +25,7 @@ export default function Header() {
         `}
         />
         Documentation
-      </a>
+      </Link>
       <a
         className={`
           border-muted flex h-10 w-auto items-center justify-center gap-2

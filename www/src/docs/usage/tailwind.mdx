@@ -1,0 +1,171 @@
+---
+title: "Tailwind CSS"
+description: "Styling with Tailwind CSS v4 in your matt-init project"
+order: 6
+---
+
+## Configuration
+
+### No Config File Needed
+Unlike previous versions, Tailwind v4 doesn't require a separate configuration file. Everything is handled through CSS:
+
+```css
+/* Configure Tailwind directly in CSS */
+@import "tailwindcss";
+
+/* Custom spacing scale */
+@theme {
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
+}
+```
+
+## Using Tailwind Classes
+
+### Basic Styling
+```html
+// Basic utility classes
+<div className="bg-white p-4 rounded-lg shadow-md">
+  <h1 className="text-2xl font-bold text-gray-900">
+    Hello World
+  </h1>
+  <p className="text-gray-600 mt-2">
+    This is styled with Tailwind CSS
+  </p>
+</div>
+```
+
+### Responsive Design
+```html
+// Mobile-first responsive design
+<div className="
+  w-full 
+  md:w-1/2 
+  lg:w-1/3 
+  xl:w-1/4
+  p-4 
+  sm:p-6 
+  lg:p-8
+">
+  <img 
+    className="w-full h-48 sm:h-64 lg:h-72 object-cover rounded-lg"
+    src="/image.jpg" 
+    alt="Responsive image"
+  />
+</div>
+```
+
+### Dark Mode
+```html
+// Dark mode utilities
+<div className="
+  bg-white dark:bg-gray-800 
+  text-gray-900 dark:text-white
+  border border-gray-200 dark:border-gray-700
+">
+  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+    Dark Mode Ready
+  </h2>
+</div>
+```
+
+## Dark Mode Implementation
+
+> **Note**: Dark mode is not properly implemented in matt-init quite yet. It's very half baked at the moment. This is all subject to change.
+
+### System Preference Detection
+```typescript
+// components/theme-toggle.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+
+export function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check system preference
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setIsDark(mediaQuery.matches);
+
+    // Listen for changes
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    // Apply dark class to document
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+
+  return (
+    <button
+      onClick={() => setIsDark(!isDark)}
+      className="p-2 rounded-md bg-gray-200 dark:bg-gray-700"
+    >
+      {isDark ? "🌞" : "🌙"}
+    </button>
+  );
+}
+```
+
+### Persistent Theme Storage
+```typescript
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Theme = "light" | "dark" | "system";
+
+export function useTheme() {
+  const [theme, setTheme] = useState<Theme>("system");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme") as Theme;
+    if (stored) setTheme(stored);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const applyTheme = () => {
+        document.documentElement.classList.toggle("dark", mediaQuery.matches);
+      };
+      
+      applyTheme();
+      mediaQuery.addEventListener("change", applyTheme);
+      return () => mediaQuery.removeEventListener("change", applyTheme);
+    } else {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+  }, [theme]);
+
+  return { theme, setTheme };
+}
+```
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://tailwindcss.com/"
+    title="Tailwind CSS Documentation"
+    description="Official documentation for Tailwind CSS, covering all utilities and features."
+  />
+  <CardLink
+    href="https://www.youtube.com/watch?v=UHciHtsuFnw"
+    title="The Advanced TailwindCSS Crash Course"
+    description="A great video introduction to Tailwind CSS."
+  />
+</div>

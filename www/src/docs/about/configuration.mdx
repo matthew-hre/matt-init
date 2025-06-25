@@ -1,0 +1,112 @@
+---
+title: "Configuration"
+description: "Key configuration files you might want to customize for your setup or deployment."
+order: 3
+---
+
+## `.env`
+
+Your `.env` file is generated dynamically during setup. It contains the environment variables needed for the backend, auth, and local dev tooling.
+
+Example:
+
+```env
+NODE_ENV=development
+TURSO_DATABASE_URL=http://127.0.0.1:8080
+TURSO_AUTH_TOKEN= # not needed for local development
+BETTER_AUTH_SECRET=abcd1234...
+BETTER_AUTH_URL=https://localhost:3000
+```
+
+### What each of these does:
+
+* `NODE_ENV` — Usually set to `development`, but overridden in production.
+* `TURSO_DATABASE_URL` — Your local or remote SQLite-compatible database URL.
+* `TURSO_AUTH_TOKEN` — Used when connecting to a remote Turso DB. Leave blank locally.
+* `BETTER_AUTH_SECRET` — Secret key used for encrypting auth tokens. You can generate one using `openssl rand -hex 32`.
+* `BETTER_AUTH_URL` — The base URL of your app, used by BetterAuth for redirects and cookie handling.
+
+> **Note:** `.env` values are type-checked at runtime using Zod via `src/lib/env.ts`. Missing or invalid values will cause the app to fail fast during boot.
+
+---
+
+## `drizzle.config.ts`
+
+Handles Drizzle ORM configuration for migrations and schema paths.
+
+Things you might tweak:
+
+* Change the `dialect` if you're switching off Turso
+* Customize `out` if you want migrations in a different folder
+
+---
+
+## `package.json`
+
+Everything here is ready to go, but worth knowing:
+
+* Scripts like `pnpm db:push`, `pnpm db:migrate`, `pnpm db:generate`, `pnpm db:studio`, and `pnpm dev` are set up for local development with Turso and Drizzle.
+* `pnpm dev` runs both the Next.js dev server and a Turso dev DB concurrently (if backend is enabled).
+
+---
+
+## `src/lib/env.ts`
+
+This handles env var validation using Zod. If you add new environment variables, you should update this schema to match.
+
+```ts
+const EnvSchema = z.object({
+  NODE_ENV: z.string(),
+  TURSO_DATABASE_URL: z.string(),
+  TURSO_AUTH_TOKEN: z.string(),
+  BETTER_AUTH_SECRET: z.string(),
+  BETTER_AUTH_URL: z.string(),
+});
+```
+
+---
+
+## `src/lib/db/schema/`
+
+This is where your Drizzle schemas live. If you're building out your app's models, this is where to do it. It already includes basic `user`, `session`, and `account` tables used by BetterAuth.
+
+---
+
+## `flake.nix` / `nix/devShell.nix`
+
+Only relevant if you enabled Nix. These define your development shell and toolchain.
+
+* Want to add a CLI tool like `jq` or `sqlite-utils`? Add it to `devShell.nix`.
+* Want to pin a different version of Node or PNPM? Adjust it here.
+
+---
+
+## `eslint.config.mjs`
+
+Based on `@antfu/eslint-config`, with extra rules for filename casing, import sorting, and strict formatting. If you need to tweak a rule, this is where it lives.
+
+---
+
+## `.vscode/`
+
+If you opted in, this includes:
+
+* Recommended extensions (`extensions.json`)
+* Project-specific settings like formatting on save, auto-imports, etc. (`settings.json`)
+
+---
+
+## Next Steps
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+    <CardLink
+        title="Project Structure"
+        description="Understand the layout of a matt-init project."
+        href="/docs/about/project-structure"
+    />
+        <CardLink
+        title="Included Tools"
+        description="Learn about the tools and libraries included in matt-init."
+        href="/docs/about/included-tools"
+    />
+</div>

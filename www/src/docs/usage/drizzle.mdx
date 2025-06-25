@@ -1,0 +1,102 @@
+---
+title: "Drizzle ORM"
+description: "Working with Drizzle ORM in your matt-init project"
+order: 2
+---
+
+## Getting Started
+
+### Understanding the Schema
+Drizzle ORM uses a schema-first approach. Your database structure is defined in TypeScript files located in `src/lib/db/schema/`. Let's look at an example schema for something simple, like a hypothetical `post` table:
+
+```typescript
+// src/lib/db/schema/auth.ts
+import { sqliteTable, text, int, integer } from "drizzle-orm/sqlite-core";
+import { user } from "~/lib/db/schema";
+
+export const post = sqliteTable("post", {
+  id: int().primaryKey({ autoIncrement: true }),
+  title: text().notNull(),
+  content: text().notNull(),
+  authorId: text().notNull().references(() => user.id, { onDelete: "cascade" }),
+  createdAt: integer({ mode: "timestamp" }).notNull(),
+  updatedAt: integer({ mode: "timestamp" }).notNull(),
+});
+```
+
+This defines a `post` table with:
+- `id`: Primary key
+- `title`: Text field, cannot be null
+- `content`: Text field, cannot be null
+- `authorId`: Foreign key referencing the `user` table
+- `createdAt` and `updatedAt`: Timestamps for creation and last update
+
+### Generating and Running Migrations
+After adding new tables or modifying existing ones, you need to generate and run migrations to update your database schema. "Migrations" are versioned changes to your database schema that can be applied incrementally. Think of it like Git for your database, but like, not at all.
+
+```bash
+# Generate migration files
+pnpm db:generate
+
+# Apply migrations to your database
+pnpm db:migrate
+
+# Or: do both at once
+pnpm db:push
+```
+
+### Querying Data
+
+Drizzle ORM provides a type-safe query builder that allows you to interact with your database using TypeScript. Here's how you can perform basic operations:
+
+```typescript
+// In your API routes or Server Components
+import { db } from "~/lib/db";
+import { posts, users } from "~/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+// Fetch all posts
+const allPosts = await db.select().from(posts);
+
+// Fetch a specific post by ID
+const postId = "123";
+const post = await db.select().from(posts).where(eq(posts.id, postId)).get();
+
+// Insert a new post
+const newPost = await db.insert(posts).values({
+  title: "My New Post",
+  content: "This is the content of my new post.",
+  authorId: "author-id-123",
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+}).returning();
+```
+
+## Drizzle Studio
+
+Drizzle Studio is a powerful web interface for managing your Drizzle ORM database. It allows you to visually interact with your database, making it easier to explore and manipulate data.
+
+```bash
+pnpm db:studio
+```
+
+This opens a web interface where you can:
+- Browse tables and data
+- Run queries
+- Edit records
+- Explore relationships
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="https://orm.drizzle.team/docs"
+    title="Drizzle ORM Documentation"
+    description="Official documentation for Drizzle ORM."
+  />
+  <CardLink
+    href="/docs/usage/databases"
+    title="Database Integration Guide"
+    description="How to integrate databases with your matt-init project."
+  />
+</div>

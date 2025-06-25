@@ -10,3 +10,5 @@ coverage/
 # Temporary test artifacts
 test/temp/
 test/output/
+
+.claude/

@@ -1,0 +1,106 @@
+---
+title: "Included Tools"
+description: "Overview of the tools and technologies included in every matt-init project"
+order: 5
+---
+
+## Core Stack (Every Project)
+
+### Next.js 15
+- **What it is:** React framework with App Router, Server Components, and modern features
+- **Why I chose it:** Production-ready, excellent DX, strong ecosystem, and I already know it
+- **Version:** 15.3.2 with Turbopack
+
+### TypeScript
+- **What it is:** Typed superset of JavaScript
+- **Why I chose it:** Catches errors early, improves code quality, excellent IDE support
+- **Configuration:** Strict mode enabled with path aliases (`~/` instead of `../../../`)
+
+### Tailwind CSS v4
+- **What it is:** Utility-first CSS framework
+- **Why I chose it:** Rapid styling, consistent design, excellent developer experience
+- **Configuration:** CSS-based configuration (no separate config file needed)
+
+### ESLint + @antfu/eslint-config
+- **What it is:** Comprehensive linting setup with opinionated rules
+- **Why I chose it:** Enforces code quality, catches common mistakes, formats code consistently
+- **Includes:** React rules, TypeScript rules, import sorting, filename conventions
+
+## Environment & Validation
+
+### Zod
+- **What it is:** TypeScript-first schema declaration and validation library
+- **Why I chose it:** Type-safe environment variables, runtime validation, great DX
+- **Usage:** Environment variable validation in `src/lib/env.ts`
+
+### Environment Management
+- **What it is:** Type-safe environment variable handling
+- **Why I chose it:** Fail-fast on missing config, prevents runtime errors, godsend in production
+- **Files:** `.env`, `.env.example`, `src/lib/env.ts`
+
+## Development Tools
+
+### VS Code Integration (Optional)
+- **What it is:** Workspace settings and recommended extensions
+- **Why I chose it:** Consistent team experience, auto-formatting, helpful extensions
+- **Includes:** ESLint, Tailwind IntelliSense, TypeScript optimizations
+
+### Nix Development Environment (Optional)
+- **What it is:** Reproducible development shell with all dependencies
+- **Why I chose it:** Consistent environment across machines, version pinning
+- **Includes:** Node.js, pnpm, database tools (when backend enabled)
+
+## Backend Stack (Optional)
+
+### Drizzle ORM
+- **What it is:** TypeScript ORM with excellent developer experience
+- **Why I chose it:** Type-safe database queries, excellent migrations, lightweight
+- **Learn more:** [Drizzle documentation](/docs/usage/drizzle)
+
+### Turso Database
+- **What it is:** Edge-compatible SQLite database
+- **Why I chose it:** Fast, scalable, works everywhere, great for development
+- **Learn more:** [Database documentation](/docs/usage/databases)
+
+### Better Auth
+- **What it is:** Modern authentication library for TypeScript
+- **Why I chose it:** Type-safe, framework agnostic, extensive provider support
+- **Learn more:** [Better Auth documentation](/docs/usage/better-auth)
+
+## Why These Tools?
+
+There's no method to my madness, these tools were chosen truly based on my personal preferences and experience. I wanted to create a stack that I would find myself throwing together during a weekend project, or something I would use to build a side project. This probably means this isn't the most opimized or efficient stack, but it is one that I know works well together and provides a solid developer experience.
+
+## What's NOT Included
+
+### UI Component Libraries
+- No shadcn/ui, Chakra UI, or other component libraries by default
+- You can add these later based on your needs (they are also in the roadmap, eyes peeled!)
+
+### State Management
+- No Redux, Zustand, or other global state libraries
+- Start with React's built-in state, add complexity only when needed
+
+### Testing Frameworks
+- No Jest, Vitest, or testing libraries by default
+- Add testing setup based on your project requirements
+- Writing unit tests triggers a post-trauma response in me, so I don't include them here
+
+### Additional Databases
+- Only Turso (SQLite) is currently implemented
+- Neon (Postgres) and Docker Postgres are planned for future releases
+
+## Next Steps
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="/docs/usage/quick-start"
+    title="Quick Start"
+    description="Follow our quick start guide to create your first project"
+  />
+  <CardLink
+    href="/docs/about/configuration"
+    title="Configuration Guide"
+    description="Learn how to customize your matt-init setup"
+  />
+</div>
