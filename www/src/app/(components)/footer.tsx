@@ -1,3 +1,5 @@
+import { ModeToggle } from "~/components/theme-toggle";
+
 export default function Footer() {
   return (
     <footer className={`
@@ -106,10 +108,19 @@ export default function Footer() {
           `}
           >
             <div className={`
-              flex flex-col gap-1
+              flex flex-col gap-1 space-y-0.5
               md:items-end
             `}
             >
+              <ModeToggle
+                className={`
+                  text-muted-foreground h-auto cursor-pointer py-0 pr-0
+                  font-mono text-xs
+                  hover:text-foreground
+                  focus-visible:text-foreground focus-visible:underline
+                  focus-visible:ring-0
+                `}
+              />
               <p className="text-muted-foreground font-mono text-xs">
                 commit #abcd123
               </p>

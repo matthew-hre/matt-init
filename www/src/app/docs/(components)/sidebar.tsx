@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { ModeToggle } from "~/components/theme-toggle";
+
 type DocItem = {
   title: string;
   slug: string;
@@ -39,18 +41,21 @@ export function Sidebar({ structure }: SidebarProps) {
 
   return (
     <aside className={`
-      bg-background border-muted fixed top-0 left-0 h-screen w-64
+      bg-background border-muted fixed top-0 left-0 flex h-screen w-64 flex-col
       overflow-y-auto border-r
     `}
     >
       <Link
         href="/"
-        className="border-muted flex items-center border-b p-6 pb-6"
+        className={`
+          border-muted bg-background sticky top-0 flex items-center border-b p-6
+          pb-6
+        `}
       >
         <h2 className="text-lg font-bold">matt-init</h2>
       </Link>
 
-      <nav>
+      <nav className="flex flex-1 flex-col">
         <Link
           href="/docs"
           className={`
@@ -119,7 +124,24 @@ export function Sidebar({ structure }: SidebarProps) {
             )}
           </div>
         ))}
+        <div className="h-16" />
       </nav>
+      <div className={`
+        border-muted bg-background sticky bottom-0 w-full border-t px-3 py-2
+      `}
+      >
+        <ModeToggle
+          className={`
+            text-muted-foreground cursor-pointer pl-0 font-mono text-xs
+            hover:text-foreground
+            focus-visible:text-foreground focus-visible:underline
+            focus-visible:ring-0
+          `}
+        />
+        <p className="text-muted-foreground font-mono text-xs">
+          © 2025 Matthew Hrehirchuk
+        </p>
+      </div>
     </aside>
   );
 }

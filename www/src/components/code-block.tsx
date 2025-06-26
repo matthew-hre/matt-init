@@ -79,6 +79,7 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
           theme: theme === "dark" ? "github-dark" : "github-light",
           colorReplacements: {
             "#24292e": "#141416",
+            "#fff": "#f2f2f3",
           },
         });
         setHtml(highlighted);
@@ -96,8 +97,8 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
   if (!html) {
     return (
       <pre className={`
-        bg-foreground/[0.05] min-w-full overflow-x-auto rounded-lg border px-6
-        py-4
+        bg-foreground/[0.05] mb-4 min-w-full overflow-x-auto rounded-lg border
+        px-6 py-4
       `}
       >
         <code className="font-mono text-sm">{children}</code>
