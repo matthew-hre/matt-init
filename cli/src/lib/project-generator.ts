@@ -42,11 +42,6 @@ export async function generateProject(options: ProjectOptions, PACKAGE_ROOT: str
     await installDependencies(targetPath);
   }
 
-  // do this at the very end to ensure all files are in place
-  if (options.shouldInitGit) {
-    await applyGitInit(targetPath);
-  }
-
   // clean up
   const gitignorePath = path.join(targetPath, "_gitignore");
   const newGitignorePath = path.join(targetPath, ".gitignore");
@@ -58,6 +53,12 @@ export async function generateProject(options: ProjectOptions, PACKAGE_ROOT: str
   await fs.rename(eslintConfigPath, newEslintConfigPath);
 
   await setProjectName(targetPath, options.projectName);
+
+  // do this at the very end to ensure all files are in place.
+  // make sure this happens *after* we set up the gitignore
+  if (options.shouldInitGit) {
+    await applyGitInit(targetPath);
+  }
 }
 
 /**
