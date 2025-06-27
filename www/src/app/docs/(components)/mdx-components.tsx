@@ -118,8 +118,7 @@ export const components: MDXComponents = {
     return (
       <pre
         className={`
-          bg-foreground/[0.05] mb-4 min-w-full overflow-x-auto rounded-lg px-6
-          py-4
+          bg-foreground/[0.05] mb-4 overflow-x-auto rounded-lg px-6 py-4
         `}
         {...props}
       >

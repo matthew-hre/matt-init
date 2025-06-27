@@ -41,18 +41,26 @@ export function Sidebar({ structure }: SidebarProps) {
 
   return (
     <aside className={`
-      bg-background border-muted fixed top-0 left-0 flex h-screen w-64 flex-col
-      overflow-y-auto border-r
+      bg-background border-muted flex h-screen w-full flex-col overflow-y-auto
+      border-r
+      lg:fixed lg:top-0 lg:left-0 lg:w-64
     `}
     >
       <Link
         href="/"
         className={`
-          border-muted bg-background sticky top-0 flex items-center border-b p-6
-          pb-6
+          border-muted bg-background sticky top-0 flex items-center border-b
+          pt-1.5 pb-1.5
+          lg:p-6
         `}
       >
-        <h2 className="text-lg font-bold">matt-init</h2>
+        <h2 className={`
+          pl-12 text-lg font-bold
+          lg:pl-0
+        `}
+        >
+          matt-init
+        </h2>
       </Link>
 
       <nav className="flex flex-1 flex-col">
@@ -127,7 +135,8 @@ export function Sidebar({ structure }: SidebarProps) {
         <div className="h-16" />
       </nav>
       <div className={`
-        border-muted bg-background sticky bottom-0 w-full border-t px-3 py-2
+        border-muted bg-background sticky bottom-0 w-full border-t px-6 py-2
+        pb-4
       `}
       >
         <ModeToggle

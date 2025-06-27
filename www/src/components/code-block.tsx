@@ -97,8 +97,7 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
   if (!html) {
     return (
       <pre className={`
-        bg-foreground/[0.05] mb-4 min-w-full overflow-x-auto rounded-lg border
-        px-6 py-4
+        bg-foreground/[0.05] mb-4 overflow-x-auto rounded-lg border px-6 py-4
       `}
       >
         <code className="font-mono text-sm">{children}</code>
@@ -108,7 +107,7 @@ export function CodeBlock({ children, className = "", language }: CodeBlockProps
 
   return (
     <div
-      className="border-muted mb-4 overflow-x-auto rounded-lg border"
+      className="border-muted mb-4 w-full overflow-x-auto rounded-lg border"
       // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
       dangerouslySetInnerHTML={{ __html: html }}
     />

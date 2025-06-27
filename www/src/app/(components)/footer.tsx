@@ -114,8 +114,8 @@ export default function Footer() {
             >
               <ModeToggle
                 className={`
-                  text-muted-foreground h-auto cursor-pointer py-0 pr-0
-                  font-mono text-xs
+                  text-muted-foreground h-auto w-min cursor-pointer py-0 pr-0
+                  pl-0 font-mono text-xs
                   hover:text-foreground
                   focus-visible:text-foreground focus-visible:underline
                   focus-visible:ring-0
