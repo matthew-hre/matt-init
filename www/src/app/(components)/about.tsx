@@ -8,7 +8,13 @@ export default function About() {
     `}
     >
       <div className="flex flex-1 flex-col items-start justify-center gap-4">
-        <h2 className="text-3xl font-bold">...another Next.js Scaffolding tool?</h2>
+        <h2 className={`
+          w-full text-center text-3xl font-bold
+          md:text-left
+        `}
+        >
+          ...another Next.js Scaffolding tool?
+        </h2>
         <p className="text-muted-foreground text-lg">
           Yeah yeah, I know. Everyone has a Next.js starter these days. Tech stacks are like assholes: everyone's got one. But this one's mine.
         </p>

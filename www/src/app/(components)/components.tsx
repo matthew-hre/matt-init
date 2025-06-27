@@ -1,7 +1,8 @@
 export default function Components() {
   return (
     <div className={`
-      mt-32 flex w-full flex-col items-center justify-center gap-8 p-8
+      flex w-full flex-col items-center justify-center gap-8 p-8
+      md:mt-32
     `}
     >
       <h2 className="text-3xl font-bold">What's in the Box?</h2>

@@ -1,5 +1,6 @@
 import type React from "react";
 
+import { MobileSidebarWrapper } from "~/app/docs/(components)/mobile-sidebar-wrapper";
 import { Sidebar } from "~/app/docs/(components)/sidebar";
 import { TableOfContents } from "~/components/table-of-contents";
 import { getDocsStructure } from "~/lib/docs";
@@ -14,10 +15,34 @@ export default async function DocsLayout({
   return (
     <div className="min-h-screen">
       <div className="flex">
-        <Sidebar structure={docsStructure} />
-        <div className="ml-64 flex flex-1">
-          <main className="flex flex-1 justify-center">
-            <div className="w-full max-w-3xl px-8 py-12">{children}</div>
+        {/* Mobile Navigation */}
+        <div className="lg:hidden">
+          <MobileSidebarWrapper structure={docsStructure} />
+        </div>
+
+        {/* Desktop Sidebar */}
+        <div className={`
+          hidden
+          lg:block
+        `}
+        >
+          <Sidebar structure={docsStructure} />
+        </div>
+
+        <div className={`
+          flex flex-1 overflow-hidden
+          lg:ml-64
+        `}
+        >
+          <main className="flex flex-1 justify-center overflow-x-hidden">
+            <div className={`
+              w-full max-w-3xl px-4 py-12
+              sm:px-6
+              lg:px-8
+            `}
+            >
+              {children}
+            </div>
             <aside className={`
               hidden w-64 shrink-0
               xl:block

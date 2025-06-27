@@ -129,13 +129,35 @@
 
 /* Shiki code block styles */
 .shiki {
-  @apply rounded-lg px-6 py-4 overflow-x-auto;
+  @apply rounded-lg px-6 py-4 overflow-x-auto w-full;
 }
 
 .shiki pre {
-  @apply m-0 p-0 bg-transparent border-0;
+  @apply m-0 p-0 bg-transparent border-0 overflow-x-auto;
 }
 
 .shiki code {
   @apply font-mono text-sm bg-transparent;
+}
+
+/* Prevent code blocks from causing page overflow on mobile */
+article pre,
+main article pre,
+.prose pre,
+.shiki {
+  @apply max-w-full overflow-x-auto;
+}
+
+article pre code,
+main article pre code,
+.prose pre code,
+.shiki code {
+  @apply block w-max;
+}
+
+/* Ensure code block containers don't overflow */
+article pre,
+main article pre,
+.prose pre {
+  @apply max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-3rem)] lg:max-w-full;
 }

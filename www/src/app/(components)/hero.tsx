@@ -5,8 +5,9 @@ export default function Hero() {
   return (
     <div className={`
       grid h-full max-h-screen grid-rows-[20px_1fr_20px] items-center
-      justify-items-center gap-16 p-8 pb-20 font-sans
+      justify-items-center gap-16 p-8 font-sans
       sm:p-40
+      md:pb-20
     `}
     >
       <main className={`
@@ -22,9 +23,9 @@ export default function Hero() {
           <MattInitBanner />
         </div>
         <h1 className={`
-          text-center text-6xl font-bold
+          pt-24 text-center text-6xl font-bold
           sm:text-left sm:text-6xl
-          md:hidden
+          md:hidden md:pt-0
         `}
         >
           matt-init
