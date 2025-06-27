@@ -7,7 +7,9 @@ export async function findGitExecutable(): Promise<string> {
   const { execa } = await import("execa");
 
   try {
-    const { stdout } = await execa("which", ["git"]);
+    // windows uses 'where', others use 'which'
+    const cmd = process.platform === "win32" ? "where" : "which";
+    const { stdout } = await execa(cmd, ["git"]);
     return stdout.trim();
   }
   catch {
