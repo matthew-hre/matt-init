@@ -3,6 +3,7 @@
 import pc from "picocolors";
 
 import { runCLI } from "./cli";
+import { getGitBashErrorMessage, isGitBash } from "./utils/environment";
 
 /**
  * Main entry point for the application.
@@ -14,6 +15,13 @@ import { runCLI } from "./cli";
  */
 async function main() {
   try {
+    // Check if running in Git Bash before proceeding
+    if (isGitBash() && !process.argv.includes("--ci")) {
+      console.error(pc.red("Error: Git Bash detected"));
+      console.error(getGitBashErrorMessage());
+      process.exit(1);
+    }
+
     await runCLI();
   }
   catch (error) {
