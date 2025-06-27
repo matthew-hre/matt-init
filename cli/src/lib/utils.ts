@@ -76,22 +76,37 @@ export async function setProjectName(
   projectDir: string,
   projectName: string,
 ): Promise<void> {
-  // this isn't comprehensive at all, and probably needs a refactor.
-  // since we know what files the project name is used in, we can just
-  // replace the placeholder with the actual project name.
+  // always update package.json as it's required
+  const packageJsonPath = path.join(projectDir, "package.json");
+  try {
+    if (await fs.pathExists(packageJsonPath)) {
+      let content = await fs.readFile(packageJsonPath, "utf-8");
+      content = content.replace(/__APP_NAME__/g, projectName);
+      await fs.writeFile(packageJsonPath, content, "utf-8");
+    }
+  }
+  catch (error) {
+    // updating the package.json is critical, so we throw an error if it fails
+    throw new Error(`Failed to update package.json: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
-  const filesToUpdate = [
-    path.join(projectDir, "package.json"),
+  // optional files - only update if they exist
+  const optionalFiles = [
     path.join(projectDir, "flake.nix"),
     path.join(projectDir, "nix", "devShell.nix"),
   ];
 
-  for (const filePath of filesToUpdate) {
-    if (await fs.pathExists(filePath)) {
-      let content = await fs.readFile(filePath, "utf-8");
-      content = content.replace(/__APP_NAME__/g, projectName);
-      await fs.writeFile(filePath, content, "utf-8");
+  for (const filePath of optionalFiles) {
+    try {
+      if (await fs.pathExists(filePath)) {
+        let content = await fs.readFile(filePath, "utf-8");
+        content = content.replace(/__APP_NAME__/g, projectName);
+        await fs.writeFile(filePath, content, "utf-8");
+      }
     }
-    // just skip if the file doesn't exist, this needs to be more robust
+    catch (error) {
+      // log error but continue processing other files
+      console.debug(`Failed to update ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 }
