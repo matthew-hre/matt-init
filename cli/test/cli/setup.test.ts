@@ -39,7 +39,7 @@ describe("cLI Command Setup", () => {
       expect(context.mockCommand.option).toHaveBeenCalledWith("--no-vscode", "Skip VS Code settings setup");
       expect(context.mockCommand.option).toHaveBeenCalledWith("-y, --default", "Use defaults, skip prompts");
       expect(context.mockCommand.option).toHaveBeenCalledWith("--ci", "Run in CI mode (non-interactive, test mode)");
-      expect(context.mockCommand.version).toHaveBeenCalledWith("1.0.3");
+      expect(context.mockCommand.version).toHaveBeenCalledWith("1.0.4");
     });
   });
 });
