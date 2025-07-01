@@ -4,6 +4,11 @@ description: "Working with databases in your matt-init project"
 order: 3
 ---
 
+### Database Operations
+
+> **Note**: Database operations are handled using Drizzle ORM, which provides a type-safe way to interact with your SQLite database. Check the documentation for [Drizzle ORM](/docs/usage/drizzle) to learn how to define schemas, run queries, and manage migrations.
+
+
 ## Turso (SQLite)
 
 ### What is Turso?
@@ -16,12 +21,12 @@ Turso is a distributed SQLite platform that brings SQLite to the edge. It's comp
 - **Edge-compatible:** Works in serverless environments
 - **Cost-effective:** Generous free tier, pay-as-you-go pricing
 
-## Local Development
+### Local Development
 
-### Pre-requisites
+#### Pre-requisites
 - **Turso CLI** - Install via [Nix](/docs/usage/nix), or download from [Turso Downloads](https://docs.turso.tech/cli/introduction). 
 
-### Starting the Database
+#### Starting the Database
 When you run `pnpm dev` with backend enabled, two things happen:
 
 ```bash
@@ -33,28 +38,65 @@ pnpm dev
 - **[0]** - Turso local server (`sqld`) on port 8080
 - **[1]** - Next.js development server on port 3000
 
-### Database File
+#### Database File
 Your local database is stored as `local.db` in your project root. This file contains all your data and can be:
 - Backed up by copying the file
 - Reset by deleting the file (will be recreated on next `pnpm dev`)
 - Shared with teammates (though not recommended for sensitive data)
 
-### Environment Variables
+#### Environment Variables
 ```env
 # Local development
 TURSO_DATABASE_URL=http://127.0.0.1:8080
 TURSO_AUTH_TOKEN=  # Empty for local development
 ```
+## Docker + Postgres
 
-## Database Operations
+### What is Docker? What is Postgres?
+**Docker** is a platform that allows you to run applications in isolated containers. Each container has everything it needs to run, including the code, runtime, libraries, and dependencies. This ensures that your application runs consistently across different environments.
 
-Database operations are handled using Drizzle ORM, which provides a type-safe way to interact with your SQLite database. Check the documentation for [Drizzle ORM](/docs/usage/drizzle) to learn how to define schemas, run queries, and manage migrations.
+**Postgres** (or PostgreSQL) is a powerful, open-source relational database management system. It supports advanced data types and offers features like transactions, foreign keys, and complex queries.
+
+### Why Docker + Postgres?
+
+- **Full-featured:** Postgres is a powerful relational database with advanced features
+- **Isolation:** Each project can have its own database instance
+- **Easy setup:** Docker makes it easy to run and manage your database
+- **Consistent environment:** Same database setup across all developers' machines
+
+### Local Development
+
+#### Pre-requisites
+- **Docker** - Install Docker Desktop or Docker Engine on your machine.
+- **Docker Compose** - Comes with Docker Desktop, or installed separately on some Linux distributions (included in the Nix flake if using Nix).
+
+#### Starting the Database
+When you run `pnpm dev` with backend enabled, the Docker container for Postgres will start automatically. The database is defined in `docker-compose.yml`.
+
+```bash
+pnpm dev
+# [0] Starting Postgres container...
+# [1] ▲ Next.js ready at http://localhost:3000
+```
+
+#### Database Configuration
+The Postgres database is configured in `docker-compose.yml`. You can customize the database name,
+user, and password by modifying the environment variables in the file.
+
+#### Environment Variables
+```env
+# Local development
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/matt-init-docker-postgres_db
+POSTGRES_DB=matt_init_docker_postgres_db 
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5432
+```
 
 ## Future Database Options
 
 ### Coming Soon
 - **Neon (Postgres)** - Serverless Postgres with modern features
-- **Docker Postgres** - Local Postgres development with Docker
 - **Supabase** - Full-stack Postgres with auth and storage
 
 ## Resources

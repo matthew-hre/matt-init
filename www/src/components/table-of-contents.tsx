@@ -23,7 +23,7 @@ export function TableOfContents({ className }: TableOfContentsProps) {
     const extractHeadings = () => {
       // Extract all headings from the content
       const elements = Array.from(
-        document.querySelectorAll("article h1, article h2, article h3"),
+        document.querySelectorAll("article h1, article h2, article h3, article h4"),
       );
 
       const usedIds = new Set<string>();
