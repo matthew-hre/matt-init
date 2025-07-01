@@ -1,4 +1,6 @@
 import antfu from "@antfu/eslint-config";
+import nextPlugin from "@next/eslint-plugin-next";
+import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 
 export default antfu(
   {
@@ -10,15 +12,27 @@ export default antfu(
       semi: true,
       quotes: "double",
     },
-    ignores: ["**/migrations/*", "next-env.d.ts"],
-    overrides: [
-      {
-        files: ["template/**/*.tsx"],
-        parserOptions: {
-          ignoreDiagnostics: [7026],
-        },
-      },
-    ],
+    ignores: ["**/dist/*", "next-env.d.ts"],
+  },
+  {
+    plugins: {
+      "better-tailwindcss": eslintPluginBetterTailwindcss,
+    },
+    rules: {
+      ...eslintPluginBetterTailwindcss.configs["recommended-warn"].rules,
+      "better-tailwindcss/no-unregistered-classes": "off",
+    },
+  },
+  {
+    plugins: {
+      "@next/next": nextPlugin,
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
+      "@next/next/no-html-link-for-pages": "off",
+      "@next/next/no-img-element": "off",
+    },
   },
   {
     rules: {

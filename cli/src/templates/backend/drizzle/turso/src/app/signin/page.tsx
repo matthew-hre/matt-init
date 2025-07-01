@@ -22,16 +22,31 @@ async function signinAction(formData: FormData) {
 
 export default function SigninPage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full">
-        <div className="w-full max-w-md mx-auto">
-          <h1 className="text-2xl font-semibold tracking-tight mb-8 text-center font-[family-name:var(--font-geist-sans)]">
+    <div className={`
+      grid min-h-screen grid-rows-[20px_1fr_20px] items-center
+      justify-items-center gap-16 p-8 pb-20
+      font-[family-name:var(--font-geist-sans)]
+      sm:p-20
+    `}
+    >
+      <main className={`
+        row-start-2 flex w-full flex-col items-center gap-8
+        sm:items-start
+      `}
+      >
+        <div className="mx-auto w-full max-w-md">
+          <h1 className={`
+            mb-8 text-center
+            font-[family-name:var(--font-geist-sans)]
+            text-2xl font-semibold tracking-tight
+          `}
+          >
             Sign In
           </h1>
 
           <form action={signinAction} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
+              <label htmlFor="email" className="mb-2 block text-sm font-medium">
                 Email
               </label>
               <input
@@ -39,13 +54,22 @@ export default function SigninPage() {
                 id="email"
                 name="email"
                 required
-                className="w-full px-4 py-3 rounded-full border border-black/[.08] dark:border-white/[.145] bg-background text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-transparent"
+                className={`
+                  bg-background text-foreground w-full rounded-full border
+                  border-black/[.08] px-4 py-3 transition-colors
+                  focus:ring-foreground/20 focus:border-transparent focus:ring-2
+                  focus:outline-none
+                  dark:border-white/[.145]
+                `}
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="password"
+                className="mb-2 block text-sm font-medium"
+              >
                 Password
               </label>
               <input
@@ -53,24 +77,42 @@ export default function SigninPage() {
                 id="password"
                 name="password"
                 required
-                className="w-full px-4 py-3 rounded-full border border-black/[.08] dark:border-white/[.145] bg-background text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-transparent"
+                className={`
+                  bg-background text-foreground w-full rounded-full border
+                  border-black/[.08] px-4 py-3 transition-colors
+                  focus:ring-foreground/20 focus:border-transparent focus:ring-2
+                  focus:outline-none
+                  dark:border-white/[.145]
+                `}
                 placeholder="Enter your password"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-12 px-5 cursor-pointer"
+              className={`
+                bg-foreground text-background flex h-12 w-full cursor-pointer
+                items-center justify-center gap-2 rounded-full border
+                border-solid border-transparent px-5 text-sm font-medium
+                transition-colors
+                hover:bg-[#383838]
+                sm:text-base
+                dark:hover:bg-[#ccc]
+              `}
             >
               Sign In
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <span className="text-sm text-foreground/60">Don't have an account? </span>
+            <span className="text-foreground/60 text-sm">Don't have an account? </span>
             <Link
               href="/signup"
-              className="text-sm underline font-medium hover:text-[#1a1a1a] dark:hover:text-[#ccc] transition-colors"
+              className={`
+                text-sm font-medium underline transition-colors
+                hover:text-[#1a1a1a]
+                dark:hover:text-[#ccc]
+              `}
             >
               Sign up
             </Link>
