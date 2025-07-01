@@ -1,6 +1,6 @@
 {
   "name": "matt-init",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "packageManager": "pnpm@10.8.1",
   "description": "A simple CLI tool for scaffolding Next.js projects",
   "author": "",
