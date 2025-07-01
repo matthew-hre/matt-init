@@ -31,9 +31,7 @@ nix develop
 When you enter the shell, you'll have access to:
 - **Node.js**
 - **pnpm** (latest stable)
-- **Turso CLI** (for database management) (if it was selected during setup)
-- **sqld** (local SQLite server) (if it was selected during setup)
-- **Development tools** (alejandra for formatting, etc)
+- **Development tools** (alejandra for formatting, sqld if you're using Turso, etc.)
 
 ## Configuration
 
@@ -70,7 +68,7 @@ This isn't the exciting part. This file is the entry point for your Nix configur
 
 ### Development Shell (nix/devShell.nix)
 
-Here's the meat and potatoes of your Nix setup. This file defines the development environment, including all the tools you need for your project.
+Here's the meat and potatoes of your Nix setup. This file defines the development environment, including all the tools you need for your project. As an example, here's the devShell for a project using Turso:
 
 ```nix
 {

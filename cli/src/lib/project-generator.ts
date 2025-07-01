@@ -6,7 +6,7 @@ import { detectPackageManager } from "~/utils/package-manager";
 
 import type { BackendSetup, DatabaseProvider, ProjectOptions } from "../types";
 
-import { applyDrizzleTurso } from "./db";
+import { applyDrizzleDockerPostgres, applyDrizzleTurso } from "./db";
 import { setProjectName } from "./utils";
 
 /**
@@ -27,6 +27,9 @@ export async function generateProject(options: ProjectOptions, PACKAGE_ROOT: str
   if (options.backendSetup === "drizzle") {
     if (options.databaseProvider === "turso") {
       await applyDrizzleTurso(targetPath, PACKAGE_ROOT);
+    }
+    if (options.databaseProvider === "docker-postgres") {
+      await applyDrizzleDockerPostgres(targetPath, PACKAGE_ROOT);
     }
   }
 
@@ -102,6 +105,15 @@ async function applyNixFlake(projectDir: string, backend: BackendSetup, dbProvid
     // Copy the Drizzle + Turso Nix flake template
     const drizzleTursoNixPath = path.join(PACKAGE_ROOT, "templates/extras/nix/drizzle/turso");
     await fs.copy(drizzleTursoNixPath, projectDir, {
+      overwrite: true,
+      errorOnExist: false,
+    });
+  }
+
+  if (backend === "drizzle" && dbProvider === "docker-postgres") {
+    // Copy the Drizzle + Docker Postgres Nix flake template
+    const drizzleDockerPostgresNixPath = path.join(PACKAGE_ROOT, "templates/extras/nix/drizzle/docker-postgres");
+    await fs.copy(drizzleDockerPostgresNixPath, projectDir, {
       overwrite: true,
       errorOnExist: false,
     });

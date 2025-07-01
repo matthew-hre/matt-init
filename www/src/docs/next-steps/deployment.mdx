@@ -1,6 +1,6 @@
 ---
 title: "Deployment"
-description: "Deploy your matt-init project to production with Vercel and Turso"
+description: "Deploy your matt-init project to production with Vercel"
 order: 1
 ---
 
@@ -79,6 +79,32 @@ turso db shell my-app-prod ".dump" > backup-$(date +%Y%m%d).sql
 # Turso Pro includes automatic backups (if you feel like spending money)
 ```
 
+## Postgres Database Setup
+
+### Create Production Database
+
+There are plenty of options for Postgres, but the most common is to use a managed service like [Neon](https://neon.tech).
+
+First, **create a Neon Database:**
+   - Sign up at [Neon](https://neon.tech)
+   - Create a new project and database
+   - Get your database connection string
+
+Next, **Run your migrations:**
+```bash
+# Set production environment variables
+export DATABASE_URL="postgresql://user:password@host:port/dbname"
+# Run migrations
+pnpm db:migrate
+```
+Finally, make sure to configure **backups:**
+   - Neon provides automatic backups, but you can also create manual backups:
+```bash
+# Manual backup
+pg_dump -h host -U user -d dbname > backup-$(date +%Y%m%d).sql
+```
+
+
 ## Resources
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -98,8 +124,8 @@ turso db shell my-app-prod ".dump" > backup-$(date +%Y%m%d).sql
     description="Official guide for deploying Turso databases."
   />
   <CardLink
-    href="https://www.better-auth.com/docs/deployment"
-    title="Better Auth Production Guide"
-    description="Learn how to deploy Better Auth in production."
+    href="https://neon.tech/docs"
+    title="Neon Postgres Docs"
+    description="Learn how to deploy and manage Postgres databases with Neon."
   />
 </div>

@@ -11,6 +11,7 @@ const bool = [true, false];
 const backendConfigs = [
   { backendSetup: "none" as const, databaseProvider: "none" as const },
   { backendSetup: "drizzle" as const, databaseProvider: "turso" as const },
+  { backendSetup: "drizzle" as const, databaseProvider: "docker-postgres" as const },
 ];
 
 const combinations = bool.flatMap(shouldInitGit =>
@@ -64,6 +65,11 @@ describe.each(combinations)(
       }
 
       if (backendSetup === "drizzle" && databaseProvider === "turso") {
+        expect(await fs.pathExists(path.join(projectDir, "drizzle.config.ts"))).toBe(true);
+      }
+
+      if (backendSetup === "drizzle" && databaseProvider === "docker-postgres") {
+        expect(await fs.pathExists(path.join(projectDir, "docker-compose.yml"))).toBe(true);
         expect(await fs.pathExists(path.join(projectDir, "drizzle.config.ts"))).toBe(true);
       }
 

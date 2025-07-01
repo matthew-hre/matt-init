@@ -12,19 +12,45 @@ Example:
 
 ```env
 NODE_ENV=development
-TURSO_DATABASE_URL=http://127.0.0.1:8080
-TURSO_AUTH_TOKEN= # not needed for local development
 BETTER_AUTH_SECRET=abcd1234...
 BETTER_AUTH_URL=https://localhost:3000
+```
+
+### Turso
+
+If you choose to use Turso as your database, it will include:
+
+```env
+TURSO_DATABASE_URL=http://127.0.0.1:8080
+TURSO_AUTH_TOKEN= # not needed for local development
+```
+
+### Docker + Postgres
+
+If you choose Docker + Postgres, it will include:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/matt-init_db
+POSTGRES_DB=matt_init_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5432
 ```
 
 ### What each of these does:
 
 * `NODE_ENV` — Usually set to `development`, but overridden in production.
-* `TURSO_DATABASE_URL` — Your local or remote SQLite-compatible database URL.
-* `TURSO_AUTH_TOKEN` — Used when connecting to a remote Turso DB. Leave blank locally.
 * `BETTER_AUTH_SECRET` — Secret key used for encrypting auth tokens. You can generate one using `openssl rand -hex 32`.
 * `BETTER_AUTH_URL` — The base URL of your app, used by BetterAuth for redirects and cookie handling.
+
+* `TURSO_DATABASE_URL` — The URL for your local Turso database instance.
+* `TURSO_AUTH_TOKEN` — Not needed for local development, but required in production
+
+* `DATABASE_URL` — The connection string for your Postgres database.
+* `POSTGRES_DB` — The name of your Postgres database.
+* `POSTGRES_USER` — The username for your Postgres database.
+* `POSTGRES_PASSWORD` — The password for your Postgres database.
+* `POSTGRES_PORT` — The port your Postgres database is running on (default is 5432).
 
 > **Note:** `.env` values are type-checked at runtime using Zod via `src/lib/env.ts`. Missing or invalid values will cause the app to fail fast during boot.
 
@@ -36,7 +62,7 @@ Handles Drizzle ORM configuration for migrations and schema paths.
 
 Things you might tweak:
 
-* Change the `dialect` if you're switching off Turso
+* Change the `dialect` if you're switching off Turso or Postgres.
 * Customize `out` if you want migrations in a different folder
 
 ---
@@ -52,13 +78,11 @@ Everything here is ready to go, but worth knowing:
 
 ## `src/lib/env.ts`
 
-This handles env var validation using Zod. If you add new environment variables, you should update this schema to match.
+This handles env var validation using Zod. If you add new environment variables, you should update this schema to match. Check out the [Zod documentation](/docs/usage/zod) for more details on how to modify it.
 
 ```ts
 const EnvSchema = z.object({
   NODE_ENV: z.string(),
-  TURSO_DATABASE_URL: z.string(),
-  TURSO_AUTH_TOKEN: z.string(),
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.string(),
 });

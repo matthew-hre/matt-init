@@ -50,7 +50,7 @@ order: 5
 - **Why I chose it:** Consistent environment across machines, version pinning
 - **Includes:** Node.js, pnpm, database tools (when backend enabled)
 
-## Backend Stack (Optional)
+## Backend Stack (All Optional)
 
 ### Drizzle ORM
 - **What it is:** TypeScript ORM with excellent developer experience
@@ -61,6 +61,13 @@ order: 5
 - **What it is:** Edge-compatible SQLite database
 - **Why I chose it:** Fast, scalable, works everywhere, great for development
 - **Learn more:** [Database documentation](/docs/usage/databases)
+
+### Docker + Postgres
+- **What it is:** Full-featured relational database using Docker
+- **Why I chose it:** Powerful, flexible, great for complex applications
+- **Learn more:** [Docker + Postgres documentation](/docs/usage/databases#docker-postgres)
+
+
 
 ### Better Auth
 - **What it is:** Modern authentication library for TypeScript
@@ -85,10 +92,6 @@ There's no method to my madness, these tools were chosen truly based on my perso
 - No Jest, Vitest, or testing libraries by default
 - Add testing setup based on your project requirements
 - Writing unit tests triggers a post-trauma response in me, so I don't include them here
-
-### Additional Databases
-- Only Turso (SQLite) is currently implemented
-- Neon (Postgres) and Docker Postgres are planned for future releases
 
 ## Next Steps
 

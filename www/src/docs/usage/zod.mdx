@@ -18,8 +18,6 @@ import { z } from "zod";
 const EnvSchema = z.object({
   NODE_ENV: z.string(),
   // Backend-specific variables (if enabled)
-  TURSO_DATABASE_URL: z.string(),
-  TURSO_AUTH_TOKEN: z.string(),
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.string(),
 });
@@ -40,7 +38,6 @@ import { env } from "~/lib/env";
 
 // TypeScript knows these are strings
 env.NODE_ENV;           // string
-env.TURSO_DATABASE_URL; // string
 env.BETTER_AUTH_URL;    // string
 
 // This would cause a TypeScript error

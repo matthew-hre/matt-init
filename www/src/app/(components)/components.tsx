@@ -123,6 +123,27 @@ export default function Components() {
           />
         </ComponentExample>
         <ComponentExample
+          name="Docker"
+          description="Containerization platform for running applications in isolated environments."
+        >
+          <img
+            src="https://www.docker.com/app/uploads/2024/02/cropped-docker-logo-favicon-192x192.png"
+            alt="Docker logo"
+            className="min-h-8 min-w-8"
+          />
+        </ComponentExample>
+        <ComponentExample
+          name="PostgreSQL"
+          description="A powerful, open-source relational database management system."
+        >
+          <img
+            src="https://www.postgresql.org/media/img/about/press/elephant.png"
+            alt="PostgreSQL logo"
+            className="min-h-8 min-w-8"
+          />
+        </ComponentExample>
+
+        <ComponentExample
           name="Nix"
           description="The greatest package manager ever made. Declaratively manage your environments with ease."
         >

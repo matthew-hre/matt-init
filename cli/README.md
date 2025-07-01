@@ -159,6 +159,7 @@ my-project/
 - [x] Nix development environment (--nix flag)
 - [x] Git repository initialization
 - [x] Dependency installation
+- [x] Docker Postgres support
 - [ ] Custom README generation
 
 ### In Progress
@@ -171,7 +172,6 @@ my-project/
 
 - [ ] Supabase integration
 - [ ] Neon (Postgres) support
-- [ ] Docker Postgres support
 
 **Future Flags:**
 

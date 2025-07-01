@@ -16,11 +16,11 @@ export async function promptDatabaseProvider(): Promise<DatabaseProvider> {
         label: "Turso",
         hint: "Locally hostable SQLite",
       },
-      // {
-      //   value: "postgres" as const,
-      //   label: "Docker Postgres",
-      //   hint: "Local development with Docker",
-      // },
+      {
+        value: "docker-postgres" as const,
+        label: "Docker + Postgres",
+        hint: "Local Postgres development with Docker",
+      },
     ],
   });
 

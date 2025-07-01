@@ -1,12 +1,14 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 
-import { components } from "~/app/docs/(components)/mdx-components";
+import { createComponents } from "~/app/docs/(components)/mdx-components";
 import { getDocsContent } from "~/lib/docs";
 
 export default async function DocsRootPage() {
   try {
     const { content, frontmatter } = await getDocsContent("docs");
+
+    const components = createComponents();
 
     return (
       <article className="prose prose-lg max-w-none">
