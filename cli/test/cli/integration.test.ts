@@ -78,5 +78,59 @@ describe("cLI Integration", () => {
         databaseProvider: "turso",
       }, expect.any(String));
     });
+
+    it("handles relative paths correctly for project naming", async () => {
+      // Test with current directory (.)
+      context.mockCommand.args = ["."];
+      context.mockCommand.opts = vi.fn(() => ({ default: true }));
+
+      const { generateProject } = await import("../../src/lib/project-generator");
+      const { runCLI } = await import("../../src/cli");
+
+      // Mock current working directory name
+      const originalCwd = process.cwd();
+      const testDirName = "test-app-dir";
+      vi.spyOn(process, "cwd").mockReturnValue(`/home/user/projects/${testDirName}`);
+
+      await runCLI();
+
+      expect(generateProject).toHaveBeenCalledWith({
+        projectName: testDirName, // Should use the directory name, not "."
+        projectDir: expect.stringContaining(testDirName),
+        templateDir: expect.stringContaining("src/templates"),
+        shouldUseNix: true,
+        shouldSetupVsCode: true,
+        shouldInitGit: true,
+        shouldInstall: true,
+        backendSetup: "none",
+        databaseProvider: "none",
+      }, expect.any(String));
+
+      // Restore original cwd
+      vi.spyOn(process, "cwd").mockReturnValue(originalCwd);
+    });
+
+    it("handles nested relative paths correctly for project naming", async () => {
+      // Test with nested relative path
+      context.mockCommand.args = ["../projects/my-cool-app"];
+      context.mockCommand.opts = vi.fn(() => ({ default: true }));
+
+      const { generateProject } = await import("../../src/lib/project-generator");
+      const { runCLI } = await import("../../src/cli");
+
+      await runCLI();
+
+      expect(generateProject).toHaveBeenCalledWith({
+        projectName: "my-cool-app", // Should extract basename from path
+        projectDir: expect.stringContaining("my-cool-app"),
+        templateDir: expect.stringContaining("src/templates"),
+        shouldUseNix: true,
+        shouldSetupVsCode: true,
+        shouldInitGit: true,
+        shouldInstall: true,
+        backendSetup: "none",
+        databaseProvider: "none",
+      }, expect.any(String));
+    });
   });
 });
