@@ -94,6 +94,9 @@ export async function setProjectName(
   const optionalFiles = [
     path.join(projectDir, "flake.nix"),
     path.join(projectDir, "nix", "devShell.nix"),
+    path.join(projectDir, "docker-compose.yml"),
+    path.join(projectDir, ".env.example"),
+    path.join(projectDir, ".env"),
   ];
 
   for (const filePath of optionalFiles) {

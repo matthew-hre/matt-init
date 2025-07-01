@@ -1,5 +1,5 @@
 export type BackendSetup = "none" | "drizzle" | "supabase";
-export type DatabaseProvider = "none" | "turso" | "neon" | "postgres";
+export type DatabaseProvider = "none" | "turso" | "neon" | "docker-postgres";
 
 export type ProjectOptions = {
   projectName: string;
