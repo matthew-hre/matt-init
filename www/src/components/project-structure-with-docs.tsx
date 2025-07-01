@@ -100,7 +100,7 @@ export function ProjectStructureWithDocs() {
           {" "}
           <em>and</em>
           {" "}
-          the Turso dev server at the same time. If you add new CLI tooling or frameworks later, this is one of the first files you'll touch.
+          your optional database at the same time. If you add new CLI tooling or frameworks later, this is one of the first files you'll touch.
         </p>
         <hr className="my-6" />
 
@@ -328,7 +328,7 @@ export function ProjectStructureWithDocs() {
         >
           <li className="text-muted-foreground ml-4">
             <strong>auth.ts</strong>
-            : Configures BetterAuth with Drizzle + SQLite.
+            : Configures BetterAuth with Drizzle ORM and your database.
           </li>
           <li className="text-muted-foreground ml-4">
             <strong>db/</strong>
@@ -339,7 +339,7 @@ export function ProjectStructureWithDocs() {
             >
               <li className="text-muted-foreground ml-4">
                 <strong>index.ts</strong>
-                : Connects to the DB using libSQL.
+                : Connects to the DB using your selected backend.
               </li>
               <li className="text-muted-foreground ml-4">
                 <strong>schema/</strong>
