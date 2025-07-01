@@ -1,7 +1,11 @@
 export default function MattInitBanner() {
   return (
     <pre>
-      <code className="text-sm sm:text-lg font-semibold tracking-tight leading-0 text-center sm:text-left">
+      <code className={`
+        text-center text-sm leading-0 font-semibold tracking-tight
+        sm:text-left sm:text-lg
+      `}
+      >
         ███╗   ███╗ █████╗ ████████╗████████╗      ██╗███╗   ██╗██╗████████╗
         <br />
         ████╗ ████║██╔══██╗╚══██╔══╝╚══██╔══╝      ██║████╗  ██║██║╚══██╔══╝

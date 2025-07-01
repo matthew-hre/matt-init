@@ -2,14 +2,36 @@ import MattInitBanner from "../components/matt-init-banner";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <div className={`
+      grid min-h-screen grid-rows-[20px_1fr_20px] items-center
+      justify-items-center gap-16 p-8 pb-20
+      font-[family-name:var(--font-geist-sans)]
+      sm:p-20
+    `}
+    >
+      <main className={`
+        row-start-2 flex flex-col items-center gap-[32px]
+        sm:items-start
+      `}
+      >
         <MattInitBanner />
-        <ol className="list-inside list-decimal text-sm/8 text-center sm:text-left font-[family-name:var(--font-geist-mono)] mx-auto">
+        <ol className={`
+          mx-auto list-inside list-decimal text-center
+          font-[family-name:var(--font-geist-mono)]
+          text-sm/8
+          sm:text-left
+        `}
+        >
           <li>
             Get started by editing
             {" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
+            <code className={`
+              rounded bg-black/[.05] px-1 py-0.5
+              font-[family-name:var(--font-geist-mono)]
+              font-semibold
+              dark:bg-white/[.06]
+            `}
+            >
               src/app/page.tsx
             </code>
             .
@@ -19,9 +41,20 @@ export default function Home() {
           </li>
         </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row mx-auto">
+        <div className={`
+          mx-auto flex flex-col items-center gap-4
+          sm:flex-row
+        `}
+        >
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            className={`
+              bg-foreground text-background flex h-10 items-center
+              justify-center gap-2 rounded-full border border-solid
+              border-transparent px-4 text-sm font-medium transition-colors
+              hover:bg-[#383838]
+              sm:h-12 sm:w-auto sm:px-5 sm:text-base
+              dark:hover:bg-[#ccc]
+            `}
             href="https://github.com/matthew-hre/matt-init"
             target="_blank"
             rel="noopener noreferrer"
@@ -29,7 +62,15 @@ export default function Home() {
             ⭐ Star matt-init
           </a>
           <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[172px]"
+            className={`
+              flex h-10 w-full items-center justify-center rounded-full border
+              border-solid border-black/[.08] px-4 text-sm font-medium
+              transition-colors
+              hover:border-transparent hover:bg-[#f2f2f2]
+              sm:h-12 sm:w-auto sm:px-5 sm:text-base
+              md:w-[172px]
+              dark:border-white/[.145] dark:hover:bg-[#1a1a1a]
+            `}
             href="https://matthew-hre.com"
             target="_blank"
             rel="noopener noreferrer"
