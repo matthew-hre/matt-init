@@ -24,6 +24,13 @@ describe("promptDatabaseProvider", () => {
     expect(exitSpy).not.toHaveBeenCalled();
   });
 
+  it("returns 'docker-postgres' when selected", async () => {
+    (select as any).mockResolvedValue("docker-postgres");
+    const result = await promptDatabaseProvider();
+    expect(result).toBe("docker-postgres");
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
   it("calls process.exit on cancel", async () => {
     (select as any).mockResolvedValue(Symbol("cancel"));
     await expect(promptDatabaseProvider()).rejects.toThrow("process.exit");
