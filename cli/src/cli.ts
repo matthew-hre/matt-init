@@ -47,7 +47,11 @@ export async function runCLI() {
     intro(pc.green(BANNER));
   }
 
-  let projectName = cliProvidedName;
+  // Separate the path from the project name
+  // If user provides a path like "./my-app" or "../projects/my-app",
+  // we use the path for directory creation but extract just the basename for the project name
+  let projectPath = cliProvidedName;
+  let projectName = cliProvidedName ? path.basename(path.resolve(process.cwd(), cliProvidedName)) : undefined;
   let shouldInitGit = !options.noGit;
   let shouldInstall = !options.noInstall;
   let shouldUseNix = !options.noNix;
@@ -94,7 +98,11 @@ export async function runCLI() {
       projectName = "my-app";
     }
 
-    const projectDir = path.resolve(process.cwd(), projectName);
+    if (!projectPath) {
+      projectPath = projectName;
+    }
+
+    const projectDir = path.resolve(process.cwd(), projectPath);
     const templateDir = path.join(PACKAGE_ROOT, "src", "templates");
 
     // Handle existing directory conflicts
