@@ -101,9 +101,10 @@ export async function applyDrizzleDockerPostgres(projectDir: string, PACKAGE_ROO
   // replace some .env values
   const envContent = await fs.readFile(envPath, "utf-8");
   const updatedEnvContent = envContent
-    .replace("your_postgres_database_url", "postgresql://postgres:postgres@localhost:5432/__APP_NAME___db")
     .replace("your_better_auth_url", "https://localhost:3000")
-    .replace("your_better_auth_secret", await generateRandomSecret());
+    .replace("your_better_auth_secret", await generateRandomSecret())
+    .replace("POSTGRES_USER=", "POSTGRES_USER=postgres")
+    .replace("POSTGRES_PASSWORD=", "POSTGRES_PASSWORD=postgres");
   await fs.writeFile(envPath, updatedEnvContent, "utf-8");
 
   // Add Drizzle scripts to package.json
