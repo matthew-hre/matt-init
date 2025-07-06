@@ -149,16 +149,31 @@ export const auth = betterAuth({
 });
 ```
 
-That's it! Your application now supports GitHub authentication. Signing in with a social provider is incredibly similar to email/password authentication:
+That's it! Your application now supports GitHub authentication. Signing in with a social provider is a bit trickier: you'll need to redirect users to the provider's login page yourself.
 
 ```typescript
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
 import { auth } from "~/lib/auth";
 
-const { data, error } = await auth.api.signInSocial({
-  body: {
-    provider: "github", // or any other provider you've configured
-  },
-});
+async function signInWithGithubAction() {
+  "use server";
+
+  const { url } = await auth.api.signInSocial({
+    headers: await headers(),
+    body: {
+      provider: "github",
+      callbackURL: "/dashboard",
+    },
+  });
+
+  if (!url) {
+    redirect("/signup?error=Failed to sign in with GitHub");
+  }
+
+  redirect(url);
+}
 ```
 
 ## Resources
