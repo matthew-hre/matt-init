@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { ModeToggle } from "~/components/theme-toggle";
 
 export default function Footer() {
@@ -71,34 +73,33 @@ export default function Footer() {
           >
             <h4 className="text-foreground text-sm font-bold">Documentation</h4>
             <div className="flex flex-col gap-2">
-              <a
-                href="#"
+              <Link
+                href="/docs/about/installation"
                 className={`
                   text-muted-foreground text-sm transition-colors
                   hover:text-foreground
                 `}
               >
-                Getting Started
-              </a>
-              <a
-                href="#"
+                Installation
+              </Link>
+              <Link
+                href="/docs/usage/quick-start"
+                className={`
+                  text-muted-foreground text-sm transition-colors
+                  hover:text-foreground
+                `}
+              >
+                Quick Start
+              </Link>
+              <Link
+                href="/docs/about/configuration"
                 className={`
                   text-muted-foreground text-sm transition-colors
                   hover:text-foreground
                 `}
               >
                 Configuration
-              </a>
-              <a
-                href="#"
-                className={`
-                  text-muted-foreground text-sm transition-colors
-                  hover:text-foreground
-                `}
-              >
-                Building an App
-              </a>
-
+              </Link>
             </div>
           </div>
 
