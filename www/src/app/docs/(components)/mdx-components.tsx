@@ -1,6 +1,7 @@
 import type { MDXComponents } from "mdx/types";
 import type { ReactNode } from "react";
 
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 import { CodeBlock } from "~/components/code-block";
@@ -184,9 +185,28 @@ export function createComponents(): MDXComponents {
           hover:bg-foreground/[0.05]
         `}
         href={href}
+        target={href.includes("://") ? "_blank" : undefined}
       >
-        <h3 className="mb-2 text-xl font-semibold">{title}</h3>
-        <p className="text-muted-foreground mb-4">{description}</p>
+        <h3 className="mb-2 text-xl font-semibold">
+          {title}
+          {" "}
+          {
+            href.includes("://")
+              ? (
+                  <ExternalLink
+                    className={`
+                      text-muted-foreground align-text-center ml-1 inline-block
+                    `}
+                    size={16}
+                  />
+                )
+              : null
+          }
+        </h3>
+        <p className="text-muted-foreground mb-4">
+          {description}
+
+        </p>
       </Link>
     ),
     ProjectStructure,
