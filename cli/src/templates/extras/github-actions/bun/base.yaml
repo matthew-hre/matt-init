@@ -1,0 +1,23 @@
+name: Lint (Bun)
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          version: latest
+
+      - name: Install deps
+        run: bun install
+
+      - name: Run lint
+        run: bun lint

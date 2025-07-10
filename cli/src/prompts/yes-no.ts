@@ -58,6 +58,25 @@ export async function promptInitGit(): Promise<boolean> {
 }
 
 /**
+ * Prompts the user to include basic CI for linting and returns the answer.
+ * If the user cancels, the process exits gracefully.
+ *
+ * @returns {Promise<boolean>} The user's response (true for yes, false for no).
+ */
+export async function includeLintingCI(): Promise<boolean> {
+  const includeLinting = await confirm({
+    message: "Include a basic Github Action for linting?",
+    initialValue: true,
+  });
+
+  if (typeof includeLinting === "symbol") {
+    process.exit(0);
+  }
+
+  return includeLinting;
+}
+
+/**
  * Prompts the user to set up VS Code settings and returns the answer.
  * If the user cancels, the process exits gracefully.
  *

@@ -1,0 +1,24 @@
+name: Lint (npm)
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint

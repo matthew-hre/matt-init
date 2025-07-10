@@ -10,7 +10,7 @@ import { generateProject } from "./lib/project-generator";
 import { promptBackendSetup } from "./prompts/backend-setup";
 import { promptDatabaseProvider } from "./prompts/database-provider";
 import { promptProjectName } from "./prompts/project-name";
-import { promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, promptUseNix } from "./prompts/yes-no";
+import { includeLintingCI, promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, promptUseNix } from "./prompts/yes-no";
 import { BANNER } from "./utils/banner";
 import { handleDirectoryConflict } from "./utils/directory-handler";
 
@@ -29,6 +29,7 @@ export async function runCLI() {
     .option("--no-git", "Skip git initialization")
     .option("--no-install", "Skip package installation")
     .option("--no-nix", "Skip Nix flake for environment management")
+    .option("--no-linting-ci", "Skip linting CI setup")
     .option("--no-vscode", "Skip VS Code settings setup")
     .option("-y, --default", "Use defaults, skip prompts")
     .option("--ci", "Run in CI mode (non-interactive, test mode)")
@@ -56,6 +57,7 @@ export async function runCLI() {
   let shouldInitGit = !options.noGit;
   let shouldInstall = !options.noInstall;
   let shouldUseNix = !options.noNix;
+  let shouldIncludeCI = !options.noLintingCi;
   let shouldSetupVsCode = !options.noVscode;
   let backendSetup: BackendSetup = "none";
   let databaseProvider: DatabaseProvider = "none";
@@ -80,6 +82,10 @@ export async function runCLI() {
       // 4. Quick yes/no prompts
       if (!options.noNix) {
         shouldUseNix = await promptUseNix();
+      }
+
+      if (!options.noLintCi) {
+        shouldIncludeCI = await includeLintingCI();
       }
 
       if (!options.noVscode) {
@@ -115,6 +121,7 @@ export async function runCLI() {
       projectDir,
       templateDir,
       shouldUseNix,
+      shouldIncludeCI,
       shouldSetupVsCode,
       shouldInitGit,
       shouldInstall,

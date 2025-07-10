@@ -6,6 +6,7 @@ export type ProjectOptions = {
   projectDir: string;
   templateDir: string;
   shouldUseNix: boolean;
+  shouldIncludeCI: boolean;
   shouldSetupVsCode?: boolean;
   shouldInitGit: boolean;
   shouldInstall: boolean;
