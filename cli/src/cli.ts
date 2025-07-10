@@ -5,6 +5,7 @@ import pc from "picocolors";
 
 import type { BackendSetup, DatabaseProvider, ProjectOptions } from "./types";
 
+import { version } from "../package.json";
 import { generateProject } from "./lib/project-generator";
 import { promptBackendSetup } from "./prompts/backend-setup";
 import { promptDatabaseProvider } from "./prompts/database-provider";
@@ -31,7 +32,7 @@ export async function runCLI() {
     .option("--no-vscode", "Skip VS Code settings setup")
     .option("-y, --default", "Use defaults, skip prompts")
     .option("--ci", "Run in CI mode (non-interactive, test mode)")
-    .version("1.1.0");
+    .version(version);
 
   program.addHelpText("before", `${BANNER}\n`);
 
