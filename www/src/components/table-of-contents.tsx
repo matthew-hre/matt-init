@@ -237,6 +237,9 @@ export function TableOfContents({ className }: TableOfContentsProps) {
         top: offsetPosition,
         behavior: "smooth",
       });
+
+      // add the ID to the URL hash
+      history.replaceState(null, "", `#${id}`);
     }
   };
 
