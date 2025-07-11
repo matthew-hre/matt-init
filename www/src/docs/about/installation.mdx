@@ -24,6 +24,7 @@ You'll get a few prompts:
   * `Docker Postgres`: local Postgres instance
   * `Neon (Postgres)`: (coming soon)
 * **Nix flake**: Set up a reproducible Nix flake for dev environment
+* **Include Linting CI**: Set up GitHub Actions for linting
 * **Install dependencies**: Skip or run `pnpm install`
 * **VS Code settings**: Adds recommended extensions and workspace config
 * **Git repo**: Optionally initializes git and makes the first commit
@@ -55,6 +56,10 @@ matt-init [project-name] [options]
             <tr className="border-b border-muted">
                 <td className="border border-muted px-4 py-3 bg-background"><code>--no-nix</code></td>
                 <td className="border border-muted px-4 py-3 bg-background">Skip setting up the Nix flake</td>
+            </tr>
+            <tr className="border-b border-muted">
+                <td className="border border-muted px-4 py-3 bg-background"><code>--no-linting-ci</code></td>
+                <td className="border border-muted px-4 py-3 bg-background">Skip setting up GitHub Actions for linting</td>
             </tr>
             <tr className="border-b border-muted">
                 <td className="border border-muted px-4 py-3 bg-background"><code>--no-vscode</code></td>

@@ -19,7 +19,7 @@ function ConditionalSection({ feature, children, enabledFeatures }: ConditionalS
 
 export function ProjectStructureWithDocs() {
   const [enabledFeatures, setEnabledFeatures] = useState<Set<string>>(
-    () => new Set(["base", "backend", "nix", "vscode"]),
+    () => new Set(["base", "backend", "nix", "ci", "vscode"]),
   );
 
   const handleFeaturesChange = (features: Set<string>) => {
@@ -233,6 +233,23 @@ export function ProjectStructureWithDocs() {
           <li className="text-muted-foreground ml-4">
             <strong>settings.json</strong>
             : Preconfigured formatting, import sorting, and TypeScript settings.
+          </li>
+        </ul>
+        <hr className="my-6" />
+      </ConditionalSection>
+
+      <ConditionalSection feature="ci" enabledFeatures={enabledFeatures}>
+        <h2 className="text-foreground mt-8 mb-4 text-2xl font-semibold">.github/workflows/</h2>
+        <p className="text-muted-foreground mb-4 text-base leading-relaxed">
+          If you opted in, this folder contains the GitHub Actions workflow for linting:
+        </p>
+        <ul className={`
+          text-muted-foreground mb-4 list-outside list-disc space-y-1
+        `}
+        >
+          <li className="text-muted-foreground ml-4">
+            <strong>lint.yaml</strong>
+            : Runs ESLint (and Alejandra if you're using Nix) checks on every pull request. It ensures code quality and consistency across your project. If you add new files or change linting rules, this workflow will automatically pick up those changes.
           </li>
         </ul>
         <hr className="my-6" />

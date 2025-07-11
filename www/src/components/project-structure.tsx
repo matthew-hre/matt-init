@@ -13,6 +13,7 @@ const DEFAULT_FEATURES: Feature[] = [
   { id: "backend", label: "Backend (Database + Auth)", checked: true },
   { id: "nix", label: "Nix Environment", checked: true },
   { id: "vscode", label: "VS Code Settings", checked: true },
+  { id: "ci", label: "GitHub Actions CI", checked: true },
 ];
 
 type FileNode = {
@@ -38,6 +39,12 @@ const PROJECT_STRUCTURE: FileNode = {
         { name: "extensions.json", type: "file" },
         { name: "settings.json", type: "file" },
       ],
+    },
+    {
+      name: ".github/workflows/",
+      type: "folder",
+      features: ["ci"],
+      children: [{ name: "lint.yaml", type: "file" }],
     },
     { name: "drizzle.config.ts", type: "file", features: ["backend"] },
     { name: "eslint.config.mjs", type: "file" },
