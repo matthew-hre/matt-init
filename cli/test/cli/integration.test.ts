@@ -32,6 +32,7 @@ describe("cLI Integration", () => {
         projectDir: expect.any(String),
         templateDir: expect.stringContaining("src/templates"),
         shouldUseNix: true, // Default is true, --no-nix makes it false
+        shouldIncludeCI: true, // Default is true, --no-linting-ci makes it false
         shouldSetupVsCode: true, // Default is true, --no-vscode makes it false
         shouldInitGit: true, // Default is true, --no-git makes it false
         shouldInstall: true, // Default is true, --no-install makes it false
@@ -46,6 +47,7 @@ describe("cLI Integration", () => {
         default: false,
         ci: false,
         noNix: false,
+        noLintingCi: false,
         noVscode: false,
         noInstall: false,
         noGit: false,
@@ -53,12 +55,13 @@ describe("cLI Integration", () => {
 
       const { promptBackendSetup } = await import("../../src/prompts/backend-setup");
       const { promptDatabaseProvider } = await import("../../src/prompts/database-provider");
-      const { promptUseNix, promptSetupVsCodeSettings, promptInstallDependencies, promptInitGit } = await import("../../src/prompts/yes-no");
+      const { promptIncludeLintingCI, promptUseNix, promptSetupVsCodeSettings, promptInstallDependencies, promptInitGit } = await import("../../src/prompts/yes-no");
       const { generateProject } = await import("../../src/lib/project-generator");
 
       vi.mocked(promptBackendSetup).mockResolvedValue("drizzle");
       vi.mocked(promptDatabaseProvider).mockResolvedValue("turso");
       vi.mocked(promptUseNix).mockResolvedValue(true);
+      vi.mocked(promptIncludeLintingCI).mockResolvedValue(false);
       vi.mocked(promptSetupVsCodeSettings).mockResolvedValue(false);
       vi.mocked(promptInstallDependencies).mockResolvedValue(true);
       vi.mocked(promptInitGit).mockResolvedValue(false);
@@ -71,6 +74,7 @@ describe("cLI Integration", () => {
         projectDir: expect.any(String),
         templateDir: expect.stringContaining("src/templates"),
         shouldUseNix: true,
+        shouldIncludeCI: false,
         shouldSetupVsCode: false,
         shouldInitGit: false,
         shouldInstall: true,
@@ -99,6 +103,7 @@ describe("cLI Integration", () => {
         projectDir: expect.stringContaining(testDirName),
         templateDir: expect.stringContaining("src/templates"),
         shouldUseNix: true,
+        shouldIncludeCI: true,
         shouldSetupVsCode: true,
         shouldInitGit: true,
         shouldInstall: true,
@@ -125,6 +130,7 @@ describe("cLI Integration", () => {
         projectDir: expect.stringContaining("my-cool-app"),
         templateDir: expect.stringContaining("src/templates"),
         shouldUseNix: true,
+        shouldIncludeCI: true,
         shouldSetupVsCode: true,
         shouldInitGit: true,
         shouldInstall: true,

@@ -10,7 +10,7 @@ import { generateProject } from "./lib/project-generator";
 import { promptBackendSetup } from "./prompts/backend-setup";
 import { promptDatabaseProvider } from "./prompts/database-provider";
 import { promptProjectName } from "./prompts/project-name";
-import { includeLintingCI, promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, promptUseNix } from "./prompts/yes-no";
+import { promptIncludeLintingCI, promptInitGit, promptInstallDependencies, promptSetupVsCodeSettings, promptUseNix } from "./prompts/yes-no";
 import { BANNER } from "./utils/banner";
 import { handleDirectoryConflict } from "./utils/directory-handler";
 
@@ -85,7 +85,7 @@ export async function runCLI() {
       }
 
       if (!options.noLintCi) {
-        shouldIncludeCI = await includeLintingCI();
+        shouldIncludeCI = await promptIncludeLintingCI();
       }
 
       if (!options.noVscode) {

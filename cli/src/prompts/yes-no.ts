@@ -63,7 +63,7 @@ export async function promptInitGit(): Promise<boolean> {
  *
  * @returns {Promise<boolean>} The user's response (true for yes, false for no).
  */
-export async function includeLintingCI(): Promise<boolean> {
+export async function promptIncludeLintingCI(): Promise<boolean> {
   const includeLinting = await confirm({
     message: "Include a basic Github Action for linting?",
     initialValue: true,
