@@ -100,6 +100,21 @@ describe("cLI Project Options", () => {
       );
     });
 
+    it("respects no-linting-ci flag", async () => {
+      context.mockCommand.opts = vi.fn(() => ({ default: true, noLintingCi: true }));
+
+      const { generateProject } = await import("../../src/lib/project-generator");
+      const { runCLI } = await import("../../src/cli");
+      await runCLI();
+
+      expect(generateProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          shouldIncludeCI: false,
+        }),
+        expect.any(String),
+      );
+    });
+
     it("respects no-vscode flag", async () => {
       context.mockCommand.opts = vi.fn(() => ({ default: true, noVscode: true }));
 

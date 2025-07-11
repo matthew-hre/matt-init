@@ -60,6 +60,7 @@ export function setupMocks() {
     promptInstallDependencies: vi.fn(() => Promise.resolve(true)),
     promptSetupVsCodeSettings: vi.fn(() => Promise.resolve(true)),
     promptUseNix: vi.fn(() => Promise.resolve(false)),
+    promptIncludeLintingCI: vi.fn(() => Promise.resolve(true)),
   }));
 
   vi.mock("../../src/utils/directory-handler", () => ({

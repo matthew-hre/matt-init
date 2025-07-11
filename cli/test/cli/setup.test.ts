@@ -37,6 +37,7 @@ describe("cLI Command Setup", () => {
       expect(context.mockCommand.option).toHaveBeenCalledWith("--no-git", "Skip git initialization");
       expect(context.mockCommand.option).toHaveBeenCalledWith("--no-install", "Skip package installation");
       expect(context.mockCommand.option).toHaveBeenCalledWith("--no-nix", "Skip Nix flake for environment management");
+      expect(context.mockCommand.option).toHaveBeenCalledWith("--no-linting-ci", "Skip linting CI setup");
       expect(context.mockCommand.option).toHaveBeenCalledWith("--no-vscode", "Skip VS Code settings setup");
       expect(context.mockCommand.option).toHaveBeenCalledWith("-y, --default", "Use defaults, skip prompts");
       expect(context.mockCommand.option).toHaveBeenCalledWith("--ci", "Run in CI mode (non-interactive, test mode)");

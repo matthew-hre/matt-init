@@ -14,23 +14,27 @@ const backendConfigs = [
   { backendSetup: "drizzle" as const, databaseProvider: "docker-postgres" as const },
 ];
 
+// TODO: this is getting ridiculous
 const combinations = bool.flatMap(shouldInitGit =>
   bool.flatMap(shouldUseNix =>
-    bool.flatMap(shouldSetupVsCode =>
-      backendConfigs.map(({ backendSetup, databaseProvider }) => ({
-        shouldInitGit,
-        shouldUseNix,
-        shouldSetupVsCode,
-        backendSetup,
-        databaseProvider,
-      })),
+    bool.flatMap(shouldIncludeCI =>
+      bool.flatMap(shouldSetupVsCode =>
+        backendConfigs.map(({ backendSetup, databaseProvider }) => ({
+          shouldInitGit,
+          shouldUseNix,
+          shouldIncludeCI,
+          shouldSetupVsCode,
+          backendSetup,
+          databaseProvider,
+        })),
+      ),
     ),
   ),
 );
 
 describe.each(combinations)(
-  "generateProject with git=$shouldInitGit, nix=$shouldUseNix, vscode=$shouldSetupVsCode, backend=$backendSetup, db=$databaseProvider",
-  ({ shouldInitGit, shouldUseNix, shouldSetupVsCode, backendSetup, databaseProvider }) => {
+  "generateProject with git=$shouldInitGit, nix=$shouldUseNix, CI=$shouldIncludeCI, vscode=$shouldSetupVsCode, backend=$backendSetup, db=$databaseProvider",
+  ({ shouldInitGit, shouldUseNix, shouldIncludeCI, shouldSetupVsCode, backendSetup, databaseProvider }) => {
     it("generates project correctly", async () => {
       const options = {
         projectName: "test-app",
@@ -38,6 +42,7 @@ describe.each(combinations)(
         databaseProvider,
         shouldInitGit,
         shouldUseNix,
+        shouldIncludeCI,
         shouldSetupVsCode,
         shouldInstall: false,
       };
@@ -71,6 +76,10 @@ describe.each(combinations)(
       if (backendSetup === "drizzle" && databaseProvider === "docker-postgres") {
         expect(await fs.pathExists(path.join(projectDir, "docker-compose.yml"))).toBe(true);
         expect(await fs.pathExists(path.join(projectDir, "drizzle.config.ts"))).toBe(true);
+      }
+
+      if (shouldIncludeCI) {
+        expect(await fs.pathExists(path.join(projectDir, ".github", "workflows", "lint.yaml"))).toBe(true);
       }
 
       tempDir.removeCallback();

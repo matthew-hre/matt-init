@@ -18,6 +18,7 @@ function baseOptions(): ProjectOptions {
     projectDir: tempDir,
     templateDir: path.join(__dirname, "../../src/templates"),
     shouldUseNix: false,
+    shouldIncludeCI: false,
     shouldSetupVsCode: false,
     shouldInitGit: false,
     shouldInstall: false,
@@ -81,6 +82,7 @@ describe("generateProject", () => {
       ...baseOptions(),
       shouldUseNix: false,
       shouldSetupVsCode: false,
+      shouldIncludeCI: false,
       shouldInitGit: false,
       shouldInstall: false,
     };

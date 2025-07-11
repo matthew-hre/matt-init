@@ -89,12 +89,13 @@ describe("cLI Modes", () => {
         noGit: false,
       }));
 
-      const { promptUseNix, promptSetupVsCodeSettings, promptInstallDependencies, promptInitGit } = await import("../../src/prompts/yes-no");
+      const { promptIncludeLintingCI, promptUseNix, promptSetupVsCodeSettings, promptInstallDependencies, promptInitGit } = await import("../../src/prompts/yes-no");
 
       const { runCLI } = await import("../../src/cli");
       await runCLI();
 
       expect(promptUseNix).toHaveBeenCalled();
+      expect(promptIncludeLintingCI).toHaveBeenCalled();
       expect(promptSetupVsCodeSettings).toHaveBeenCalled();
       expect(promptInstallDependencies).toHaveBeenCalled();
       expect(promptInitGit).toHaveBeenCalled();

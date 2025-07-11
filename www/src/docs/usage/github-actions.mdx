@@ -1,0 +1,93 @@
+---
+title: "Github Actions"
+description: "Using GitHub Actions for CI in matt-init projects"
+order: 9
+---
+
+## What are GitHub Actions?
+
+GitHub Actions is a CI/CD platform that allows you to automate workflows directly in your GitHub repository. It can be used for tasks like running tests, building applications, and deploying code. In the context of matt-init, it sets up a basic linting workflow to ensure code quality.
+
+## Setting Up GitHub Actions in matt-init
+
+When you create a new project with matt-init, you can choose to include GitHub Actions for linting. This is done through via default, but can be disabled using the `--no-linting-ci` flag.
+
+## Understanding YAML
+
+YAML (YAML Ain't Markup Language) is a human-readable data serialization format often used for configuration files. I hate it. If I ever write YAML again, it will be too soon. But it's widely used in GitHub Actions workflows, so you'll need to understand the basics.
+
+```yaml
+# The name of the workflow
+name: Lint (npm)
+
+# What events trigger this workflow?
+# In this case, we run on pull requests to the main branch
+on:
+  pull_request:
+    branches: [main]
+
+# The jobs that this workflow will run
+jobs:
+  # The lint job
+  eslint:
+    # What environment to run this job in?
+    runs-on: ubuntu-latest
+    # How long to wait before timing out this job
+    timeout-minutes: 60
+    # The steps that this job will run
+    steps:
+      # Check out the code from the repository
+      - uses: actions/checkout@v4
+
+      # Set up Node.js using the latest LTS version
+      - name: Use Node.js LTS
+        # This action sets up Node.js for the workflow
+        uses: actions/setup-node@v3
+        # Specify the Node.js version and enable npm caching
+        with:
+          node-version: "lts/*"
+          cache: npm
+
+      # Install dependencies using npm
+      - name: Install deps
+        run: npm ci
+
+      # Run the linting command
+      - name: Run lint
+        run: npm run lint
+```
+
+This is the default linting workflow created by matt-init when using NPM. It runs on every pull request to the `main` branch, checks out the code, sets up Node.js, installs dependencies, and runs the linting command.
+
+## Customizing Your Workflow
+
+You can customize the workflow file located at `.github/workflows/lint.yaml` in your project. Here are some common customizations:
+
+- **Change the Node.js version**: Modify the `node-version` field in the `setup-node` step. (If you use Nix, this is handled automatically.)
+- **Add more steps**: You can add additional steps to run tests, build your application, or deploy your code.
+- **Change the trigger events**: Modify the `on` section to run the workflow on different events, like `push` or `release`.
+
+## Resources
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardLink
+    href="/docs/usage/eslint"
+    title="ESLint Guide"
+    description="Learn how to configure and use ESLint"
+  />
+  <CardLink
+    href="/docs/usage/nix"
+    title="Nix"
+    description="Learn how to use Nix for reproducible development environments"
+  />
+  <CardLink
+    href="https://noyaml.com/"
+    title="No YAML"
+    description="A rant on why YAML is terrible"
+  />
+  <CardLink
+    href="https://docs.github.com/en/actions"
+    title="GitHub Actions Documentation"
+    description="Official documentation for GitHub Actions"
+  />
+</div>

@@ -4,6 +4,7 @@ import { confirm } from "@clack/prompts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  promptIncludeLintingCI,
   promptInitGit,
   promptInstallDependencies,
   promptSetupVsCodeSettings,
@@ -33,6 +34,19 @@ describe("prompt functions", () => {
     (confirm as any).mockResolvedValue(Symbol("cancel"));
     await expect(promptUseNix()).rejects.toThrow("process.exit");
     expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  it("promptIncludeLintingCI returns true", async () => {
+    (confirm as any).mockResolvedValue(true);
+    const result = await promptIncludeLintingCI();
+    expect(result).toBe(true);
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it("promptIncludeLintingCI returns false", async () => {
+    (confirm as any).mockResolvedValue(false);
+    const result = await promptIncludeLintingCI();
+    expect(result).toBe(false);
   });
 
   it("promptInstallDependencies returns false", async () => {

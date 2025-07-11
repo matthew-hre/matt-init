@@ -37,6 +37,10 @@ export async function generateProject(options: ProjectOptions, PACKAGE_ROOT: str
     await applyNixFlake(targetPath, options.backendSetup, options.databaseProvider, PACKAGE_ROOT);
   }
 
+  if (options.shouldIncludeCI) {
+    await applyCIConfig(targetPath, options.shouldUseNix, PACKAGE_ROOT);
+  }
+
   if (options.shouldSetupVsCode) {
     await applyVsCodeSettings(targetPath, PACKAGE_ROOT);
   }
@@ -145,6 +149,34 @@ async function applyGitInit(projectDir: string): Promise<void> {
   await execa(gitPath, ["add", "."], {
     cwd: projectDir,
     stdio: "pipe",
+  });
+}
+
+/**
+ * Applies the CI configuration to the project directory.
+ * This function copies the appropriate CI configuration file based on the package manager
+ * and whether Nix is being used, into the .github/workflows directory.
+ *
+ * @param projectDir The directory where the project is located.
+ * @param shouldUseNix Whether to use Nix for the CI configuration.
+ * @param PACKAGE_ROOT The root directory of the package, used to locate templates.
+ * @returns {Promise<void>} A promise that resolves when the CI configuration has been applied.
+ */
+async function applyCIConfig(projectDir: string, shouldUseNix: boolean, PACKAGE_ROOT: string): Promise<void> {
+  const packageManager = detectPackageManager();
+
+  const ciConfigFolderPath = path.join(PACKAGE_ROOT, "templates/extras/github-actions", packageManager);
+  const ciConfigFileName = shouldUseNix ? "nix.yaml" : "base.yaml";
+  const ciConfigFilePath = path.join(ciConfigFolderPath, ciConfigFileName);
+
+  // Create the .github/workflows directory if it doesn't exist
+  const workflowsDir = path.join(projectDir, ".github", "workflows");
+  await fs.ensureDir(workflowsDir);
+
+  // Copy the CI configuration file to the workflows directory
+  await fs.copy(ciConfigFilePath, path.join(workflowsDir, "lint.yaml"), {
+    overwrite: true,
+    errorOnExist: false,
   });
 }
 
