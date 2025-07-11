@@ -30,30 +30,31 @@ export default async function DocsLayout({
         </div>
 
         <div className={`
-          flex flex-1 overflow-hidden
+          flex flex-1 flex-col items-center
           lg:ml-64
         `}
         >
-          <main className="flex flex-1 justify-center overflow-x-hidden">
-            <div className={`
-              w-full max-w-3xl px-4 py-12
-              sm:px-6
-              lg:px-8
-            `}
-            >
-              {children}
-            </div>
+          <div className="flex flex-row">
+            <main className="flex max-w-3xl justify-center overflow-x-hidden">
+              <div className={`
+                w-full px-4 py-12
+                sm:px-6
+                lg:px-8
+              `}
+              >
+                {children}
+              </div>
+            </main>
             <aside className={`
               hidden w-64 shrink-0
               xl:block
             `}
             >
-              <div className="sticky top-12 px-6">
+              <div className="sticky top-0 h-screen overflow-y-auto px-6 py-12">
                 <TableOfContents />
               </div>
             </aside>
-          </main>
-
+          </div>
         </div>
       </div>
     </div>
