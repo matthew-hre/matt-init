@@ -7,6 +7,12 @@
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "never"
   },
+  "workbench.editor.customLabels.patterns": {
+    "**/app/**/page.tsx": "(${dirname})/page.${extname}",
+    "**/app/**/layout.tsx": "(${dirname})/layout.${extname}",
+    "**/app/**/index.tsx": "(${dirname})/index.${extname}",
+    "**/app/**/route.ts": "(${dirname})/route.${extname}"
+  },
   "files.associations": {
     "*.css": "tailwindcss"
   },

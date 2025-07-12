@@ -10,6 +10,12 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
+  "workbench.editor.customLabels.patterns": {
+    "**/app/**/page.tsx": "(${dirname})/page.${extname}",
+    "**/app/**/layout.tsx": "(${dirname})/layout.${extname}",
+    "**/app/**/index.tsx": "(${dirname})/index.${extname}",
+    "**/app/**/route.ts": "(${dirname})/route.${extname}"
+  },
   // Silent the stylistic rules in you IDE, but still auto fix them
   "eslint.rules.customizations": [
     {
