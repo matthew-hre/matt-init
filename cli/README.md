@@ -47,9 +47,11 @@ This will prompt you for:
   - `Supabase` - (coming soon)
   - `None` - Frontend-only
 - **Database provider** - If you chose the full-stack option:
+
   - `Turso (SQLite)` - Edge database (implemented)
+  - `Docker Postgres` - Local Postgres with Docker (implemented)
   - `Neon (Postgres)` - (coming soon)
-  - `Docker Postgres` - (coming soon)
+
 - **Nix flake** - Optional reproducible dev environment
 - **Install dependencies** - Run `pnpm install` automatically
 - **VS Code settings** - Setup workspace settings and recommended extensions
@@ -61,14 +63,15 @@ This will prompt you for:
 matt-init [project-name] [options]
 
 Options:
-  --no-git      Skip git initialization
-  --no-install  Skip package installation
-  --no-nix      Skip Nix flake for environment management
-  --no-vscode   Skip VS Code settings setup
-  -y, --default Use defaults, skip prompts
-  --ci          Run in CI mode (non-interactive, test mode)
-  -V, --version Display version number
-  -h, --help    Display help
+  --no-git        Skip git initialization
+  --no-install    Skip package installation
+  --no-nix        Skip Nix flake for environment management
+  --no-linting-ci Skip setting up GitHub Actions CI
+  --no-vscode     Skip VS Code settings setup
+  -y, --default   Use defaults, skip prompts
+  --ci            Run in CI mode (non-interactive, test mode)
+  -V, --version   Display version number
+  -h, --help      Display help
 ```
 
 ### Examples
@@ -160,11 +163,8 @@ my-project/
 - [x] Git repository initialization
 - [x] Dependency installation
 - [x] Docker Postgres support
+- [x] CI/CD for Linting
 - [ ] Custom README generation
-
-### In Progress
-
-- [ ] Improved CI/CD templates
 
 ### Roadmap
 
