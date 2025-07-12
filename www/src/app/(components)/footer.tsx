@@ -1,8 +1,12 @@
+import { GitBranch } from "lucide-react";
 import Link from "next/link";
 
 import { ModeToggle } from "~/components/theme-toggle";
+import { getCommitData } from "~/lib/get-commit-data";
 
-export default function Footer() {
+export default async function Footer() {
+  const commitData = await getCommitData();
+
   return (
     <footer className={`
       bg-background/80 border-muted mt-16 w-full border-t px-8 py-12
@@ -122,9 +126,19 @@ export default function Footer() {
                   focus-visible:ring-0
                 `}
               />
-              <p className="text-muted-foreground font-mono text-xs">
-                commit #abcd123
-              </p>
+              <Link
+                className={`
+                  text-muted-foreground font-mono text-xs
+                  hover:text-foreground
+                `}
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`https://github.com/matthew-hre/matt-init/commit/${commitData?.sha}`}
+              >
+                <GitBranch className="inline" size={12} />
+                {" "}
+                {commitData?.sha.slice(0, 7)}
+              </Link>
               <p className="text-muted-foreground text-xs">
                 ©
                 {" "}
