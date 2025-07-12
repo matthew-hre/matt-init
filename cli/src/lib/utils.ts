@@ -30,6 +30,39 @@ export async function addPackageToDependencies(
 }
 
 /**
+ * Adds multiple packages to the project's dependencies or devDependencies in package.json.
+ * This is more efficient than calling addPackageToDependencies multiple times as it only
+ * reads and writes the package.json file once.
+ *
+ * @param projectDir the directory of the project
+ * @param packages array of package names to add
+ * @param devDependency whether to add packages as devDependencies (default: false)
+ */
+export async function addPackagesToDependencies(
+  projectDir: string,
+  packages: string[],
+  devDependency: boolean = false,
+): Promise<void> {
+  const packageJsonPath = path.join(projectDir, "package.json");
+  const packageJson = await fs.readJson(packageJsonPath);
+
+  if (devDependency) {
+    packageJson.devDependencies = packageJson.devDependencies || {};
+    for (const packageName of packages) {
+      packageJson.devDependencies[packageName] = "latest";
+    }
+  }
+  else {
+    packageJson.dependencies = packageJson.dependencies || {};
+    for (const packageName of packages) {
+      packageJson.dependencies[packageName] = "latest";
+    }
+  }
+
+  await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+}
+
+/**
  * Adds a script to the project's package.json scripts section.
  *
  * @param projectDir the directory of the project
@@ -52,6 +85,34 @@ export async function addScriptToPackageJson(
   }
 
   packageJson.scripts[scriptName] = scriptCommand;
+  await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+}
+
+/**
+ * Adds multiple scripts to the project's package.json scripts section.
+ * This is more efficient than calling addScriptToPackageJson multiple times as it only
+ * reads and writes the package.json file once.
+ *
+ * @param projectDir the directory of the project
+ * @param scripts object with script names as keys and commands as values
+ * @param updateExisting whether to update existing scripts with the same names (default: false)
+ */
+export async function addScriptsToPackageJson(
+  projectDir: string,
+  scripts: Record<string, string>,
+  updateExisting: boolean = false,
+): Promise<void> {
+  const packageJsonPath = path.join(projectDir, "package.json");
+  const packageJson = await fs.readJson(packageJsonPath);
+  packageJson.scripts = packageJson.scripts || {};
+
+  for (const [scriptName, scriptCommand] of Object.entries(scripts)) {
+    if (!updateExisting && packageJson.scripts[scriptName]) {
+      continue;
+    }
+    packageJson.scripts[scriptName] = scriptCommand;
+  }
+
   await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 }
 

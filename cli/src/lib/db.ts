@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "node:path";
 
-import { addPackageToDependencies, addScriptToPackageJson, generateRandomSecret } from "./utils";
+import { addPackagesToDependencies, addScriptsToPackageJson, generateRandomSecret } from "./utils";
 
 /**
  * Applies the Drizzle ORM setup for a Turso database in the specified project directory.
@@ -12,14 +12,9 @@ import { addPackageToDependencies, addScriptToPackageJson, generateRandomSecret 
  * @param PACKAGE_ROOT the root directory of the package containing templates
  */
 export async function applyDrizzleTurso(projectDir: string, PACKAGE_ROOT: string): Promise<void> {
-  // dependencies
-  await addPackageToDependencies(projectDir, "@libsql/client");
-  await addPackageToDependencies(projectDir, "drizzle-orm");
-  await addPackageToDependencies(projectDir, "better-auth");
-
-  // devDependencies
-  await addPackageToDependencies(projectDir, "drizzle-kit", true);
-  await addPackageToDependencies(projectDir, "concurrently", true);
+  // Install dependencies in batches
+  await addPackagesToDependencies(projectDir, ["@libsql/client", "drizzle-orm", "better-auth"]);
+  await addPackagesToDependencies(projectDir, ["drizzle-kit", "concurrently"], true);
 
   // Copy the base Drizzle template to the project directory
   const baseTemplatePath = path.join(PACKAGE_ROOT, "templates/backend/drizzle/base");
@@ -49,13 +44,19 @@ export async function applyDrizzleTurso(projectDir: string, PACKAGE_ROOT: string
     .replace("your_better_auth_secret", await generateRandomSecret());
   await fs.writeFile(envPath, updatedEnvContent, "utf-8");
 
-  // Add Drizzle scripts to package.json
-  await addScriptToPackageJson(projectDir, "db:migrate", "drizzle-kit migrate");
-  await addScriptToPackageJson(projectDir, "db:generate", "drizzle-kit generate");
-  await addScriptToPackageJson(projectDir, "db:push", "drizzle-kit push");
-  await addScriptToPackageJson(projectDir, "db:studio", "drizzle-kit studio");
-  await addScriptToPackageJson(projectDir, "dev:db", "turso dev --db-file local.db");
-  await addScriptToPackageJson(projectDir, "dev", "concurrently \"pnpm run dev:db\" \"next dev --turbopack\"", true);
+  // Add Drizzle scripts to package.json in batch
+  await addScriptsToPackageJson(projectDir, {
+    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "dev:db": "turso dev --db-file local.db",
+  });
+
+  // Update the dev script separately since it needs to overwrite existing
+  await addScriptsToPackageJson(projectDir, {
+    dev: "concurrently \"pnpm run dev:db\" \"next dev --turbopack\"",
+  }, true);
 }
 
 /**
@@ -67,17 +68,9 @@ export async function applyDrizzleTurso(projectDir: string, PACKAGE_ROOT: string
  * @param PACKAGE_ROOT the root directory of the package containing templates
  */
 export async function applyDrizzleDockerPostgres(projectDir: string, PACKAGE_ROOT: string): Promise<void> {
-  // dependencies
-  await addPackageToDependencies(projectDir, "drizzle-orm");
-  await addPackageToDependencies(projectDir, "better-auth");
-  await addPackageToDependencies(projectDir, "pg");
-  await addPackageToDependencies(projectDir, "postgres");
-  await addPackageToDependencies(projectDir, "uuid");
-
-  // devDependencies
-  await addPackageToDependencies(projectDir, "drizzle-kit", true);
-  await addPackageToDependencies(projectDir, "concurrently", true);
-  await addPackageToDependencies(projectDir, "@types/pg", true);
+  // Install dependencies in batches
+  await addPackagesToDependencies(projectDir, ["drizzle-orm", "better-auth", "pg", "postgres", "uuid"]);
+  await addPackagesToDependencies(projectDir, ["drizzle-kit", "concurrently", "@types/pg"], true);
 
   // Copy the base Drizzle template to the project directory
   const baseTemplatePath = path.join(PACKAGE_ROOT, "templates/backend/drizzle/base");
@@ -107,19 +100,20 @@ export async function applyDrizzleDockerPostgres(projectDir: string, PACKAGE_ROO
     .replace("POSTGRES_PASSWORD=", "POSTGRES_PASSWORD=postgres");
   await fs.writeFile(envPath, updatedEnvContent, "utf-8");
 
-  // Add Drizzle scripts to package.json
-  await addScriptToPackageJson(projectDir, "db:migrate", "drizzle-kit migrate");
-  await addScriptToPackageJson(projectDir, "db:generate", "drizzle-kit generate");
-  await addScriptToPackageJson(projectDir, "db:push", "drizzle-kit push");
-  await addScriptToPackageJson(projectDir, "db:studio", "drizzle-kit studio");
-  await addScriptToPackageJson(projectDir, "dev:db", "docker-compose up db");
-  await addScriptToPackageJson(
-    projectDir,
-    "dev",
-    "concurrently --kill-others \"pnpm run dev:db\" \"next dev --turbopack\"",
-    true,
-  );
-  await addScriptToPackageJson(projectDir, "db:down", "docker-compose down");
-  await addScriptToPackageJson(projectDir, "db:reset", "docker-compose down && pnpm run dev:db");
-  await addScriptToPackageJson(projectDir, "db:wipe", "docker-compose down -v && pnpm run dev:db && pnpm run db:push");
+  // Add Drizzle scripts to package.json in batch
+  await addScriptsToPackageJson(projectDir, {
+    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "dev:db": "docker-compose up db",
+    "db:down": "docker-compose down",
+    "db:reset": "docker-compose down && pnpm run dev:db",
+    "db:wipe": "docker-compose down -v && pnpm run dev:db && pnpm run db:push",
+  });
+
+  // Update the dev script separately since it needs to overwrite existing
+  await addScriptsToPackageJson(projectDir, {
+    dev: "concurrently --kill-others \"pnpm run dev:db\" \"next dev --turbopack\"",
+  }, true);
 }
