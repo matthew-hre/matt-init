@@ -1,10 +1,10 @@
 ```txt
- ███╗   ███╗ █████╗ ████████╗████████╗      ██╗███╗   ██╗██╗████████╗
- ████╗ ████║██╔══██╗╚══██╔══╝╚══██╔══╝      ██║████╗  ██║██║╚══██╔══╝
- ██╔████╔██║███████║   ██║      ██║   █████╗██║██╔██╗ ██║██║   ██║
- ██║╚██╔╝██║██╔══██║   ██║      ██║   ╚════╝██║██║╚██╗██║██║   ██║
- ██║ ╚═╝ ██║██║  ██║   ██║      ██║         ██║██║ ╚████║██║   ██║
- ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝         ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝
+███╗   ███╗ █████╗ ████████╗████████╗      ██╗███╗   ██╗██╗████████╗
+████╗ ████║██╔══██╗╚══██╔══╝╚══██╔══╝      ██║████╗  ██║██║╚══██╔══╝
+██╔████╔██║███████║   ██║      ██║   █████╗██║██╔██╗ ██║██║   ██║
+██║╚██╔╝██║██╔══██║   ██║      ██║   ╚════╝██║██║╚██╗██║██║   ██║
+██║ ╚═╝ ██║██║  ██║   ██║      ██║         ██║██║ ╚████║██║   ██║
+╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝         ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝
 ```
 
 > A CLI tool for scaffolding Next.js projects the way I like 'em.
@@ -12,18 +12,29 @@
 ## Features
 
 - **Wickedly Fast Setup** - Under 30 seconds to a fully wired Next.js starter
-- **Minimal Choices** - Three streamlined prompts: backend setup, database provider, and tooling preferences
-- **Opinionated Defaults** - Pre-configured with sensible defaults and best practices
-- **Backend Bundles** - Choose "DB + Drizzle + BetterAuth" for full-stack or "None" for frontend-only
-- **Zero Configuration** - Strict linting, Prettier, pre-commit hooks, and CI rules included
-- **Type-Safe Environment** - Zod-validated env variables that fail fast on missing config
-- **Ready for Deployment** - Tailwind, VSCode settings, and production optimizations included
+- **Minimal Choices** - Three streamlined prompts: backend setup, database
+  provider, and tooling preferences
+- **Opinionated Defaults** - Pre-configured with sensible defaults and best
+  practices
+- **Backend Bundles** - Choose "DB + Drizzle + BetterAuth" for full-stack or
+  "None" for frontend-only
+- **Zero Configuration** - Strict linting, Prettier, pre-commit hooks, and CI
+  rules included
+- **Type-Safe Environment** - Zod-validated env variables that fail fast on
+  missing config
+- **Ready for Deployment** - Tailwind, VSCode settings, and production
+  optimizations included
 
 ## ...why?
 
-I've probably started and abandoned a dozen Next.js projects. The commonality between them is that the first hour or two of a given project is spent setting up the same things over and over again. This tool aims to automate that setup process with the components and configurations I prefer, so I can focus on building features instead of boilerplate.
+I've probably started and abandoned a dozen Next.js projects. The commonality
+between them is that the first hour or two of a given project is spent setting
+up the same things over and over again. This tool aims to automate that setup
+process with the components and configurations I prefer, so I can focus on
+building features instead of boilerplate.
 
-Also, because enforcing harsh linting rules on hackathon teammates is more justafiable when "it came installed like that".
+Also, because enforcing harsh linting rules on hackathon teammates is more
+justafiable when "it came installed like that".
 
 ## Installation
 
@@ -43,7 +54,8 @@ This will prompt you for:
 
 - **Project name** - What to call your app
 - **Backend setup** - Choose from:
-  - `DB + Drizzle + BetterAuth` - Full-stack with database, ORM, and authentication
+  - `DB + Drizzle + BetterAuth` - Full-stack with database, ORM, and
+    authentication
   - `Supabase` - (coming soon)
   - `None` - Frontend-only
 - **Database provider** - If you chose the full-stack option:
@@ -109,7 +121,8 @@ Every generated project includes:
 
 ### Optional Addons
 
-- **Full-Stack Backend** - Turso database + Drizzle ORM + BetterAuth authentication
+- **Full-Stack Backend** - Turso database + Drizzle ORM + BetterAuth
+  authentication
 - **Supabase Integration** - (coming soon)
 - **Nix Flake** - Reproducible development environment
 
@@ -184,7 +197,9 @@ my-project/
 
 - Nix
 
-> Feel free to go install all the project dependencies manually if you don't want to use Nix, but I ain't telling you how to do that. This is a Nix-first project baby.
+> Feel free to go install all the project dependencies manually if you don't
+> want to use Nix, but I ain't telling you how to do that. This is a Nix-first
+> project baby.
 
 ### Setup
 
@@ -213,10 +228,12 @@ pnpm dev:cli
 
 ## License
 
-CC BY-SA 4.0
+MIT
 
 ## Acknowledgements
 
 - Thanks to [@antfu](https://github.com/antfu/) for the ESLint config
-- Shoutout to [@w3cj](https://github.com/w3cj/) from the Syntax team for general project setup advice, and the `try-parse-env.ts` script
-- Quick mention to [create-t3-app](https://github.com/t3-oss/create-t3-app/) for pointing me in the right direction architecture-wise
+- Shoutout to [@w3cj](https://github.com/w3cj/) from the Syntax team for general
+  project setup advice, and the `try-parse-env.ts` script
+- Quick mention to [create-t3-app](https://github.com/t3-oss/create-t3-app/) for
+  pointing me in the right direction architecture-wise
