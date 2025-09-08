@@ -13,14 +13,17 @@ export function tryParseEnv<T extends ZodRawShape>(
   catch (error) {
     if (error instanceof ZodError) {
       let message = "Missing required values in .env:\n";
-      error.errors.forEach((err) => {
-        message += `${err.path[0]}\n`;
+      error.issues.forEach((err) => {
+        message += `${String(err.path[0])}\n`;
       });
 
       console.error(message);
     }
     else {
-      console.error("An unexpected error occurred while parsing environment variables:", error);
+      console.error(
+        "An unexpected error occurred while parsing environment variables:",
+        error,
+      );
     }
     process.exit(1);
   }
