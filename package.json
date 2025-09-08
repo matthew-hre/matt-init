@@ -4,7 +4,7 @@
   "description": "Create NextJS apps the way Matt likes 'em",
   "author": "Matthew Hrehirchuk <mhreh594@mtroyal.ca> (https://matthew-hre.com)",
   "type": "module",
-  "license": "CC BY-SA 4.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/matthew-hre/matt-init.git"
