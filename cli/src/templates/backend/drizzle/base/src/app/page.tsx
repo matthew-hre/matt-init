@@ -99,7 +99,7 @@ export default async function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            ⭐ Star matt-init
+            📖 Read the docs
           </a>
           <a
             className={`
@@ -115,7 +115,7 @@ export default async function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            👋 Say hi to Matt
+            ⭐ Star matt-init
           </a>
         </div>
       </main>
