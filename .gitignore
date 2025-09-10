@@ -12,3 +12,5 @@ test/temp/
 test/output/
 
 .claude/
+
+.direnv/
