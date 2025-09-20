@@ -121,7 +121,6 @@ const PROJECT_STRUCTURE: FileNode = {
           children: [
             { name: "auth.ts", type: "file", features: ["backend"] },
             { name: "env.ts", type: "file" },
-            { name: "try-parse-env.ts", type: "file" },
             {
               name: "db/",
               type: "folder",

@@ -6,6 +6,8 @@ order: 5
 
 ## Environment Variable Validation
 
+> These docs are a bit outdated with the release of [@matthew-hre/env](https://www.npmjs.com/package/@matthew-hre/env), which abstracts away some of the complexity here. Check out the [package docs](https://www.npmjs.com/package/@matthew-hre/env) for the latest usage instructions.
+
 If you've never used Zod before, the first place you'll encounter it in a matt-init project is in the environment variable validation. This ensures that your application has all the necessary environment variables set up correctly, and provides type safety for them.
 
 ### How It Works
@@ -13,21 +15,25 @@ Every matt-init project validates environment variables at startup:
 
 ```typescript
 // src/lib/env.ts
+import { loadEnv } from "@matthew-hre/env";
 import { z } from "zod";
 
-const EnvSchema = z.object({
-  NODE_ENV: z.string(),
-  // Backend-specific variables (if enabled)
-  BETTER_AUTH_SECRET: z.string(),
-  BETTER_AUTH_URL: z.string(),
-});
+const schema = {
+  server: z.object({
+    NODE_ENV: z.string().nonempty(),
+  }),
+  client: z.object({})
+};
 
-export const env = EnvSchema.parse(process.env);
+export type ServerEnvSchema = z.infer<typeof schema.server>;
+export type ClientEnvSchema = z.infer<typeof schema.client>;
+
+export const { serverEnv, clientEnv } = loadEnv(schema);
 ```
 
 "Huh? What?" I hear you say. Let's break it down:
-- **Zod Schema**: We define a schema using `z.object()` that describes the expected environment variables. This includes their types and any validation rules. In this case, all variables are required strings.
-- **Validation**: When the app starts, `EnvSchema.parse(process.env)` checks that all required variables are present and valid.
+- **Zod Schema**: We define a schema using `z.object()` that describes the expected environment variables, both server and client. This includes their types and any validation rules. In this case, we're only using server variables, and all variables are required strings.
+- **Validation**: When the app starts, `loadEnv(schema)` checks that all required variables are present and valid.
 - **Exporting `env`**: The validated environment variables are exported as a typed object, so you can access them safely throughout your application.
 
 ### Type Safety
@@ -38,7 +44,6 @@ import { env } from "~/lib/env";
 
 // TypeScript knows these are strings
 env.NODE_ENV;           // string
-env.BETTER_AUTH_URL;    // string
 
 // This would cause a TypeScript error
 env.NONEXISTENT_VAR; // ❌ Property doesn't exist

@@ -329,10 +329,6 @@ export function ProjectStructureWithDocs() {
           <strong>env.ts</strong>
           : Loads and validates environment variables using Zod.
         </li>
-        <li className="text-muted-foreground ml-4">
-          <strong>try-parse-env.ts</strong>
-          : Helper that throws if required env vars are missing.
-        </li>
       </ul>
 
       <ConditionalSection feature="backend" enabledFeatures={enabledFeatures}>
