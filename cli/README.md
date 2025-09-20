@@ -140,8 +140,7 @@ my-project/
 │   ├── components/
 │   │   └── matt-init-banner.tsx
 │   └── lib/
-│       ├── env.ts
-│       └── try-parse-env.ts
+│       └── env.ts
 ├── .vscode/               # (if VSCode setup chosen)
 │   ├── extensions.json
 │   └── settings.json

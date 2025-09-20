@@ -36,6 +36,9 @@ importers:
       '@libsql/client':
         specifier: ^0.15.7
         version: 0.15.7
+      '@matthew-hre/env':
+        specifier: ^0.3.0
+        version: 0.3.0
       '@next/eslint-plugin-next':
         specifier: ^15.3.4
         version: 15.3.4
@@ -127,8 +130,8 @@ importers:
         specifier: ^3.2.3
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.15.23)(@vitest/ui@3.2.3)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
       zod:
-        specifier: ^3.25.34
-        version: 3.25.34
+        specifier: ^4.1.5
+        version: 4.1.11
 
 packages:
 
@@ -884,6 +887,9 @@ packages:
     resolution: {integrity: sha512-NES0P2pyx5XjveTYotTG03eoJwx0haJBYWXfqmcPLmbQ5u03Qmd7rxhLfWDdIRj4PrdhVProwdB0FA82ryLcKQ==}
     cpu: [x64]
     os: [win32]
+
+  '@matthew-hre/env@0.3.0':
+    resolution: {integrity: sha512-W3eZVjoieWVuB2CBXBPmDTAcyaTbMeGrQIodJ3Crx2RWl7xdH9feJd4wwfqlDM6woNVdbkZjlcByifvY0WT7tw==}
 
   '@napi-rs/wasm-runtime@0.2.10':
     resolution: {integrity: sha512-bCsCyeZEwVErsGmyPNSzwfwFn4OdxBj0mmv6hOFucB/k81Ojdu68RbZdxYsRQUPc9l6SU5F/cG+bXgWs3oUgsQ==}
@@ -4091,6 +4097,9 @@ packages:
   zod@3.25.34:
     resolution: {integrity: sha512-lZHvSc2PpWdcfpHlyB33HA9nqP16GpC9IpiG4lYq9jZCJVLZNnWd6Y1cj79bcLSBKTkxepfpjckPv5Y5VOPlwA==}
 
+  zod@4.1.11:
+    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -4756,6 +4765,11 @@ snapshots:
 
   '@libsql/win32-x64-msvc@0.5.11':
     optional: true
+
+  '@matthew-hre/env@0.3.0':
+    dependencies:
+      picocolors: 1.1.1
+      zod: 4.1.11
 
   '@napi-rs/wasm-runtime@0.2.10':
     dependencies:
@@ -8305,5 +8319,7 @@ snapshots:
   yoctocolors@2.1.1: {}
 
   zod@3.25.34: {}
+
+  zod@4.1.11: {}
 
   zwitch@2.0.4: {}
