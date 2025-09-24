@@ -5,7 +5,7 @@ const schema = {
   server: z.object({
     NODE_ENV: z.string().nonempty(),
   }),
-  client: z.object({})
+  client: z.object({}),
 };
 
 export type ServerEnvSchema = z.infer<typeof schema.server>;

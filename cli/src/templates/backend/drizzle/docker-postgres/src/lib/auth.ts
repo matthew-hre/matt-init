@@ -3,9 +3,10 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { v4 as uuidv4 } from "uuid";
 
+import { serverEnv } from "~/lib/env";
+
 import { db } from "./db";
 import * as schema from "./db/schema";
-import { serverEnv } from "~/lib/env";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
