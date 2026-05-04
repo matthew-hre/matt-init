@@ -140,8 +140,7 @@ my-project/
 │   ├── components/
 │   │   └── matt-init-banner.tsx
 │   └── lib/
-│       ├── env.ts
-│       └── try-parse-env.ts
+│       └── env.ts
 ├── .vscode/               # (if VSCode setup chosen)
 │   ├── extensions.json
 │   └── settings.json
@@ -237,6 +236,6 @@ MIT
 
 - Thanks to [@antfu](https://github.com/antfu/) for the ESLint config
 - Shoutout to [@w3cj](https://github.com/w3cj/) from the Syntax team for general
-  project setup advice, and the `try-parse-env.ts` script
+  project setup advice, and the original `try-parse-env.ts` script
 - Quick mention to [create-t3-app](https://github.com/t3-oss/create-t3-app/) for
   pointing me in the right direction architecture-wise

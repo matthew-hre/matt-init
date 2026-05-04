@@ -1,14 +1,14 @@
+import { loadEnv } from "@matthew-hre/env";
 import { z } from "zod";
 
-import { tryParseEnv } from "./try-parse-env";
+const schema = {
+  server: z.object({
+    NODE_ENV: z.string().nonempty(),
+  }),
+  client: z.object({}),
+};
 
-const EnvSchema = z.object({
-  NODE_ENV: z.string().nonempty(),
-});
+export type ServerEnvSchema = z.infer<typeof schema.server>;
+export type ClientEnvSchema = z.infer<typeof schema.client>;
 
-export type EnvSchema = z.infer<typeof EnvSchema>;
-
-tryParseEnv(EnvSchema);
-
-// eslint-disable-next-line node/no-process-env
-export default EnvSchema.parse(process.env);
+export const { serverEnv, clientEnv } = loadEnv(schema);
