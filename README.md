@@ -9,6 +9,9 @@
 
 > A CLI tool for scaffolding Next.js projects the way I like 'em.
 
+> [!WARNING]
+> I am no longer maintaining this project. I've trying to expand out from the NextJS ecosystem, and have been learning tons of new tools and technologies! There's so many fun project out there beyond this; go explore!
+
 ## Features
 
 - **Wickedly Fast Setup** - Under 30 seconds to a fully wired Next.js starter
